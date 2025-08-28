@@ -1,0 +1,2 @@
+/api/hello OK: {'message': 'Hello, Automated Trading Platform is running!'}
+/health OK: {'status': 'ok', 'app': 'Automated Trading Platform', 'env': 'development'}

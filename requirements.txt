@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+breeze-connect
+python-dotenv
+pydantic
+loguru
+
+
