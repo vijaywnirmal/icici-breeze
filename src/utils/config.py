@@ -16,6 +16,10 @@ class Settings:
     breeze_api_secret: str | None = os.getenv("BREEZE_API_SECRET")
     breeze_session_token: str | None = os.getenv("BREEZE_SESSION_TOKEN")
 
+    # Supabase configuration (optional)
+    supabase_url: str | None = os.getenv("SUPABASE_URL")
+    supabase_key: str | None = os.getenv("SUPABASE_KEY")
+
 
 settings = Settings()
 

@@ -18,3 +18,51 @@
 2025-08-27 06:12:17,859 - Error while unsubscribing to feeds : / is not a connected namespace.
 2025-08-27 06:12:40,164 - {'message': 'Stock NIFTY subscribed successfully'}
 2025-08-27 06:12:42,252 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 22:40:29,927 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 22:45:46,725 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 22:45:47,932 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 22:47:20,786 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 22:47:26,265 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 22:48:02,642 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 22:48:08,448 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 22:48:31,052 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:14:32,097 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:14:37,201 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:14:37,510 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:14:37,513 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-08-28 23:14:37,832 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:14:52,006 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:19:47,723 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:19:58,042 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:20:12,719 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:20:20,025 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:28:27,724 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:28:51,037 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:29:36,937 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:29:39,563 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:29:42,286 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:29:56,476 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:30:01,886 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:30:03,035 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:31:57,726 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:32:00,285 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:32:09,716 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:32:11,905 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:32:52,911 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:32:54,788 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:35:29,718 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:35:30,084 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:35:43,723 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:35:57,489 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:37:27,731 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:37:34,976 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-08-28 23:37:41,507 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-08-28 23:39:20,580 - Exception while subscribing to feeds list index out of range
+2025-08-28 23:40:11,723 - Error while unsubscribing to feeds : list index out of range
+2025-08-28 23:40:19,054 - Exception while subscribing to feeds list index out of range
+2025-08-28 23:40:40,717 - Error while unsubscribing to feeds : list index out of range
+2025-08-28 23:40:42,763 - Exception while subscribing to feeds list index out of range
+2025-08-28 23:40:48,738 - Error while unsubscribing to feeds : list index out of range
+2025-08-28 23:40:54,045 - Error while unsubscribing to feeds : 'BreezeConnect' object has no attribute 'interval'
+2025-08-28 23:40:54,383 - Exception while subscribing to feeds list index out of range
+2025-08-28 23:42:18,376 - Error while unsubscribing to feeds : list index out of range

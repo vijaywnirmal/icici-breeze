@@ -3,12 +3,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .utils.config import settings
-from .routes.hello import router as hello_router
 from .routes.login import router as login_router
 from .routes.home import router as home_router
 from .routes.stream import router as stream_router
-from .routes.watchlist import router as watchlist_router
-from .routes.watchlist_stream import router as watchlist_stream_router
+from .routes.quotes import router as quotes_router
 
 
 # Load environment variables from .env at startup
@@ -29,13 +27,12 @@ app.add_middleware(
 
 
 # Include route modules
-app.include_router(hello_router)
 app.include_router(login_router)
 app.include_router(home_router)
 # websocket router added without prefix
 app.include_router(stream_router)
-app.include_router(watchlist_router)
-app.include_router(watchlist_stream_router)
+# removed watchlist routes per request
+app.include_router(quotes_router)
 
 
 @app.get("/health")

@@ -4,5 +4,6 @@ breeze-connect
 python-dotenv
 pydantic
 loguru
+supabase
 
 
