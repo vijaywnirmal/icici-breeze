@@ -9,6 +9,7 @@ import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
 import Sidebar from './components/Sidebar.jsx'
 import TickerBar from './components/TickerBar.jsx'
+import CustomerProfile from './components/CustomerProfile.jsx'
 import './styles.css'
 
 createRoot(document.getElementById('root')).render(

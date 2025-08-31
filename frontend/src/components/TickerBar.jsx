@@ -31,6 +31,7 @@ export default function TickerBar() {
 	const retryRef = useRef(0)
 	const pollTimer = useRef(null)
 	const liveTimer = useRef(null)
+	const didInitialPollRef = useRef(false)
 
 	const displayPrice = useMemo(() => {
 		if (typeof data.ltp === 'number') return data.ltp
@@ -110,6 +111,7 @@ export default function TickerBar() {
 		}
 
 		async function pollSnapshot() {
+			if (didInitialPollRef.current) return
 			try {
 				const [nRes, sRes, bRes] = await Promise.all([
 					fetch(`${httpBase}/api/quotes/index?symbol=NIFTY&exchange=NSE`),
@@ -122,6 +124,7 @@ export default function TickerBar() {
 					bRes.json().catch(() => ({})),
 				])
 				if (!closed) {
+					didInitialPollRef.current = true
 					// If reset window, clear persisted values and blank out state
 					if (nJson && nJson.reset) {
 						try { localStorage.removeItem('ticker:nifty') } catch (_) {}
@@ -221,8 +224,7 @@ export default function TickerBar() {
 
 				ws.onopen = () => {
 					retryRef.current = 0
-					// fetch a snapshot immediately in case ticks are delayed
-					pollSnapshot()
+					// do not poll here to avoid duplicate snapshot requests
 					ws.send(JSON.stringify({ action: 'subscribe', symbol: 'NIFTY', exchange_code: 'NSE', product_type: 'cash' }))
 				}
 

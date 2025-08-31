@@ -6,6 +6,7 @@ from ..utils.session import set_breeze
 from ..utils.response import success_response, error_response, log_exception
 from ..utils.config import settings
 from ..utils.session import get_breeze
+from ..utils.session import get_cached_customer_details, set_cached_customer_details
 
 
 router = APIRouter(prefix="/api", tags=["auth"])
@@ -56,38 +57,95 @@ def get_profile(api_session: str | None = Query(None)) -> dict[str, object]:
     try:
         service: BreezeService | None = get_breeze()
         if service is None:
-            # Minimal fallback: if API key available, create client and use provided api_session directly
-            if settings.breeze_api_key:
+            # Prefer full env login if all creds present
+            if settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
+                svc = BreezeService(api_key=settings.breeze_api_key)
+                res = svc.login_and_fetch_profile(
+                    api_secret=settings.breeze_api_secret,
+                    session_key=settings.breeze_session_token,
+                )
+                if res.success:
+                    service = svc
+            # If not, but we have an API key, still construct client (useful when api_session is provided)
+            elif settings.breeze_api_key:
                 try:
                     service = BreezeService(api_key=settings.breeze_api_key)
                 except Exception:
                     service = None
-            # Else, try full env login only if all creds present
-            elif settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
-                svc = BreezeService(api_key=settings.breeze_api_key)
-                res = svc.login_and_fetch_profile(api_secret=settings.breeze_api_secret, session_key=settings.breeze_session_token)
-                if res.success:
-                    service = svc
         if service is None:
             return error_response("Not logged in and no server credentials available")
 
-        # Call Breeze SDK
+        # Call Breeze SDK (prefer provided token; else server token)
         try:
-            if api_session:
-                profile = service.client.get_customer_details(api_session=api_session)
-            else:
-                profile = service.client.get_customer_details()
+            session_to_use = api_session or (settings.breeze_session_token or None)
+            if not session_to_use:
+                return error_response("API Session cannot be empty and no server session configured")
+            profile = service.client.get_customer_details(api_session=session_to_use)
         except Exception as exc:
             log_exception(exc, context="login.profile.get_customer_details")
             return error_response("Failed to fetch profile", error=str(exc))
 
-        # Normalize data shape and extract first name
+        # Normalize data shape and extract customer details
         data = profile.get("Success") if isinstance(profile, dict) and "Success" in profile else profile
         full_name = ""
         if isinstance(data, dict):
             full_name = str(data.get("idirect_user_name") or "").strip()
         first_name = full_name.split()[0].title() if full_name else ""
+        
+        # Return full profile data including all customer details from the raw JSON response
+        # This includes fields like idirect_user_name, email_id, user_id, pan, etc.
         return success_response("Profile", first_name=first_name, profile=profile)
     except Exception as exc:
         log_exception(exc, context="login.profile")
+        return error_response("Unexpected error", error=str(exc))
+
+
+@router.get("/account/details")
+def account_details(api_session: str | None = Query(None)) -> dict[str, object]:
+    """Return cached customer details if available; otherwise fetch and cache.
+
+    The response format aligns with frontend expectations: `{ success, customer }`.
+    """
+    try:
+        # 1) Serve from cache if present
+        cached = get_cached_customer_details(api_session) if api_session else None
+        if cached is not None:
+            return success_response("Customer details", customer=cached)
+
+        # 2) Acquire BreezeService
+        service: BreezeService | None = get_breeze()
+        if service is None and settings.breeze_api_key:
+            try:
+                service = BreezeService(api_key=settings.breeze_api_key)
+            except Exception:
+                service = None
+        if service is None and settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
+            svc = BreezeService(api_key=settings.breeze_api_key)
+            res = svc.login_and_fetch_profile(api_secret=settings.breeze_api_secret, session_key=settings.breeze_session_token)
+            if res.success:
+                service = svc
+        if service is None:
+            return error_response("Not logged in and no server credentials available")
+
+        # 3) Fetch details using provided token; else server token
+        try:
+            session_to_use = api_session or (settings.breeze_session_token or None)
+            if not session_to_use:
+                return error_response("API Session cannot be empty and no server session configured")
+            details = service.client.get_customer_details(api_session=session_to_use)
+        except Exception as exc:
+            log_exception(exc, context="account.details.get_customer_details")
+            return error_response("Failed to fetch customer details", error=str(exc))
+
+        # 4) Normalize to inner 'Success' payload if present and cache
+        payload = details.get("Success") if isinstance(details, dict) and "Success" in details else details
+        if isinstance(payload, dict) and api_session:
+            try:
+                set_cached_customer_details(api_session, payload)
+            except Exception:
+                pass
+
+        return success_response("Customer details", customer=payload or details)
+    except Exception as exc:
+        log_exception(exc, context="login.account_details")
         return error_response("Unexpected error", error=str(exc))

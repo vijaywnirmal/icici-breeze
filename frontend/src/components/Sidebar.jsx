@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import CustomerProfile from './CustomerProfile.jsx'
 
 export default function Sidebar() {
 	return (
@@ -12,6 +13,9 @@ export default function Sidebar() {
 				<NavLink to="/builder" className={({isActive}) => 'nav-item' + (isActive ? ' active' : '')}>Strategy Builder</NavLink>
 				<NavLink to="/results" className={({isActive}) => 'nav-item' + (isActive ? ' active' : '')}>Results</NavLink>
 			</nav>
+			<div className="sidebar-footer">
+				<CustomerProfile layout="sidebar" />
+			</div>
 		</aside>
 	)
 }
