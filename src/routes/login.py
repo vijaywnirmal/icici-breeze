@@ -55,6 +55,7 @@ def get_profile(api_session: str | None = Query(None)) -> dict[str, object]:
     """
     try:
         service: BreezeService | None = get_breeze()
+        profile = None
         if service is None:
             # Minimal fallback: if API key available, create client and use provided api_session directly
             if settings.breeze_api_key:
@@ -62,21 +63,23 @@ def get_profile(api_session: str | None = Query(None)) -> dict[str, object]:
                     service = BreezeService(api_key=settings.breeze_api_key)
                 except Exception:
                     service = None
-            # Else, try full env login only if all creds present
-            elif settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
-                svc = BreezeService(api_key=settings.breeze_api_key)
-                res = svc.login_and_fetch_profile(api_secret=settings.breeze_api_secret, session_key=settings.breeze_session_token)
-                if res.success:
-                    service = svc
+        # If still no service, try full env login only if all creds present
+        if service is None and settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
+            svc = BreezeService(api_key=settings.breeze_api_key)
+            res = svc.login_and_fetch_profile(api_secret=settings.breeze_api_secret, session_key=settings.breeze_session_token)
+            if res.success:
+                service = svc
+                profile = res.profile
         if service is None:
             return error_response("Not logged in and no server credentials available")
 
-        # Call Breeze SDK
+        # Call Breeze SDK only if a profile wasn't already fetched during env login
         try:
-            if api_session:
-                profile = service.client.get_customer_details(api_session=api_session)
-            else:
-                profile = service.client.get_customer_details()
+            if profile is None:
+                if api_session:
+                    profile = service.client.get_customer_details(api_session=api_session)
+                else:
+                    profile = service.client.get_customer_details()
         except Exception as exc:
             log_exception(exc, context="login.profile.get_customer_details")
             return error_response("Failed to fetch profile", error=str(exc))

@@ -68,5 +68,5 @@ class BreezeService:
 			profile = self._client.get_customer_details()
 			return BreezeLoginResult(success=True, message="Login successful", profile=profile)
 		except Exception as exc:  # Catch SDK/network errors and map to friendly error
-			log_exception(exc, context="BreezeService.login_and_fetch_profile", api_secret_present=bool(api_secret), session_key_len=len(session_key))
+			log_exception(exc, context="BreezeService.login_and_fetch_profile", api_secret_present=bool(api_secret), session_key_len=len(session_key or ""))
 			return BreezeLoginResult(success=False, message="Login failed", error=str(exc))
