@@ -10,7 +10,8 @@ from ..utils.config import settings
 from ..services.breeze_service import BreezeService
 from ..utils.session import get_breeze
 from ..utils.response import log_exception
-from ..services.quotes_cache import get_cached_quote, upsert_quote
+from ..services.quotes_cache import get_cached_quote, upsert_quote, delete_quote
+from ..utils.usage import record_breeze_call
 
 
 router = APIRouter(prefix="/api", tags=["quotes"])
@@ -30,10 +31,42 @@ def _now_ist(now_utc: Optional[datetime] = None) -> datetime:
 
 def _is_market_open_ist(now_utc: Optional[datetime] = None) -> bool:
     ist = _now_ist(now_utc)
-    is_weekday = ist.weekday() < 5
+    # Skip weekends and holidays from CSV
+    if ist.weekday() >= 5:
+        return False
+    iso_date = ist.date().isoformat()
+    try:
+        from ..utils.holidays_csv import load_holidays
+        holidays = load_holidays()
+    except Exception:
+        holidays = set()
+    if iso_date in holidays or iso_date in settings.market_holidays:
+        return False
     open_time = time(hour=9, minute=15)
     close_time = time(hour=15, minute=30)
-    return is_weekday and (open_time <= ist.time() < close_time)
+    return open_time <= ist.time() < close_time
+
+
+def _is_reset_window_ist(now_utc: Optional[datetime] = None) -> bool:
+    """Return True during 09:00–09:15 IST on weekdays.
+
+    During this window we "lose" previous close values from cache to avoid
+    displaying stale prices right before market open.
+    """
+    ist = _now_ist(now_utc)
+    # Only reset on active trading days (not weekends/holidays)
+    if ist.weekday() >= 5:
+        return False
+    try:
+        from ..utils.holidays_csv import load_holidays
+        holidays = load_holidays()
+    except Exception:
+        holidays = set()
+    if ist.date().isoformat() in holidays or ist.date().isoformat() in settings.market_holidays:
+        return False
+    reset_start = time(hour=9, minute=0)
+    reset_end = time(hour=9, minute=15)
+    return reset_start <= ist.time() < reset_end
 
 
 def _last_session_close_range_utc(now_utc: Optional[datetime] = None) -> Tuple[datetime, datetime]:
@@ -144,6 +177,7 @@ def get_index_quote(
     symbol_upper = (symbol or "").upper()
     exchange_upper = (exchange or "NSE").upper()
     is_open = _is_market_open_ist()
+    in_reset = _is_reset_window_ist()
 
     payload: Dict[str, Any] = {
         "symbol": symbol_upper,
@@ -154,15 +188,31 @@ def get_index_quote(
         "bid": None,
         "ask": None,
         "timestamp": _utc_now_iso(),
+        "reset": in_reset,
     }
 
+    # Between 09:00–09:15 IST, clear any cached close and return empty values
+    if in_reset:
+        try:
+            delete_quote(symbol_upper)
+        except Exception as exc:
+            log_exception(exc, context="quotes.get_index_quote.cache_delete", symbol=symbol_upper)
+        # No further data population during reset window
+        return payload
+
     if not is_open:
+        # Cache-first: avoid Breeze calls if we have a cached snapshot for closed market
+        cached = get_cached_quote(symbol_upper)
+        if isinstance(cached, dict):
+            payload.update(cached)
+            return payload
         try:
             breeze = _ensure_breeze()
             if breeze:
                 try:
                     # Use 1day interval for last daily close as requested
                     f_utc, t_utc = _last_daily_range_utc()
+                    record_breeze_call("get_historical_data_v2")
                     resp = breeze.client.get_historical_data_v2(
                         interval="1day",
                         from_date=_to_breeze_iso(f_utc),
@@ -196,6 +246,7 @@ def get_index_quote(
 
                 if payload.get("close") is None:
                     try:
+                        record_breeze_call("get_quotes")
                         quote = breeze.client.get_quotes(
                             stock_code=symbol_upper,
                             exchange_code=exchange_upper,

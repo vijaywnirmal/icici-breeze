@@ -5,6 +5,8 @@ from typing import Any, Dict
 
 from breeze_connect import BreezeConnect
 from ..utils.response import log_exception
+from ..utils.config import settings
+from ..utils.usage import record_breeze_call
 
 
 @dataclass
@@ -25,15 +27,18 @@ class BreezeService:
 	- Fetching customer/profile details after successful session creation
 	"""
 
-	def __init__(self, api_key: str) -> None:
-		self._client = BreezeConnect(api_key=api_key)
+	def __init__(self, api_key: str | None = None) -> None:
+		resolved_key = api_key or settings.breeze_api_key
+		if not resolved_key:
+			raise ValueError("Breeze API key is not configured")
+		self._client = BreezeConnect(api_key=resolved_key)
 
 	@property
 	def client(self) -> BreezeConnect:
 		"""Expose the underlying BreezeConnect client (read-only) for advanced flows like websockets."""
 		return self._client
 
-	def login_and_fetch_profile(self, api_secret: str, session_key: str) -> BreezeLoginResult:
+	def login_and_fetch_profile(self, api_secret: str | None = None, session_key: str | None = None) -> BreezeLoginResult:
 		"""Generate session and fetch profile data using BreezeConnect.
 
 		Parameters
@@ -49,9 +54,15 @@ class BreezeService:
 			Structured result with success, message, profile or error.
 		"""
 		try:
+			# Resolve credentials from arguments or server settings
+			resolved_secret = api_secret or settings.breeze_api_secret
+			resolved_session = session_key or settings.breeze_session_token
+			if not resolved_secret or not resolved_session:
+				return BreezeLoginResult(success=False, message="Missing Breeze credentials on server", error="Missing API secret or session token")
 			# 1) Generate session
 			# Note: breeze-connect expects parameter name session_token (not session_key)
-			self._client.generate_session(api_secret=api_secret, session_token=session_key)
+			record_breeze_call("generate_session")
+			self._client.generate_session(api_secret=resolved_secret, session_token=resolved_session)
 
 			# 2) Fetch user/customer details (profile-like data)
 			profile = self._client.get_customer_details()

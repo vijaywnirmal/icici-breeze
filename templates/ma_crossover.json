@@ -1,0 +1,13 @@
+{
+  "name": "Moving Average Crossover",
+  "description": "Buy when fast MA crosses above slow MA; sell on cross below.",
+  "universe": ["NIFTY"],
+  "conditions": [
+    {"indicator": "SMA", "symbol": "NIFTY", "timeframe": "1d", "operator": "crosses_above", "value": 50},
+    {"indicator": "SMA", "symbol": "NIFTY", "timeframe": "1d", "operator": ">", "value": 200}
+  ],
+  "actions": [
+    {"type": "trade", "signal": "BUY", "instrument": "OPTION", "strike": "ATM", "expiry": "weekly"}
+  ]
+}
+

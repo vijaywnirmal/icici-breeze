@@ -1,0 +1,12 @@
+{
+  "name": "Breakout Strategy",
+  "description": "Buy when price breaks above recent high.",
+  "universe": ["NIFTY"],
+  "conditions": [
+    {"indicator": "BOLL", "symbol": "NIFTY", "timeframe": "15m", "operator": ">", "value": 2}
+  ],
+  "actions": [
+    {"type": "trade", "signal": "BUY", "instrument": "OPTION", "strike": "ATM", "expiry": "weekly"}
+  ]
+}
+

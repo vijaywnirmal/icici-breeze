@@ -1,0 +1,12 @@
+{
+  "name": "RSI Overbought/Oversold",
+  "description": "Oversold (<20) buy, overbought (>80) sell signal template.",
+  "universe": ["NIFTY"],
+  "conditions": [
+    {"indicator": "RSI", "symbol": "NIFTY", "timeframe": "5m", "operator": "<", "value": 20}
+  ],
+  "actions": [
+    {"type": "trade", "signal": "BUY", "instrument": "OPTION", "strike": "ATM", "expiry": "weekly"}
+  ]
+}
+

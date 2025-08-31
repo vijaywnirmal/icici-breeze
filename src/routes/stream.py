@@ -14,6 +14,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from ..utils.response import log_exception
 from ..services.breeze_service import BreezeService
 from ..utils.session import get_breeze
+from ..utils.config import settings
 from ..services.quotes_cache import get_cached_quote, upsert_quote
 from .quotes import _is_market_open_ist, _last_session_close_range_utc, _to_breeze_iso
 
@@ -54,6 +55,25 @@ async def ws_ticks(websocket: WebSocket) -> None:
         }
         await websocket.send_text(json.dumps(normalized))
 
+    def _ensure_breeze_runtime() -> Optional[BreezeService]:
+        """Ensure a BreezeService is available from runtime or .env fallback."""
+        try:
+            runtime = get_breeze()
+            if runtime is not None:
+                return runtime
+            # Fallback to environment-based login if all creds present
+            if settings.breeze_api_key and settings.breeze_api_secret and settings.breeze_session_token:
+                svc = BreezeService(api_key=settings.breeze_api_key)
+                result = svc.login_and_fetch_profile(
+                    api_secret=settings.breeze_api_secret,
+                    session_key=settings.breeze_session_token,
+                )
+                if result.success:
+                    return svc
+        except Exception as exc:
+            log_exception(exc, context="ws_ticks.ensure_breeze_runtime")
+        return None
+
     async def send_last_close(symbol: str) -> None:
         """Send last close price using cached quote or historical data."""
         cached = get_cached_quote(symbol)
@@ -67,11 +87,14 @@ async def ws_ticks(websocket: WebSocket) -> None:
 
         try:
             if not state.breeze:
-                runtime = get_breeze()
-                if runtime is not None:
-                    state.breeze = runtime
-                else:
-                    raise RuntimeError("No Breeze session. Login required.")
+                state.breeze = _ensure_breeze_runtime()
+            if not state.breeze:
+                # No session available; skip historical fetch and return
+                await websocket.send_text(json.dumps({
+                    "type": "info",
+                    "message": "No Breeze session. Using cache only.",
+                }))
+                return
 
             f_utc, t_utc = _last_session_close_range_utc()
             resp = state.breeze.client.get_historical_data_v2(
@@ -148,11 +171,9 @@ async def ws_ticks(websocket: WebSocket) -> None:
                 }))
                 try:
                     if not state.breeze:
-                        runtime = get_breeze()
-                        if runtime is not None:
-                            state.breeze = runtime
-                        else:
-                            raise RuntimeError("No Breeze session. Login required.")
+                        state.breeze = _ensure_breeze_runtime()
+                    if not state.breeze:
+                        raise RuntimeError("No Breeze session available")
                     state.breeze.client.ws_connect()
                     breeze_ws_connected = True
                 except Exception as exc:

@@ -7,6 +7,9 @@ from .routes.login import router as login_router
 from .routes.home import router as home_router
 from .routes.stream import router as stream_router
 from .routes.quotes import router as quotes_router
+from .routes.backtests import router as backtests_router
+from .routes.strategies import router as strategies_router
+from .routes.historical import router as historical_router
 
 
 # Load environment variables from .env at startup
@@ -33,6 +36,9 @@ app.include_router(home_router)
 app.include_router(stream_router)
 # removed watchlist routes per request
 app.include_router(quotes_router)
+app.include_router(backtests_router)
+app.include_router(strategies_router)
+app.include_router(historical_router)
 
 
 @app.get("/health")

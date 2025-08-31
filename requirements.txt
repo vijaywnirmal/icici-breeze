@@ -4,6 +4,8 @@ breeze-connect
 python-dotenv
 pydantic
 loguru
-supabase
+psycopg[binary]
+SQLAlchemy>=2.0
 
 
+beautifulsoup4

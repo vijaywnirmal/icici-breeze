@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function App() {
-	const [apiKey, setApiKey] = useState('')
-	const [secretKey, setSecretKey] = useState('')
 	const [sessionKey, setSessionKey] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [message, setMessage] = useState('')
@@ -25,7 +23,7 @@ export default function App() {
 			const res = await fetch(loginUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ api_key: apiKey.trim(), api_secret: secretKey.trim(), session_key: sessionKey.trim() })
+				body: JSON.stringify({ session_key: sessionKey.trim() || undefined })
 			})
 			const data = await res.json().catch(() => ({}))
 			if (!res.ok || data.success === false) {
@@ -33,6 +31,10 @@ export default function App() {
 				setStatus('error')
 				setMessage(errText)
 				return
+			}
+			// store session key for later profile fetch
+			if (sessionKey.trim()) {
+				try { sessionStorage.setItem('api_session', sessionKey.trim()) } catch {}
 			}
 			setStatus('success')
 			setMessage('Login successful.')
@@ -50,14 +52,8 @@ export default function App() {
 			<section className="card">
 				<h1>Sign in</h1>
 				<form onSubmit={onSubmit}>
-					<label htmlFor="apiKey">API Key</label>
-					<input id="apiKey" type="password" placeholder="Enter API Key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} required />
-
-					<label htmlFor="secretKey">Secret Key</label>
-					<input id="secretKey" type="password" placeholder="Enter Secret Key" value={secretKey} onChange={(e) => setSecretKey(e.target.value)} required />
-
 					<label htmlFor="sessionKey">Session Key</label>
-					<input id="sessionKey" type="password" placeholder="Enter Session Key" value={sessionKey} onChange={(e) => setSessionKey(e.target.value)} required />
+					<input id="sessionKey" type="password" placeholder="Optional: Enter Session Key" value={sessionKey} onChange={(e) => setSessionKey(e.target.value)} />
 
 					<button type="submit" disabled={loading}>
 						{loading && <span className="spinner" aria-hidden="true"></span>}

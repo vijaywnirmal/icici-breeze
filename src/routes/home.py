@@ -5,6 +5,9 @@ from typing import Any, Dict, List
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter
+from ..utils.response import success_response
+from ..utils.usage import get_breeze_usage_summary
+from ..services.holidays_service import list_holidays, list_holiday_objects, seed_holidays_from_csv
 
 router = APIRouter(prefix="/api", tags=["home"])
 
@@ -46,3 +49,23 @@ def market_status() -> Dict[str, Any]:
         "open": bool(is_open),
         "server_time": now_utc.isoformat(),
     }
+
+
+@router.get("/market/holidays")
+def list_market_holidays() -> Dict[str, Any]:
+    # Seed from CSV (idempotent): will backfill names if missing
+    try:
+        seed_holidays_from_csv()
+    except Exception:
+        pass
+    # Backward compat: also return flat dates, but primary is list with names
+    return {
+        "dates": sorted(list(list_holidays())),
+        "items": list_holiday_objects(),
+    }
+
+
+@router.get("/usage/breeze")
+def breeze_usage() -> Dict[str, Any]:
+    """Return Breeze API usage stats (minute window + today)."""
+    return success_response("Breeze usage", **get_breeze_usage_summary())
