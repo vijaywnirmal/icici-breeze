@@ -2670,3 +2670,293 @@
 2025-09-01 08:12:38,833 - Get Historical data V2 response
 2025-09-01 08:12:39,008 - <Response [200]>
 2025-09-01 08:12:39,009 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:00:09,036 - <Response [200]>
+2025-09-01 11:00:09,036 - Customer Details response: {'Success': {'exg_trade_date': {'NSE': '01-Sep-2025', 'BSE': '01-Sep-2025', 'FNO': '01-Sep-2025', 'NDX': '19-May-2025'}, 'exg_status': {'NSE': 'O', 'BSE': 'O', 'FNO': 'Y', 'NDX': 'X'}, 'segments_allowed': {'Trading': 'Y', 'Equity': 'Y', 'Derivatives': 'Y', 'Currency': 'Z'}, 'idirect_userid': 'AE585479', 'idirect_user_name': 'VIJAY WILSON NIRMAL', 'idirect_ORD_TYP': 'N', 'idirect_lastlogin_time': '01-Sep-2025 11:00:10', 'mf_holding_mode_popup_flg': 'N', 'commodity_exchange_status': 'Y', 'commodity_trade_date': '01-Sep-2025', 'commodity_allowed': 'O'}, 'Status': 200, 'Error': None}
+2025-09-01 11:16:12,008 - <Response [200]>
+2025-09-01 11:16:12,008 - Customer Details response: {'Success': {'exg_trade_date': {'NSE': '01-Sep-2025', 'BSE': '01-Sep-2025', 'FNO': '01-Sep-2025', 'NDX': '19-May-2025'}, 'exg_status': {'NSE': 'O', 'BSE': 'O', 'FNO': 'Y', 'NDX': 'X'}, 'segments_allowed': {'Trading': 'Y', 'Equity': 'Y', 'Derivatives': 'Y', 'Currency': 'Z'}, 'idirect_userid': 'AE585479', 'idirect_user_name': 'VIJAY WILSON NIRMAL', 'idirect_ORD_TYP': 'N', 'idirect_lastlogin_time': '01-Sep-2025 11:16:13', 'mf_holding_mode_popup_flg': 'N', 'commodity_exchange_status': 'Y', 'commodity_trade_date': '01-Sep-2025', 'commodity_allowed': 'O'}, 'Status': 200, 'Error': None}
+2025-09-01 11:56:28,727 - Get Historical data V2 response
+2025-09-01 11:56:28,858 - <Response [200]>
+2025-09-01 11:56:28,859 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:28,939 - Get Historical data V2 response
+2025-09-01 11:56:29,045 - <Response [200]>
+2025-09-01 11:56:29,046 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:29,134 - Get Historical data V2 response
+2025-09-01 11:56:29,201 - <Response [503]>
+2025-09-01 11:56:29,203 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:29,285 - Get Historical data V2 response
+2025-09-01 11:56:29,341 - <Response [503]>
+2025-09-01 11:56:29,342 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:29,421 - Get Historical data V2 response
+2025-09-01 11:56:29,484 - <Response [503]>
+2025-09-01 11:56:29,485 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:29,551 - Get Historical data V2 response
+2025-09-01 11:56:29,651 - <Response [200]>
+2025-09-01 11:56:29,652 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:29,733 - Get Historical data V2 response
+2025-09-01 11:56:29,792 - <Response [503]>
+2025-09-01 11:56:29,792 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:29,861 - Get Historical data V2 response
+2025-09-01 11:56:29,934 - <Response [503]>
+2025-09-01 11:56:29,934 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:30,016 - Get Historical data V2 response
+2025-09-01 11:56:30,071 - <Response [503]>
+2025-09-01 11:56:30,071 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:30,139 - Get Historical data V2 response
+2025-09-01 11:56:30,222 - <Response [200]>
+2025-09-01 11:56:30,222 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:30,293 - Get Historical data V2 response
+2025-09-01 11:56:30,378 - <Response [200]>
+2025-09-01 11:56:30,379 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:30,454 - Get Historical data V2 response
+2025-09-01 11:56:30,521 - <Response [503]>
+2025-09-01 11:56:30,521 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:30,591 - Get Historical data V2 response
+2025-09-01 11:56:30,678 - <Response [200]>
+2025-09-01 11:56:30,679 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:30,749 - Get Historical data V2 response
+2025-09-01 11:56:30,802 - <Response [503]>
+2025-09-01 11:56:30,802 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:30,876 - Get Historical data V2 response
+2025-09-01 11:56:30,931 - <Response [503]>
+2025-09-01 11:56:30,931 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,006 - Get Historical data V2 response
+2025-09-01 11:56:31,062 - <Response [503]>
+2025-09-01 11:56:31,062 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,129 - Get Historical data V2 response
+2025-09-01 11:56:31,191 - <Response [503]>
+2025-09-01 11:56:31,192 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,263 - Get Historical data V2 response
+2025-09-01 11:56:31,324 - <Response [503]>
+2025-09-01 11:56:31,324 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,392 - Get Historical data V2 response
+2025-09-01 11:56:31,483 - <Response [200]>
+2025-09-01 11:56:31,486 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:31,562 - Get Historical data V2 response
+2025-09-01 11:56:31,617 - <Response [503]>
+2025-09-01 11:56:31,617 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,689 - Get Historical data V2 response
+2025-09-01 11:56:31,763 - Get Historical data V2 response
+2025-09-01 11:56:31,825 - <Response [503]>
+2025-09-01 11:56:31,826 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:31,897 - Get Historical data V2 response
+2025-09-01 11:56:32,007 - <Response [200]>
+2025-09-01 11:56:32,010 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:32,100 - Get Historical data V2 response
+2025-09-01 11:56:32,179 - <Response [503]>
+2025-09-01 11:56:32,179 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:32,261 - Get Historical data V2 response
+2025-09-01 11:56:32,363 - <Response [200]>
+2025-09-01 11:56:32,363 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:32,445 - Get Historical data V2 response
+2025-09-01 11:56:32,505 - <Response [503]>
+2025-09-01 11:56:32,505 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:32,580 - Get Historical data V2 response
+2025-09-01 11:56:32,661 - <Response [503]>
+2025-09-01 11:56:32,661 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:32,740 - Get Historical data V2 response
+2025-09-01 11:56:32,791 - <Response [503]>
+2025-09-01 11:56:32,792 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:32,859 - Get Historical data V2 response
+2025-09-01 11:56:32,924 - <Response [503]>
+2025-09-01 11:56:32,925 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:33,016 - Get Historical data V2 response
+2025-09-01 11:56:33,192 - Get Historical data V2 response
+2025-09-01 11:56:33,288 - <Response [200]>
+2025-09-01 11:56:33,289 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:33,359 - Get Historical data V2 response
+2025-09-01 11:56:33,425 - <Response [503]>
+2025-09-01 11:56:33,425 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:33,507 - Get Historical data V2 response
+2025-09-01 11:56:33,607 - <Response [200]>
+2025-09-01 11:56:33,608 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:33,694 - Get Historical data V2 response
+2025-09-01 11:56:33,775 - <Response [503]>
+2025-09-01 11:56:33,775 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:33,872 - Get Historical data V2 response
+2025-09-01 11:56:34,008 - <Response [200]>
+2025-09-01 11:56:34,008 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:34,090 - Get Historical data V2 response
+2025-09-01 11:56:34,181 - <Response [200]>
+2025-09-01 11:56:34,181 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:34,264 - Get Historical data V2 response
+2025-09-01 11:56:34,321 - <Response [503]>
+2025-09-01 11:56:34,322 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:34,397 - Get Historical data V2 response
+2025-09-01 11:56:34,551 - <Response [200]>
+2025-09-01 11:56:34,551 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:34,641 - Get Historical data V2 response
+2025-09-01 11:56:34,711 - <Response [503]>
+2025-09-01 11:56:34,711 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:34,787 - Get Historical data V2 response
+2025-09-01 11:56:34,923 - <Response [503]>
+2025-09-01 11:56:34,923 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:35,061 - Get Historical data V2 response
+2025-09-01 11:56:35,213 - <Response [200]>
+2025-09-01 11:56:35,214 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:35,285 - Get Historical data V2 response
+2025-09-01 11:56:35,366 - <Response [200]>
+2025-09-01 11:56:35,367 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:35,453 - Get Historical data V2 response
+2025-09-01 11:56:35,553 - <Response [200]>
+2025-09-01 11:56:35,554 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:35,622 - Get Historical data V2 response
+2025-09-01 11:56:35,733 - <Response [503]>
+2025-09-01 11:56:35,733 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:35,840 - Get Historical data V2 response
+2025-09-01 11:56:35,927 - <Response [200]>
+2025-09-01 11:56:35,928 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:36,065 - Get Historical data V2 response
+2025-09-01 11:56:36,128 - <Response [503]>
+2025-09-01 11:56:36,128 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:36,199 - Get Historical data V2 response
+2025-09-01 11:56:36,271 - <Response [503]>
+2025-09-01 11:56:36,271 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:36,359 - Get Historical data V2 response
+2025-09-01 11:56:36,440 - <Response [200]>
+2025-09-01 11:56:36,441 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:36,521 - Get Historical data V2 response
+2025-09-01 11:56:36,608 - Get Historical data V2 response
+2025-09-01 11:56:36,742 - Get Historical data V2 response
+2025-09-01 11:56:36,812 - <Response [503]>
+2025-09-01 11:56:36,812 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:36,906 - Get Historical data V2 response
+2025-09-01 11:56:36,973 - <Response [503]>
+2025-09-01 11:56:36,974 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:37,067 - Get Historical data V2 response
+2025-09-01 11:56:37,255 - <Response [200]>
+2025-09-01 11:56:37,256 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:37,458 - Get Historical data V2 response
+2025-09-01 11:56:37,557 - <Response [200]>
+2025-09-01 11:56:37,558 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:37,691 - Get Historical data V2 response
+2025-09-01 11:56:37,803 - <Response [200]>
+2025-09-01 11:56:37,804 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:37,881 - Get Historical data V2 response
+2025-09-01 11:56:37,944 - <Response [503]>
+2025-09-01 11:56:37,944 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:38,015 - Get Historical data V2 response
+2025-09-01 11:56:38,099 - <Response [200]>
+2025-09-01 11:56:38,100 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:38,172 - Get Historical data V2 response
+2025-09-01 11:56:38,246 - <Response [503]>
+2025-09-01 11:56:38,246 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:38,351 - Get Historical data V2 response
+2025-09-01 11:56:38,422 - Get Historical data V2 response
+2025-09-01 11:56:38,504 - <Response [503]>
+2025-09-01 11:56:38,504 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:38,567 - Get Historical data V2 response
+2025-09-01 11:56:38,628 - <Response [503]>
+2025-09-01 11:56:38,628 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:38,716 - Get Historical data V2 response
+2025-09-01 11:56:38,822 - Get Historical data V2 response
+2025-09-01 11:56:38,908 - Get Historical data V2 response
+2025-09-01 11:56:38,964 - <Response [503]>
+2025-09-01 11:56:38,965 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:39,045 - Get Historical data V2 response
+2025-09-01 11:56:39,177 - <Response [200]>
+2025-09-01 11:56:39,178 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:39,244 - Get Historical data V2 response
+2025-09-01 11:56:39,339 - <Response [200]>
+2025-09-01 11:56:39,340 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:39,432 - Get Historical data V2 response
+2025-09-01 11:56:39,505 - <Response [503]>
+2025-09-01 11:56:39,506 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:39,592 - Get Historical data V2 response
+2025-09-01 11:56:39,731 - <Response [503]>
+2025-09-01 11:56:39,732 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:39,849 - Get Historical data V2 response
+2025-09-01 11:56:39,937 - <Response [200]>
+2025-09-01 11:56:39,939 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:40,008 - Get Historical data V2 response
+2025-09-01 11:56:40,100 - Get Historical data V2 response
+2025-09-01 11:56:40,160 - <Response [503]>
+2025-09-01 11:56:40,161 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:40,252 - Get Historical data V2 response
+2025-09-01 11:56:40,343 - <Response [503]>
+2025-09-01 11:56:40,343 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:40,430 - Get Historical data V2 response
+2025-09-01 11:56:40,533 - <Response [200]>
+2025-09-01 11:56:40,534 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:40,617 - Get Historical data V2 response
+2025-09-01 11:56:40,711 - <Response [200]>
+2025-09-01 11:56:40,712 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:40,791 - Get Historical data V2 response
+2025-09-01 11:56:40,888 - <Response [200]>
+2025-09-01 11:56:40,889 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:40,978 - Get Historical data V2 response
+2025-09-01 11:56:41,046 - <Response [503]>
+2025-09-01 11:56:41,046 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:41,150 - Get Historical data V2 response
+2025-09-01 11:56:41,223 - <Response [503]>
+2025-09-01 11:56:41,223 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:41,317 - Get Historical data V2 response
+2025-09-01 11:56:41,390 - <Response [503]>
+2025-09-01 11:56:41,391 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:41,477 - Get Historical data V2 response
+2025-09-01 11:56:41,573 - <Response [200]>
+2025-09-01 11:56:41,573 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:41,658 - Get Historical data V2 response
+2025-09-01 11:56:41,759 - <Response [200]>
+2025-09-01 11:56:41,760 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:41,846 - Get Historical data V2 response
+2025-09-01 11:56:41,924 - Get Historical data V2 response
+2025-09-01 11:56:41,990 - <Response [503]>
+2025-09-01 11:56:41,990 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:42,055 - Get Historical data V2 response
+2025-09-01 11:56:42,109 - <Response [503]>
+2025-09-01 11:56:42,110 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:42,182 - Get Historical data V2 response
+2025-09-01 11:56:42,244 - <Response [503]>
+2025-09-01 11:56:42,244 - Exception in get_quotes : Expecting value: line 1 column 1 (char 0)
+2025-09-01 11:56:42,308 - Get Historical data V2 response
+2025-09-01 11:56:42,389 - <Response [200]>
+2025-09-01 11:56:42,389 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:42,464 - Get Historical data V2 response
+2025-09-01 11:56:42,548 - Get Historical data V2 response
+2025-09-01 11:56:42,639 - <Response [200]>
+2025-09-01 11:56:42,645 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:42,728 - Get Historical data V2 response
+2025-09-01 11:56:42,822 - <Response [200]>
+2025-09-01 11:56:42,823 - Get Quotes response : {'Success': None, 'Status': 500, 'Error': 'Check stock code:Stock may not be available for trading on website or on the selected exchange'}
+2025-09-01 11:56:42,897 - Get Historical data V2 response
+2025-09-01 12:40:30,303 - <Response [200]>
+2025-09-01 12:40:30,304 - Customer Details response: {'Success': {'exg_trade_date': {'NSE': '01-Sep-2025', 'BSE': '01-Sep-2025', 'FNO': '01-Sep-2025', 'NDX': '19-May-2025'}, 'exg_status': {'NSE': 'O', 'BSE': 'O', 'FNO': 'Y', 'NDX': 'X'}, 'segments_allowed': {'Trading': 'Y', 'Equity': 'Y', 'Derivatives': 'Y', 'Currency': 'Z'}, 'idirect_userid': 'AE585479', 'idirect_user_name': 'VIJAY WILSON NIRMAL', 'idirect_ORD_TYP': 'N', 'idirect_lastlogin_time': '01-Sep-2025 12:40:32', 'mf_holding_mode_popup_flg': 'N', 'commodity_exchange_status': 'Y', 'commodity_trade_date': '01-Sep-2025', 'commodity_allowed': 'O'}, 'Status': 200, 'Error': None}
+2025-09-01 12:40:38,655 - Get Historical data V2 response
+2025-09-01 12:40:38,761 - Get Historical data V2 response
+2025-09-01 12:40:38,855 - Get Historical data V2 response
+2025-09-01 12:40:38,964 - Get Historical data V2 response
+2025-09-01 12:40:39,056 - Get Historical data V2 response
+2025-09-01 12:40:39,157 - Get Historical data V2 response
+2025-09-01 12:40:39,258 - Get Historical data V2 response
+2025-09-01 12:40:39,346 - Get Historical data V2 response
+2025-09-01 12:40:39,434 - Get Historical data V2 response
+2025-09-01 12:40:39,523 - Get Historical data V2 response
+2025-09-01 12:40:39,612 - Get Historical data V2 response
+2025-09-01 12:40:39,696 - Get Historical data V2 response
+2025-09-01 12:40:39,786 - Get Historical data V2 response
+2025-09-01 12:40:39,882 - Get Historical data V2 response
+2025-09-01 12:40:39,999 - Get Historical data V2 response
+2025-09-01 12:40:40,098 - Get Historical data V2 response
+2025-09-01 12:40:40,207 - Get Historical data V2 response
+2025-09-01 12:40:40,308 - Get Historical data V2 response
+2025-09-01 12:40:40,408 - Get Historical data V2 response
+2025-09-01 12:40:40,490 - Get Historical data V2 response
+2025-09-01 12:40:40,589 - Get Historical data V2 response
+2025-09-01 12:40:40,684 - Get Historical data V2 response
+2025-09-01 12:40:40,769 - Get Historical data V2 response
+2025-09-01 12:40:40,851 - Get Historical data V2 response
+2025-09-01 12:40:40,939 - Get Historical data V2 response
+2025-09-01 12:40:41,024 - Get Historical data V2 response
+2025-09-01 12:40:41,111 - Get Historical data V2 response
+2025-09-01 12:40:41,217 - Get Historical data V2 response
+2025-09-01 12:40:41,319 - Get Historical data V2 response
+2025-09-01 12:40:41,409 - Get Historical data V2 response
+2025-09-01 12:40:41,499 - Get Historical data V2 response
+2025-09-01 12:40:41,596 - Get Historical data V2 response
+2025-09-01 12:40:41,678 - Get Historical data V2 response
+2025-09-01 12:40:41,765 - Get Historical data V2 response
+2025-09-01 12:40:41,851 - Get Historical data V2 response
+2025-09-01 12:40:41,931 - Get Historical data V2 response
+2025-09-01 12:40:42,019 - Get Historical data V2 response
+2025-09-01 12:40:42,103 - Get Historical data V2 response
+2025-09-01 12:40:42,192 - Get Historical data V2 response

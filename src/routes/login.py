@@ -58,6 +58,13 @@ def login(payload: LoginPayload, background_tasks: BackgroundTasks) -> dict[str,
         # Non-fatal for login flow; log and continue
         log_exception(_exc, context="login.ensure_instruments_first_run")
 
+    # New: run daily refresh on first login of the day (idempotent)
+    try:
+        from ..utils.daily_refresh import run_daily_refresh_if_needed
+        background_tasks.add_task(run_daily_refresh_if_needed)
+    except Exception:
+        pass
+
     # Optional: sanitize profile dict here
     return success_response("Login successful", profile=result.profile)
 

@@ -71,55 +71,50 @@ def refresh_nifty50_list() -> int:
     if not rows:
         return 0
 
-    # Map stock_code from instruments: strict mapping to short_name; fallback to symbol only if no short_name found
+    # Map stock_code from instruments.short_name using joins:
+    # Priority: match by exchange_code -> scrip_id -> company_name to nifty50.symbol.
+    # If no match, leave stock_code as NULL (no fallback to instruments.symbol).
     with get_conn() as conn:
         if conn is None:
             return 0
         mapped: List[Dict[str, Any]] = []
         for r in rows:
-            # 1) Try match by instrument.symbol -> get short_name
-            rec = conn.execute(text(
+            stock_code: Optional[str] = None
+            # 1) Match by exchange_code to Nifty symbol
+            rec_ex = conn.execute(text(
                 """
                 SELECT short_name
                 FROM instruments
-                WHERE exchange = 'NSE' AND UPPER(symbol) = :sym
+                WHERE exchange = 'NSE' AND UPPER(exchange_code) = :sym
                 LIMIT 1
                 """
             ), {"sym": r["symbol"]}).fetchone()
-            stock_code = rec[0] if rec and rec[0] else None
-            # 1a) Direct match by short_name (common case)
+            if rec_ex and rec_ex[0]:
+                stock_code = rec_ex[0]
+            # 2) Match by scrip_id to Nifty symbol
             if not stock_code:
-                rec0 = conn.execute(text(
+                rec_sid = conn.execute(text(
                     """
                     SELECT short_name
                     FROM instruments
-                    WHERE exchange = 'NSE' AND UPPER(short_name) = :sym
+                    WHERE exchange = 'NSE' AND UPPER(scrip_id) = :sym
                     LIMIT 1
                     """
                 ), {"sym": r["symbol"]}).fetchone()
-                stock_code = rec0[0] if rec0 and rec0[0] else None
-            # 2) If not found, try case-insensitive company_name match to find short_name
+                if rec_sid and rec_sid[0]:
+                    stock_code = rec_sid[0]
+            # 3) Match by company_name to Nifty symbol (exact, case-insensitive)
             if not stock_code:
-                rec2 = conn.execute(text(
+                rec_cn = conn.execute(text(
                     """
                     SELECT short_name
                     FROM instruments
-                    WHERE exchange = 'NSE' AND UPPER(company_name) = :nm
-                    LIMIT 1
-                    """
-                ), {"nm": str(r["company_name"]).upper()}).fetchone()
-                stock_code = rec2[0] if rec2 and rec2[0] else None
-            # 3) As a last fallback, use instruments.symbol itself
-            if not stock_code:
-                rec3 = conn.execute(text(
-                    """
-                    SELECT symbol
-                    FROM instruments
-                    WHERE exchange = 'NSE' AND UPPER(symbol) = :sym
+                    WHERE exchange = 'NSE' AND UPPER(company_name) = :sym
                     LIMIT 1
                     """
                 ), {"sym": r["symbol"]}).fetchone()
-                stock_code = rec3[0] if rec3 and rec3[0] else None
+                if rec_cn and rec_cn[0]:
+                    stock_code = rec_cn[0]
             mapped.append({
                 **r,
                 "stock_code": stock_code,
@@ -131,7 +126,7 @@ def refresh_nifty50_list() -> int:
             VALUES (:symbol, :stock_code, :company_name, 'NSE', :weight, :sector, NOW())
             ON CONFLICT (symbol, exchange)
             DO UPDATE SET
-                stock_code = EXCLUDED.stock_code,
+                stock_code = COALESCE(EXCLUDED.stock_code, nifty50_list.stock_code),
                 company_name = EXCLUDED.company_name,
                 weight = EXCLUDED.weight,
                 sector = EXCLUDED.sector,

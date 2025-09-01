@@ -66,3 +66,58 @@
 2025-08-28 23:40:54,045 - Error while unsubscribing to feeds : 'BreezeConnect' object has no attribute 'interval'
 2025-08-28 23:40:54,383 - Exception while subscribing to feeds list index out of range
 2025-08-28 23:42:18,376 - Error while unsubscribing to feeds : list index out of range
+2025-09-01 11:00:06,010 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:00:06,014 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-09-01 11:00:09,017 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:05:14,161 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:05:28,682 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:15:27,427 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:15:45,162 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:15:53,010 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:16:05,456 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:16:07,448 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-09-01 11:16:09,709 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:20:44,317 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:21:04,878 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:31:19,998 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:31:33,893 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:40:12,578 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:40:30,341 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:40:30,343 - [{'message': 'socket server for rate refresh  has been disconnected.'}, {'message': 'socket server is not connected to OHLCV Stream.'}, {'message': 'socket server is not connected to order refresh.'}]
+2025-09-01 11:40:36,400 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:51:28,884 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:52:06,063 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:52:37,352 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:52:50,447 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:53:02,164 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:53:16,350 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 11:59:10,969 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 11:59:19,023 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:02:12,517 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:02:28,923 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:03:25,320 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:03:39,006 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:12:09,218 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:12:27,921 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:13:58,439 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:14:10,950 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:14:39,443 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:14:48,032 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:15:11,022 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:15:26,189 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:16:02,514 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:16:10,400 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:16:13,907 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:16:30,918 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:16:57,469 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:17:04,979 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:28:02,244 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:28:17,200 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:32:41,480 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:32:55,966 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:36:05,801 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:36:22,666 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:40:11,797 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:40:28,298 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-01 12:41:54,460 - Error while unsubscribing to feeds : / is not a connected namespace.
+2025-09-01 12:42:06,817 - {'message': 'Stock NIFTY subscribed successfully'}

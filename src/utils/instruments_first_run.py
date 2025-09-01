@@ -60,8 +60,15 @@ def populate_instruments_from_security_master(root_dir: Path) -> int:
 
     _ensure_security_master_available(root_dir)
     frames = load_and_normalize(root_dir)
-    combined = frames["NSE"].copy()
-    combined = combined._append(frames["BSE"], ignore_index=True)
+    # Keep only required columns per exchange; fill blanks explicitly
+    nse_df = frames["NSE"].copy()
+    bse_df = frames["BSE"].copy()
+
+    # For BSE, Symbol is not requested; blank it
+    if "symbol" in bse_df.columns:
+        bse_df["symbol"] = ""
+
+    combined = nse_df._append(bse_df, ignore_index=True)
 
     # Basic sanitation: drop empty/zero tokens, cast lot_size to string, de-dup by token
     combined["token"] = combined["token"].astype(str).str.strip()
@@ -89,25 +96,29 @@ def populate_instruments_from_security_master(root_dir: Path) -> int:
         row["raw"] = raw
         return row
 
-    rows = [attach_raw(r) for r in combined.to_dict(orient="records")]
+    # Narrow fields to the requested projection
+    def project_fields(r: dict) -> dict:
+        return {
+            "token": r.get("token"),
+            "symbol": r.get("symbol") if r.get("exchange") == "NSE" else "",
+            "short_name": r.get("short_name"),
+            "company_name": r.get("company_name"),
+            "isin": r.get("isin"),
+            "exchange": r.get("exchange"),
+            "exchange_code": r.get("exchange_code"),
+            "scrip_id": r.get("scrip_id"),
+            "scrip_name": r.get("scrip_name"),
+        }
+
+    rows = [project_fields(attach_raw(r)) for r in combined.to_dict(orient="records")]
     if not rows:
         logger.info("No instrument rows to write")
         return 0
 
     # Use a cursor with %s placeholders for compatibility with psycopg driver
-    upsert_sql = (
-        "INSERT INTO instruments (token, symbol, short_name, company_name, series, isin, lot_size, exchange, last_update, raw) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s) "
-        "ON CONFLICT (token) DO UPDATE SET "
-        "symbol = EXCLUDED.symbol, "
-        "short_name = EXCLUDED.short_name, "
-        "company_name = EXCLUDED.company_name, "
-        "series = EXCLUDED.series, "
-        "isin = EXCLUDED.isin, "
-        "lot_size = EXCLUDED.lot_size, "
-        "exchange = EXCLUDED.exchange, "
-        "raw = EXCLUDED.raw, "
-        "last_update = NOW()"
+    insert_sql = (
+        "INSERT INTO instruments (token, symbol, short_name, company_name, isin, exchange, exchange_code, scrip_id, scrip_name, last_update, raw) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s)"
     )
 
     # Chunk inserts to avoid very large transactions
@@ -116,6 +127,8 @@ def populate_instruments_from_security_master(root_dir: Path) -> int:
     with engine.begin() as conn:
         raw_conn = conn.connection
         with raw_conn.cursor() as cur:
+            # Replace table contents to ensure only requested rows are present
+            cur.execute("TRUNCATE TABLE instruments")
             for i in range(0, len(rows), batch_size):
                 batch = rows[i:i + batch_size]
                 import json
@@ -125,15 +138,16 @@ def populate_instruments_from_security_master(root_dir: Path) -> int:
                         r.get("symbol"),
                         r.get("short_name"),
                         r.get("company_name"),
-                        r.get("series"),
                         r.get("isin"),
-                        r.get("lot_size"),
                         r.get("exchange"),
+                        r.get("exchange_code"),
+                        r.get("scrip_id"),
+                        r.get("scrip_name"),
                         json.dumps(r.get("raw")) if r.get("raw") is not None else None,
                     )
                     for r in batch
                 ]
-                cur.executemany(upsert_sql, params)
+                cur.executemany(insert_sql, params)
                 total_written += len(params)
 
     logger.info("Upserted {} instrument rows", total_written)

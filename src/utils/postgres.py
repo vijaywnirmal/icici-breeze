@@ -141,6 +141,10 @@ def ensure_tables() -> None:
 				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS short_name VARCHAR;
 				-- Store all original source columns as JSONB for future-proofing
 				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS raw JSONB;
+				-- New fields requested for NSE/BSE mapping
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS exchange_code VARCHAR;
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS scrip_id VARCHAR;
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS scrip_name VARCHAR;
 
 				-- Nifty 50 list (daily refresh around 08:00 IST)
 				CREATE TABLE IF NOT EXISTS nifty50_list (
