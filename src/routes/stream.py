@@ -16,6 +16,7 @@ from ..services.breeze_service import BreezeService
 from ..utils.session import get_breeze
 from ..utils.config import settings
 from ..services.quotes_cache import get_cached_quote, upsert_quote
+from ..services.ws_stream_manager import STREAM_MANAGER
 from .quotes import _is_market_open_ist, _last_session_close_range_utc, _to_breeze_iso
 
 router = APIRouter(tags=["stream"])
@@ -25,7 +26,11 @@ router = APIRouter(tags=["stream"])
 class ConnectionState:
     """Per-connection registry for subscriptions and flow control."""
     symbol: Optional[str] = None
+    exchange_code: str = "NSE"
+    product_type: str = "cash"
     last_sent_ts: float = 0.0
+    last_sent_ts_by_symbol: Dict[str, float] | None = None
+    subscriptions: Dict[str, Dict[str, str]] | None = None
     min_interval_ms: int = 250
     breeze: Optional[BreezeService] = None
 
@@ -34,18 +39,37 @@ class ConnectionState:
 async def ws_ticks(websocket: WebSocket) -> None:
     await websocket.accept()
     state = ConnectionState()
+    state.last_sent_ts_by_symbol = {}
+    state.subscriptions = {}
     breeze_ws_connected = False
     loop = asyncio.get_running_loop()
+    STREAM_MANAGER.set_loop(loop)
+    STREAM_MANAGER.register_client(websocket, loop)
+
+    def _extract_symbol_from_tick(tick: Dict[str, Any]) -> Optional[str]:
+        raw = tick.get("stock_code") or tick.get("symbol") or tick.get("stock_code_name") or tick.get("security_id") or tick.get("scrip_id")
+        if not raw:
+            return state.symbol
+        try:
+            code = str(raw).upper().strip()
+            if code.endswith(".NS"):
+                code = code[:-3]
+            return code
+        except Exception:
+            return state.symbol
 
     async def forward_tick(tick: Dict[str, Any]) -> None:
         now = time.monotonic() * 1000.0
-        if now - state.last_sent_ts < state.min_interval_ms:
+        sym = _extract_symbol_from_tick(tick) or state.symbol or ""
+        last = state.last_sent_ts_by_symbol.get(sym, 0.0) if state.last_sent_ts_by_symbol is not None else 0.0
+        if now - last < state.min_interval_ms:
             return
-        state.last_sent_ts = now
+        if state.last_sent_ts_by_symbol is not None:
+            state.last_sent_ts_by_symbol[sym] = now
 
         normalized = {
             "type": "tick",
-            "symbol": state.symbol,
+            "symbol": sym,
             "ltp": tick.get("last") or tick.get("ltp") or tick.get("close") or tick.get("open"),
             "close": tick.get("close"),
             "bid": tick.get("bPrice") or tick.get("best_bid_price"),
@@ -74,7 +98,7 @@ async def ws_ticks(websocket: WebSocket) -> None:
             log_exception(exc, context="ws_ticks.ensure_breeze_runtime")
         return None
 
-    async def send_last_close(symbol: str) -> None:
+    async def send_last_close(symbol: str, exchange_code: str) -> None:
         """Send last close price using cached quote or historical data."""
         cached = get_cached_quote(symbol)
         if cached:
@@ -102,8 +126,8 @@ async def ws_ticks(websocket: WebSocket) -> None:
                 from_date=_to_breeze_iso(f_utc),
                 to_date=_to_breeze_iso(t_utc),
                 stock_code=symbol,
-                exchange_code="NSE",
-                product_type="cash"
+                exchange_code=exchange_code or "NSE",
+                product_type=state.product_type or "cash"
             )
             success = resp.get("Success") or []
             if success:
@@ -156,9 +180,12 @@ async def ws_ticks(websocket: WebSocket) -> None:
                     }))
                     continue
                 state.symbol = symbol
+                # Allow client to specify exchange/product; default to NSE/cash
+                state.exchange_code = (msg.get("exchange_code") or "NSE").upper()
+                state.product_type = (msg.get("product_type") or "cash").lower()
 
                 if not _is_market_open_ist():
-                    await send_last_close(symbol)
+                    await send_last_close(symbol, state.exchange_code)
                     await websocket.send_text(json.dumps({
                         "type": "info",
                         "message": "Market closed; WS subscription skipped"
@@ -167,43 +194,15 @@ async def ws_ticks(websocket: WebSocket) -> None:
 
                 await websocket.send_text(json.dumps({
                     "type": "info",
-                    "message": "Connecting to Breeze WS..."
+                    "message": "Subscribing via stream manager..."
                 }))
                 try:
-                    if not state.breeze:
-                        state.breeze = _ensure_breeze_runtime()
-                    if not state.breeze:
-                        raise RuntimeError("No Breeze session available")
-                    state.breeze.client.ws_connect()
-                    breeze_ws_connected = True
+                    STREAM_MANAGER.subscribe(symbol, state.exchange_code, state.product_type)
                 except Exception as exc:
-                    log_exception(exc, context="ws_ticks.ws_connect")
+                    log_exception(exc, context="ws_ticks.manager_subscribe_single")
                     await websocket.send_text(json.dumps({
                         "type": "error",
-                        "context": "ws_connect",
-                        "message": str(exc)
-                    }))
-                    await websocket.close()
-                    return
-
-                try:
-                    state.breeze.client.subscribe_feeds(
-                        exchange_code="NSE",
-                        stock_code=symbol,
-                        product_type="cash",
-                        get_market_depth=False,
-                        get_exchange_quotes=True,
-                    )
-
-                    def on_ticks(ticks: Dict[str, Any]) -> None:
-                        asyncio.run_coroutine_threadsafe(forward_tick(ticks), loop)
-
-                    state.breeze.client.on_ticks = on_ticks
-                except Exception as exc:
-                    log_exception(exc, context="ws_ticks.subscribe")
-                    await websocket.send_text(json.dumps({
-                        "type": "error",
-                        "context": "subscribe",
+                        "context": "manager_subscribe",
                         "message": str(exc)
                     }))
 
@@ -211,20 +210,68 @@ async def ws_ticks(websocket: WebSocket) -> None:
                     "type": "subscribed",
                     "symbol": symbol
                 }))
+                # Ensure central stream subscription
+                try:
+                    STREAM_MANAGER.subscribe(symbol, state.exchange_code, state.product_type)
+                except Exception as exc:
+                    log_exception(exc, context="ws_ticks.manager_subscribe")
+
+            elif action == "subscribe_many":
+                items = msg.get("symbols") or []
+                if not isinstance(items, list) or not items:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "subscribe_many",
+                        "message": "symbols list required"
+                    }))
+                    continue
+
+                if not _is_market_open_ist():
+                    for it in items:
+                        try:
+                            code = str((it.get("stock_code") or it.get("symbol") or "")).upper()
+                            if not code:
+                                continue
+                            ex = str((it.get("exchange_code") or "NSE")).upper()
+                            await send_last_close(code, ex)
+                        except Exception as exc:
+                            log_exception(exc, context="ws_ticks.subscribe_many.closed")
+                    await websocket.send_text(json.dumps({
+                        "type": "info",
+                        "message": "Market closed; WS subscription skipped"
+                    }))
+                    continue
+
+                try:
+                    STREAM_MANAGER.subscribe_many(items)
+                    for it in items:
+                        try:
+                            code = str((it.get("stock_code") or it.get("symbol") or "")).upper()
+                            if code:
+                                await websocket.send_text(json.dumps({"type": "subscribed", "symbol": code}))
+                        except Exception:
+                            pass
+                except Exception as exc:
+                    log_exception(exc, context="ws_ticks.subscribe_many_manager")
+                    await websocket.send_text(json.dumps({"type": "error", "context": "subscribe_many_manager", "message": str(exc)}))
 
             elif action == "unsubscribe":
                 try:
                     if state.symbol and state.breeze:
                         state.breeze.client.unsubscribe_feeds(
-                            exchange_code="NSE",
+                            exchange_code=state.exchange_code,
                             stock_code=state.symbol,
-                            product_type="cash"
+                            product_type=state.product_type
                         )
                         state.breeze.client.on_ticks = None
                         await websocket.send_text(json.dumps({
                             "type": "unsubscribed",
                             "symbol": state.symbol
                         }))
+                        try:
+                            STREAM_MANAGER.unsubscribe(state.symbol)
+                        except Exception as exc:
+                            log_exception(exc, context="ws_ticks.manager_unsubscribe")
                         state.symbol = None
                 except Exception as exc:
                     log_exception(exc, context="ws_ticks.unsubscribe")
@@ -233,6 +280,23 @@ async def ws_ticks(websocket: WebSocket) -> None:
                         "context": "unsubscribe",
                         "message": str(exc)
                     }))
+            elif action == "unsubscribe_many":
+                items = msg.get("symbols") or []
+                if not isinstance(items, list) or not items:
+                    await websocket.send_text(json.dumps({"type": "error", "context": "unsubscribe_many", "message": "symbols list required"}))
+                    continue
+                try:
+                    STREAM_MANAGER.unsubscribe_many(items)
+                    for it in items:
+                        try:
+                            code = str((it.get("stock_code") or it.get("symbol") or "")).upper()
+                            if code:
+                                await websocket.send_text(json.dumps({"type": "unsubscribed", "symbol": code}))
+                        except Exception:
+                            pass
+                except Exception as exc:
+                    log_exception(exc, context="ws_ticks.unsubscribe_many")
+                    await websocket.send_text(json.dumps({"type": "error", "context": "unsubscribe_many", "message": str(exc)}))
             else:
                 await websocket.send_text(json.dumps({
                     "type": "error",
@@ -242,17 +306,10 @@ async def ws_ticks(websocket: WebSocket) -> None:
 
     except WebSocketDisconnect:
         try:
-            if state.breeze and state.symbol:
-                state.breeze.client.unsubscribe_feeds(
-                    exchange_code="NSE",
-                    stock_code=state.symbol,
-                    product_type="cash"
-                )
-                state.breeze.client.on_ticks = None
-            if state.breeze and breeze_ws_connected:
-                state.breeze.client.ws_disconnect()
+            pass
         except Exception as exc:
             log_exception(exc, context="ws_ticks.disconnect_cleanup")
     finally:
         with contextlib.suppress(Exception):
+            STREAM_MANAGER.unregister_client(websocket)
             await websocket.close()

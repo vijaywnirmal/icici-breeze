@@ -38,7 +38,7 @@ def _fetch_nifty50_df():
 
 
 def refresh_nifty50_list() -> int:
-    """Fetch Nifty50 constituents and upsert into nifty50_list, mapping stock_code from instruments.
+    """Fetch Nifty50 constituents and upsert into nifty50_list, mapping stock_code and token from instruments.
 
     Returns number of rows written.
     """
@@ -71,62 +71,81 @@ def refresh_nifty50_list() -> int:
     if not rows:
         return 0
 
-    # Map stock_code from instruments.short_name using joins:
-    # Priority: match by exchange_code -> scrip_id -> company_name to nifty50.symbol.
-    # If no match, leave stock_code as NULL (no fallback to instruments.symbol).
+    # Map stock_code and token from instruments:
+    # Priority: exchange_code -> scrip_id -> company_name -> instruments.symbol
     with get_conn() as conn:
         if conn is None:
             return 0
         mapped: List[Dict[str, Any]] = []
         for r in rows:
             stock_code: Optional[str] = None
+            token: Optional[str] = None
             # 1) Match by exchange_code to Nifty symbol
             rec_ex = conn.execute(text(
                 """
-                SELECT short_name
+                SELECT short_name, token
                 FROM instruments
                 WHERE exchange = 'NSE' AND UPPER(exchange_code) = :sym
                 LIMIT 1
                 """
             ), {"sym": r["symbol"]}).fetchone()
-            if rec_ex and rec_ex[0]:
+            if rec_ex:
                 stock_code = rec_ex[0]
+                token = rec_ex[1]
             # 2) Match by scrip_id to Nifty symbol
             if not stock_code:
                 rec_sid = conn.execute(text(
                     """
-                    SELECT short_name
+                    SELECT short_name, token
                     FROM instruments
                     WHERE exchange = 'NSE' AND UPPER(scrip_id) = :sym
                     LIMIT 1
                     """
                 ), {"sym": r["symbol"]}).fetchone()
-                if rec_sid and rec_sid[0]:
+                if rec_sid:
                     stock_code = rec_sid[0]
-            # 3) Match by company_name to Nifty symbol (exact, case-insensitive)
+                    token = rec_sid[1]
+            # 3) Match by company_name exact
             if not stock_code:
                 rec_cn = conn.execute(text(
                     """
-                    SELECT short_name
+                    SELECT short_name, token
                     FROM instruments
                     WHERE exchange = 'NSE' AND UPPER(company_name) = :sym
                     LIMIT 1
                     """
                 ), {"sym": r["symbol"]}).fetchone()
-                if rec_cn and rec_cn[0]:
+                if rec_cn:
                     stock_code = rec_cn[0]
+                    token = rec_cn[1]
+            # 4) Fallback: instruments.symbol == nifty symbol
+            if not stock_code:
+                rec_sym = conn.execute(text(
+                    """
+                    SELECT short_name, token
+                    FROM instruments
+                    WHERE exchange = 'NSE' AND UPPER(symbol) = :sym
+                    LIMIT 1
+                    """
+                ), {"sym": r["symbol"]}).fetchone()
+                if rec_sym:
+                    stock_code = rec_sym[0]
+                    token = rec_sym[1]
+
             mapped.append({
                 **r,
                 "stock_code": stock_code,
+                "token": token,
             })
 
         upsert = text(
             """
-            INSERT INTO nifty50_list (symbol, stock_code, company_name, exchange, weight, sector, updated_at)
-            VALUES (:symbol, :stock_code, :company_name, 'NSE', :weight, :sector, NOW())
+            INSERT INTO nifty50_list (symbol, stock_code, token, company_name, exchange, weight, sector, updated_at)
+            VALUES (:symbol, :stock_code, :token, :company_name, 'NSE', :weight, :sector, NOW())
             ON CONFLICT (symbol, exchange)
             DO UPDATE SET
                 stock_code = COALESCE(EXCLUDED.stock_code, nifty50_list.stock_code),
+                token = COALESCE(EXCLUDED.token, nifty50_list.token),
                 company_name = EXCLUDED.company_name,
                 weight = EXCLUDED.weight,
                 sector = EXCLUDED.sector,

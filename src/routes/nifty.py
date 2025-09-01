@@ -8,6 +8,7 @@ from sqlalchemy import text
 from ..utils.postgres import get_conn
 from ..utils.response import error_response, success_response, log_exception
 from ..services.quotes_cache import get_cached_quote, upsert_quote
+from .quotes import _is_market_open_ist, _last_session_close_range_utc, _to_breeze_iso
 
 
 router = APIRouter(prefix="/api", tags=["nifty"])
@@ -58,8 +59,31 @@ def _fetch_nifty50_symbols() -> List[Dict[str, str]]:
 def _try_fetch_close(breeze, code: str) -> Optional[float]:
     from ..utils.usage import record_breeze_call
     try:
-        # 1) Historical daily close
-        from .quotes import _last_daily_range_utc, _to_breeze_iso
+        # Prefer last session 15:30 minute close when market is closed
+        if not _is_market_open_ist():
+            try:
+                f_utc, t_utc = _last_session_close_range_utc()
+                record_breeze_call("get_historical_data_v2")
+                r2 = breeze.client.get_historical_data_v2(
+                    interval="1minute",
+                    from_date=_to_breeze_iso(f_utc),
+                    to_date=_to_breeze_iso(t_utc),
+                    stock_code=code,
+                    exchange_code="NSE",
+                    product_type="cash",
+                )
+                if isinstance(r2, dict):
+                    s2 = r2.get("Success") or []
+                    if isinstance(s2, list) and s2:
+                        last_bar = s2[-1]
+                        c2 = last_bar.get("close")
+                        if isinstance(c2, (int, float)):
+                            return round(float(c2), 2)
+            except Exception:
+                pass
+
+        # Fallback: Historical daily close
+        from .quotes import _last_daily_range_utc
         f_utc, t_utc = _last_daily_range_utc()
         record_breeze_call("get_historical_data_v2")
         resp = breeze.client.get_historical_data_v2(
@@ -125,7 +149,7 @@ def list_nifty50_stocks(api_session: str | None = Query(None)) -> Dict[str, Any]
             if conn is None:
                 return error_response("Database not configured")
             rows = conn.execute(text("""
-                SELECT symbol, stock_code, company_name, exchange
+                SELECT symbol, stock_code, token, company_name, exchange
                 FROM nifty50_list
                 WHERE exchange = 'NSE'
                 ORDER BY symbol
@@ -134,8 +158,9 @@ def list_nifty50_stocks(api_session: str | None = Query(None)) -> Dict[str, Any]
             for r in rows:
                 symbol = r[0]
                 stock_code = (r[1] or symbol).upper()
-                name = r[2]
-                ex = r[3]
+                token = r[2]
+                name = r[3]
+                ex = r[4]
                 # Build candidate codes: primary stock_code, symbol, plus ".NS" variants
                 candidates = [stock_code]
                 if symbol and symbol != stock_code:
@@ -146,6 +171,7 @@ def list_nifty50_stocks(api_session: str | None = Query(None)) -> Dict[str, Any]
                 out.append({
                     "symbol": symbol,
                     "stock_code": stock_code,
+                    "token": token,
                     "company_name": name,
                     "stock_name": name,
                     "exchange": ex,

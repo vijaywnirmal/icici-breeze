@@ -31,6 +31,8 @@ export default function TickerBar() {
 	}, [httpBase, wsBase])
 
 	const wsRef = useRef(null)
+	const subscribedSymbolsRef = useRef([])
+	const niftyIndexByKeyRef = useRef({})
 	const retryRef = useRef(0)
 	const pollTimer = useRef(null)
 	const liveTimer = useRef(null)
@@ -106,6 +108,20 @@ export default function TickerBar() {
 				
 				if (result.success && result.stocks) {
 					setNiftyStocks(result.stocks)
+					// Build quick lookup index by stock_code and token (normalized)
+					const idxMap = {}
+					for (let i = 0; i < result.stocks.length; i++) {
+						const s = result.stocks[i] || {}
+						const code = String(s.stock_code || s.symbol || '').toUpperCase()
+						if (code) idxMap[code] = i
+						const token = String(s.token || '').toUpperCase()
+						if (token) {
+							const isFull = /^\d+\.\d+!\w+$/.test(token)
+							const nsePref = `4.1!${token}`
+							idxMap[isFull ? token : nsePref] = i
+						}
+					}
+					niftyIndexByKeyRef.current = idxMap
 					setShowNiftyStocks(true)
 				} else {
 					console.error('Failed to fetch Nifty 50 stocks:', result.message)
@@ -149,15 +165,17 @@ export default function TickerBar() {
 		async function pollSnapshot() {
 			if (didInitialPollRef.current) return
 			try {
-				const [nRes, sRes, bRes] = await Promise.all([
+				const [nRes, sRes, bRes, listRes] = await Promise.all([
 					fetch(`${httpBase}/api/quotes/index?symbol=NIFTY&exchange=NSE`),
 					fetch(`${httpBase}/api/quotes/index?symbol=BSESEN&exchange=BSE`),
 					fetch(`${httpBase}/api/quotes/index?symbol=CNXBAN&exchange=NSE`),
+					fetch(`${httpBase}/api/nifty50/stocks`),
 				])
-				const [nJson, sJson, bJson] = await Promise.all([
+				const [nJson, sJson, bJson, listJson] = await Promise.all([
 					nRes.json().catch(() => ({})),
 					sRes.json().catch(() => ({})),
 					bRes.json().catch(() => ({})),
+					listRes.json().catch(() => ({})),
 				])
 				if (!closed) {
 					didInitialPollRef.current = true
@@ -232,6 +250,32 @@ export default function TickerBar() {
 						}))
 						try { localStorage.setItem('ticker:banknifty', JSON.stringify({ ltp: bJson?.ltp ?? undefined, close: bJson?.close ?? undefined, change_pct: bJson?.change_pct ?? undefined, timestamp: bJson?.timestamp ?? undefined, status: bJson?.status || 'closed' })) } catch (_) {}
 					}
+
+					// Refresh Nifty50 grid snapshot (from historical close)
+					if (listJson && listJson.success && Array.isArray(listJson.stocks)) {
+						setNiftyStocks(prev => {
+							const arr = listJson.stocks.map(s => ({
+								...s,
+								ltp: typeof s.ltp === 'number' ? s.ltp : undefined,
+								close: typeof s.close === 'number' ? s.close : undefined,
+							}))
+							// rebuild index map
+							const idxMap = {}
+							for (let i = 0; i < arr.length; i++) {
+								const it = arr[i]
+								const code = String(it.stock_code || it.symbol || '').toUpperCase()
+								if (code) idxMap[code] = i
+								const token = String(it.token || '').toUpperCase()
+								if (token) {
+									const isFull = /^\d+\.\d+!\w+$/.test(token)
+									const nsePref = `4.1!${token}`
+									idxMap[isFull ? token : nsePref] = i
+								}
+							}
+							niftyIndexByKeyRef.current = idxMap
+							return arr
+						})
+					}
 				}
 			} catch (_) {
 				// ignore polling errors
@@ -248,41 +292,83 @@ export default function TickerBar() {
 			clearInterval(pollTimer.current)
 		}
 
-		function connect() {
+		async function connect() {
 			if (closed) return
 			stopPolling()
 			// If it's before 09:00 IST and backend indicates reset, avoid starting WS
 			// by first polling and returning early.
 			// This relies on pollSnapshot having cleared persisted values.
 			try {
+				// Preflight: if closed or reset, fetch snapshots but still open WS to receive last-close events
+				const preflight = await fetch(`${httpBase}/api/quotes/index?symbol=NIFTY&exchange=NSE`).then(r => r.json()).catch(() => null)
+				if (!preflight || preflight.reset || (preflight.status && preflight.status !== 'live')) {
+					startPollingOnce()
+				}
+
 				const ws = new WebSocket(wsUrl)
 				wsRef.current = ws
 
-				ws.onopen = () => {
+				ws.onopen = async () => {
 					retryRef.current = 0
-					// do not poll here to avoid duplicate snapshot requests
-					ws.send(JSON.stringify({ action: 'subscribe', symbol: 'NIFTY', exchange_code: 'NSE', product_type: 'cash' }))
+					try {
+						const apiSession = sessionStorage.getItem('api_session')
+						const url = apiSession 
+							? `${httpBase}/api/nifty50/stocks?api_session=${apiSession}`
+							: `${httpBase}/api/nifty50/stocks`
+						const res = await fetch(url)
+						const json = await res.json().catch(() => null)
+						const items = Array.isArray(json?.stocks) ? json.stocks : []
+						const base = [
+							{ stock_code: 'NIFTY', exchange_code: 'NSE', product_type: 'cash' },
+							{ stock_code: 'BSESEN', exchange_code: 'BSE', product_type: 'cash' },
+							{ stock_code: 'CNXBAN', exchange_code: 'NSE', product_type: 'cash' },
+						]
+						const subs = items.map(it => ({ stock_code: (it.stock_code || it.symbol || '').toUpperCase(), token: it.token || undefined, exchange_code: 'NSE', product_type: 'cash' }))
+						const symbols = [...base, ...subs].filter(s => s.stock_code)
+						subscribedSymbolsRef.current = symbols
+						ws.send(JSON.stringify({ action: 'subscribe_many', symbols }))
+					} catch (_) {}
 				}
 
 				ws.onmessage = (evt) => {
 					try {
 						const payload = JSON.parse(evt.data)
-						// Only treat real ticks as live; ignore info/error/subscribed, etc.
-						if (payload && payload.symbol === 'NIFTY' && (payload.type === 'tick' || typeof payload.ltp === 'number')) {
-							setData(d => ({
-								...d,
-								ltp: payload.ltp ?? d.ltp,
-								close: payload.close ?? d.close,
-								change_pct: payload.change_pct ?? d.change_pct,
-								bid: payload.bid ?? d.bid,
-								ask: payload.ask ?? d.ask,
-								timestamp: payload.timestamp ?? d.timestamp,
-								status: 'live'
-							}))
+						if (payload && payload.type === 'tick' && payload.symbol) {
+							const sym = String(payload.symbol).toUpperCase()
+							// Top indexes with tolerant matching
+							if (sym === 'NIFTY' || sym.includes('NIFTY 50')) {
+								setData(d => ({
+									...d,
+									ltp: payload.ltp ?? d.ltp,
+									close: payload.close ?? d.close,
+									change_pct: payload.change_pct ?? d.change_pct,
+									bid: payload.bid ?? d.bid,
+									ask: payload.ask ?? d.ask,
+									timestamp: payload.timestamp ?? d.timestamp,
+									status: 'live'
+								}))
+							} else if (sym === 'BSESEN' || sym.includes('SENSEX')) {
+								setSensex(s => ({ ...s, ltp: payload.ltp ?? s.ltp, close: payload.close ?? s.close, change_pct: payload.change_pct ?? s.change_pct, timestamp: payload.timestamp ?? s.timestamp, status: 'live' }))
+							} else if (sym === 'CNXBAN' || sym.includes('NIFTY BANK')) {
+								setBank(b => ({ ...b, ltp: payload.ltp ?? b.ltp, close: payload.close ?? b.close, change_pct: payload.change_pct ?? b.change_pct, timestamp: payload.timestamp ?? b.timestamp, status: 'live' }))
+							}
+							// Nifty 50 grid updates by symbol/token
+							const idx = niftyIndexByKeyRef.current[sym]
+							if (idx !== undefined) {
+								setNiftyStocks(prev => {
+									const next = prev.slice()
+									const cur = next[idx] || {}
+									next[idx] = {
+										...cur,
+										ltp: (typeof payload.ltp === 'number') ? payload.ltp : cur.ltp,
+										close: (typeof payload.close === 'number') ? payload.close : cur.close,
+										change_pct: (typeof payload.change_pct === 'number') ? payload.change_pct : cur.change_pct,
+									}
+									return next
+								})
+							}
 						}
-					} catch (_) {
-						// ignore malformed messages
-					}
+					} catch (_) { /* ignore */ }
 				}
 
 				ws.onerror = () => {
@@ -296,6 +382,14 @@ export default function TickerBar() {
 				startPollingOnce()
 				scheduleReconnect()
 			}
+
+			// If no live ticks arrive shortly (e.g., market closed), fetch a REST snapshot once
+			clearTimeout(liveTimer.current)
+			liveTimer.current = setTimeout(() => {
+				if (!didInitialPollRef.current) {
+					startPollingOnce()
+				}
+			}, 1500)
 		}
 
 		// Always fetch once on mount so a price appears even before WS
@@ -308,6 +402,20 @@ export default function TickerBar() {
 					wsRef.current.send(JSON.stringify({ action: 'unsubscribe', symbol: 'NIFTY' }))
 				}
 				wsRef.current?.close()
+				if (wsSensexRef.current?.readyState === WebSocket.OPEN) {
+					wsSensexRef.current.send(JSON.stringify({ action: 'unsubscribe', symbol: 'BSESEN' }))
+				}
+				wsSensexRef.current?.close()
+				if (wsBankRef.current?.readyState === WebSocket.OPEN) {
+					wsBankRef.current.send(JSON.stringify({ action: 'unsubscribe', symbol: 'CNXBAN' }))
+				}
+				wsBankRef.current?.close()
+				if (wsNiftyListRef.current?.readyState === WebSocket.OPEN) {
+					// best effort: send list of symbols to unsubscribe
+					const symbols = (niftyStocks || []).map(it => ({ stock_code: (it.stock_code || it.symbol || '').toUpperCase(), exchange_code: 'NSE', product_type: 'cash' })).filter(s => s.stock_code)
+					if (symbols.length) wsNiftyListRef.current.send(JSON.stringify({ action: 'unsubscribe_many', symbols }))
+				}
+				wsNiftyListRef.current?.close()
 			} catch (_) {}
 			stopPolling()
 			clearTimeout(liveTimer.current)
@@ -387,7 +495,7 @@ export default function TickerBar() {
 							}}>
 								<div style={{display:'flex', justifyContent:'space-between', alignItems:'baseline'}}>
 									<div style={{fontWeight: 600}}>{stock.stock_code || stock.symbol || 'N/A'}</div>
-									<div style={{fontWeight: 700}}>{formatNumber(typeof stock.close === 'number' ? stock.close : null)}</div>
+									<div style={{fontWeight: 700}}>{formatNumber(typeof stock.ltp === 'number' ? stock.ltp : (typeof stock.close === 'number' ? stock.close : null))}</div>
 								</div>
 								<div style={{fontSize: '12px', color: 'var(--muted)', marginTop: '4px'}}>
 									{stock.stock_name || stock.name || 'N/A'}

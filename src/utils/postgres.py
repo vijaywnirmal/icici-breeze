@@ -151,6 +151,7 @@ def ensure_tables() -> None:
 					id BIGSERIAL PRIMARY KEY,
 					symbol VARCHAR NOT NULL,
 					stock_code VARCHAR,
+					token VARCHAR,
 					company_name VARCHAR,
 					exchange VARCHAR DEFAULT 'NSE',
 					weight NUMERIC,
@@ -158,6 +159,8 @@ def ensure_tables() -> None:
 					updated_at TIMESTAMPTZ DEFAULT NOW(),
 					UNIQUE(symbol, exchange)
 				);
+				-- Backward compatibility for token column
+				ALTER TABLE nifty50_list ADD COLUMN IF NOT EXISTS token VARCHAR;
 				"""
 			))
 	except Exception as exc:
