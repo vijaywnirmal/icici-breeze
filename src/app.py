@@ -10,6 +10,9 @@ from .routes.quotes import router as quotes_router
 from .routes.backtests import router as backtests_router
 from .routes.strategies import router as strategies_router
 from .routes.historical import router as historical_router
+from .routes.instruments import router as instruments_router
+from .routes.nifty import router as nifty_router
+from .utils.instruments_scheduler import DailyInstrumentsUpdater
 
 
 # Load environment variables from .env at startup
@@ -39,6 +42,31 @@ app.include_router(quotes_router)
 app.include_router(backtests_router)
 app.include_router(strategies_router)
 app.include_router(historical_router)
+app.include_router(instruments_router)
+app.include_router(nifty_router)
+
+
+updater: DailyInstrumentsUpdater | None = None
+
+
+@app.on_event("startup")
+async def _startup() -> None:
+    global updater
+    try:
+        updater = DailyInstrumentsUpdater()
+        await updater.start()
+    except Exception:
+        updater = None
+
+
+@app.on_event("shutdown")
+async def _shutdown() -> None:
+    global updater
+    if updater is not None:
+        try:
+            await updater.stop()
+        except Exception:
+            pass
 
 
 @app.get("/health")

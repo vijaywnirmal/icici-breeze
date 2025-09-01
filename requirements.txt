@@ -6,6 +6,11 @@ pydantic
 loguru
 psycopg[binary]
 SQLAlchemy>=2.0
-
-
+requests
+numpy
+scipy
+pandas
+lxml
+pandas_market_calendars
 beautifulsoup4
+nselib

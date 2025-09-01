@@ -122,6 +122,38 @@ def ensure_tables() -> None:
 					json JSONB NOT NULL,
 					created_at TIMESTAMPTZ DEFAULT NOW()
 				);
+
+				-- Instruments master from ICICI SecurityMaster
+				CREATE TABLE IF NOT EXISTS instruments (
+					token VARCHAR PRIMARY KEY,
+					symbol VARCHAR,
+					short_name VARCHAR,
+					company_name VARCHAR,
+					series VARCHAR,
+					isin VARCHAR,
+					lot_size VARCHAR,
+					exchange VARCHAR,
+					last_update TIMESTAMPTZ DEFAULT NOW()
+				);
+
+				-- Backward compatibility: add last_update if missing
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS last_update TIMESTAMPTZ DEFAULT NOW();
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS short_name VARCHAR;
+				-- Store all original source columns as JSONB for future-proofing
+				ALTER TABLE instruments ADD COLUMN IF NOT EXISTS raw JSONB;
+
+				-- Nifty 50 list (daily refresh around 08:00 IST)
+				CREATE TABLE IF NOT EXISTS nifty50_list (
+					id BIGSERIAL PRIMARY KEY,
+					symbol VARCHAR NOT NULL,
+					stock_code VARCHAR,
+					company_name VARCHAR,
+					exchange VARCHAR DEFAULT 'NSE',
+					weight NUMERIC,
+					sector VARCHAR,
+					updated_at TIMESTAMPTZ DEFAULT NOW(),
+					UNIQUE(symbol, exchange)
+				);
 				"""
 			))
 	except Exception as exc:

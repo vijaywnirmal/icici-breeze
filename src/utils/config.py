@@ -25,6 +25,9 @@ class Settings:
     # Market holidays (optional): comma-separated YYYY-MM-DD list
     market_holidays_raw: str | None = os.getenv("MARKET_HOLIDAYS")
 
+    # Control whether to run instruments first-load automatically on login
+    instruments_first_run_on_login: bool = os.getenv("INSTRUMENTS_FIRST_RUN_ON_LOGIN", "true").lower() in ("1", "true", "yes")
+
     @property
     def market_holidays(self) -> set[str]:
         raw = (self.market_holidays_raw or "").strip()

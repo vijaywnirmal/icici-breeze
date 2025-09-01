@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, BackgroundTasks
 from pydantic import BaseModel, Field
 
 from ..services.breeze_service import BreezeService
@@ -23,7 +23,7 @@ class LoginPayload(BaseModel):
 
 
 @router.post("/login")
-def login(payload: LoginPayload) -> dict[str, object]:
+def login(payload: LoginPayload, background_tasks: BackgroundTasks) -> dict[str, object]:
     """Attempt a Breeze login and return profile information on success."""
     try:
         service = BreezeService(api_key=payload.api_key)
@@ -42,6 +42,21 @@ def login(payload: LoginPayload) -> dict[str, object]:
         set_breeze(service)
     except Exception:
         pass
+
+    # First-run: ensure instruments table exists and populate if empty (background)
+    try:
+        if settings.instruments_first_run_on_login:
+            from ..utils.instruments_first_run import ensure_instruments_first_run
+            background_tasks.add_task(ensure_instruments_first_run)
+            # Also refresh Nifty 50 list on first login of the day (idempotent)
+            try:
+                from ..utils.nifty50_service import refresh_nifty50_list
+                background_tasks.add_task(refresh_nifty50_list)
+            except Exception:
+                pass
+    except Exception as _exc:
+        # Non-fatal for login flow; log and continue
+        log_exception(_exc, context="login.ensure_instruments_first_run")
 
     # Optional: sanitize profile dict here
     return success_response("Login successful", profile=result.profile)

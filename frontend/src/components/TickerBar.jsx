@@ -14,6 +14,9 @@ export default function TickerBar() {
 	})
 	const [sensex, setSensex] = useState({ ltp: null, close: null, change_pct: null, timestamp: null, status: 'closed' })
 	const [bank, setBank] = useState({ ltp: null, close: null, change_pct: null, timestamp: null, status: 'closed' })
+	const [niftyStocks, setNiftyStocks] = useState([])
+	const [showNiftyStocks, setShowNiftyStocks] = useState(false)
+	const [loadingStocks, setLoadingStocks] = useState(false)
 
 	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 	const wsBase = import.meta.env.VITE_API_BASE_WS || ''
@@ -83,6 +86,39 @@ export default function TickerBar() {
 		if (pct === null && typeof bank.change_pct === 'number') pct = bank.change_pct
 		return { change, pct }
 	}, [bank.ltp, bank.close, bank.change_pct])
+
+	const handleNiftyClick = async () => {
+		if (showNiftyStocks) {
+			setShowNiftyStocks(false)
+			return
+		}
+
+		if (niftyStocks.length === 0 && !loadingStocks) {
+			setLoadingStocks(true)
+			try {
+				const apiSession = sessionStorage.getItem('api_session')
+				const url = apiSession 
+					? `${httpBase}/api/nifty50/stocks?api_session=${apiSession}`
+					: `${httpBase}/api/nifty50/stocks`
+				
+				const response = await fetch(url)
+				const result = await response.json()
+				
+				if (result.success && result.stocks) {
+					setNiftyStocks(result.stocks)
+					setShowNiftyStocks(true)
+				} else {
+					console.error('Failed to fetch Nifty 50 stocks:', result.message)
+				}
+			} catch (error) {
+				console.error('Error fetching Nifty 50 stocks:', error)
+			} finally {
+				setLoadingStocks(false)
+			}
+		} else {
+			setShowNiftyStocks(true)
+		}
+	}
 
 	useEffect(() => {
 		let closed = false
@@ -283,39 +319,84 @@ export default function TickerBar() {
 	const colorBank = derivedBank.change > 0 ? '#57d38c' : derivedBank.change < 0 ? '#ff5c5c' : 'var(--text)'
 
 	return (
-		<div style={{display:'flex', alignItems:'baseline', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:10, padding:'10px 14px', width:'100%'}}>
-			<div style={{display:'flex', gap:12, alignItems:'baseline', paddingRight:12}}>
-				<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>NIFTY 50</div>
-				<div style={{fontSize:20, fontWeight:700, color}}>{formatNumber(displayPrice)}</div>
-				{derived.change !== null && (
-					<div style={{fontSize:13, color: derived.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
-						{formatNumber(Math.abs(derived.change))}
-						<span style={{opacity:0.7}}> ({typeof derived.pct === 'number' ? `${derived.pct.toFixed(2)}%` : '--'})</span>
-					</div>
-				)}
+		<div style={{position: 'relative'}}>
+			<div style={{display:'flex', alignItems:'baseline', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:10, padding:'10px 14px', width:'100%'}}>
+				<div style={{display:'flex', gap:12, alignItems:'baseline', paddingRight:12, cursor: 'pointer'}} onClick={handleNiftyClick}>
+					<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>NIFTY 50</div>
+					<div style={{fontSize:20, fontWeight:700, color}}>{formatNumber(displayPrice)}</div>
+					{derived.change !== null && (
+						<div style={{fontSize:13, color: derived.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
+							{formatNumber(Math.abs(derived.change))}
+							<span style={{opacity:0.7}}> ({typeof derived.pct === 'number' ? `${derived.pct.toFixed(2)}%` : '--'})</span>
+						</div>
+					)}
+					{loadingStocks && <div style={{fontSize:12, color:'var(--muted)'}}>Loading...</div>}
+				</div>
+				<div style={{width:1, height:22, background:'rgba(255,255,255,0.08)', margin:'0 14px'}} />
+				<div style={{display:'flex', gap:12, alignItems:'baseline', paddingLeft:12}}>
+					<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>SENSEX</div>
+					<div style={{fontSize:20, fontWeight:700, color: colorSensex}}>{formatNumber(typeof sensex.ltp === 'number' ? sensex.ltp : sensex.close)}</div>
+					{derivedSensex.change !== null && (
+						<div style={{fontSize:13, color: derivedSensex.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
+							{formatNumber(Math.abs(derivedSensex.change))}
+							<span style={{opacity:0.7}}> ({typeof derivedSensex.pct === 'number' ? `${derivedSensex.pct.toFixed(2)}%` : '--'})</span>
+						</div>
+					)}
+				</div>
+				<div style={{width:1, height:22, background:'rgba(255,255,255,0.08)', margin:'0 14px'}} />
+				<div style={{display:'flex', gap:12, alignItems:'baseline', paddingLeft:12}}>
+					<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>BANKNIFTY</div>
+					<div style={{fontSize:20, fontWeight:700, color: colorBank}}>{formatNumber(typeof bank.ltp === 'number' ? bank.ltp : bank.close)}</div>
+					{derivedBank.change !== null && (
+						<div style={{fontSize:13, color: derivedBank.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
+							{formatNumber(Math.abs(derivedBank.change))}
+							<span style={{opacity:0.7}}> ({typeof derivedBank.pct === 'number' ? `${derivedBank.pct.toFixed(2)}%` : '--'})</span>
+						</div>
+					)}
+				</div>
 			</div>
-			<div style={{width:1, height:22, background:'rgba(255,255,255,0.08)', margin:'0 14px'}} />
-			<div style={{display:'flex', gap:12, alignItems:'baseline', paddingLeft:12}}>
-				<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>SENSEX</div>
-				<div style={{fontSize:20, fontWeight:700, color: colorSensex}}>{formatNumber(typeof sensex.ltp === 'number' ? sensex.ltp : sensex.close)}</div>
-				{derivedSensex.change !== null && (
-					<div style={{fontSize:13, color: derivedSensex.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
-						{formatNumber(Math.abs(derivedSensex.change))}
-						<span style={{opacity:0.7}}> ({typeof derivedSensex.pct === 'number' ? `${derivedSensex.pct.toFixed(2)}%` : '--'})</span>
+			
+			{showNiftyStocks && (
+				<div style={{
+					position: 'absolute',
+					top: '100%',
+					left: 0,
+					right: 0,
+					background: 'var(--bg)',
+					border: '1px solid rgba(255,255,255,0.1)',
+					borderRadius: '8px',
+					marginTop: '8px',
+					padding: '16px',
+					maxHeight: '400px',
+					overflowY: 'auto',
+					zIndex: 1000,
+					boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+				}}>
+					<div style={{fontWeight: 600, marginBottom: '12px', color: 'var(--text)'}}>
+						Nifty 50 Stocks ({niftyStocks.length})
 					</div>
-				)}
-			</div>
-			<div style={{width:1, height:22, background:'rgba(255,255,255,0.08)', margin:'0 14px'}} />
-			<div style={{display:'flex', gap:12, alignItems:'baseline', paddingLeft:12}}>
-				<div style={{fontWeight:700, letterSpacing:0.4, color:'var(--text)'}}>BANKNIFTY</div>
-				<div style={{fontSize:20, fontWeight:700, color: colorBank}}>{formatNumber(typeof bank.ltp === 'number' ? bank.ltp : bank.close)}</div>
-				{derivedBank.change !== null && (
-					<div style={{fontSize:13, color: derivedBank.change >= 0 ? '#57d38c' : '#ff5c5c'}}>
-						{formatNumber(Math.abs(derivedBank.change))}
-						<span style={{opacity:0.7}}> ({typeof derivedBank.pct === 'number' ? `${derivedBank.pct.toFixed(2)}%` : '--'})</span>
+					<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px'}}>
+						{niftyStocks.map((stock, index) => (
+							<div key={index} style={{
+								padding: '8px 12px',
+								background: 'rgba(255,255,255,0.02)',
+								borderRadius: '4px',
+								border: '1px solid rgba(255,255,255,0.05)',
+								fontSize: '14px',
+								color: 'var(--text)'
+							}}>
+								<div style={{display:'flex', justifyContent:'space-between', alignItems:'baseline'}}>
+									<div style={{fontWeight: 600}}>{stock.stock_code || stock.symbol || 'N/A'}</div>
+									<div style={{fontWeight: 700}}>{formatNumber(typeof stock.close === 'number' ? stock.close : null)}</div>
+								</div>
+								<div style={{fontSize: '12px', color: 'var(--muted)', marginTop: '4px'}}>
+									{stock.stock_name || stock.name || 'N/A'}
+								</div>
+							</div>
+						))}
 					</div>
-				)}
-			</div>
+				</div>
+			)}
 		</div>
 	)
 }
