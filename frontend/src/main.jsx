@@ -7,6 +7,7 @@ import HolidaysPage from './pages/Holidays.jsx'
 import BacktestPage from './pages/Backtest.jsx'
 import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
+import LiveTrading from './pages/LiveTrading.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import TickerBar from './components/TickerBar.jsx'
 import CustomerProfile from './components/CustomerProfile.jsx'
@@ -58,6 +59,15 @@ createRoot(document.getElementById('root')).render(
 					<div>
 						<div style={{padding:'18px'}}><TickerBar /></div>
 						<BacktestResults />
+					</div>
+				</div>
+			} />
+			<Route path="/live-trading" element={
+				<div className="layout">
+					<Sidebar />
+					<div>
+						<div style={{padding:'18px'}}><TickerBar /></div>
+						<LiveTrading />
 					</div>
 				</div>
 			} />

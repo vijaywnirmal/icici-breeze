@@ -1907,3 +1907,248 @@
 2025-09-01 15:18:32,246 - {'message': 'Stock NIFTY subscribed successfully'}
 2025-09-01 15:18:32,246 - {'message': 'Stock BSESEN subscribed successfully'}
 2025-09-01 15:18:32,246 - {'message': 'Stock CNXBAN subscribed successfully'}
+2025-09-04 11:16:34,717 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:16:34,717 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:16:34,717 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:17:35,578 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:17:35,578 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:17:35,578 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:20:20,485 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:20:20,486 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:20:20,486 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:21:30,181 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:21:30,181 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:21:30,182 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:32:02,298 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:32:02,299 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:32:02,299 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:50:47,816 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:50:47,816 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:50:47,817 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:31,916 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:31,926 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:43,875 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:43,876 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:51,340 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:51,343 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:51,344 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:51:51,345 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:39,516 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:39,517 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:39,519 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:39,520 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:46,517 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:46,518 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:46,519 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:46,520 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:56,507 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:56,508 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:56,509 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:52:56,509 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:53:40,502 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:53:40,503 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:53:40,504 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:53:40,504 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:47,365 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:47,366 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:47,366 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:58,907 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:58,908 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 11:54:58,908 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:27:02,045 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:27:02,045 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:27:02,046 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:29:40,300 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:29:40,300 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:29:40,301 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:32:43,348 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:32:43,348 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:32:43,349 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:33:37,446 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:33:37,447 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:33:37,447 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:20,488 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:20,488 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:20,489 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:29,023 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:29,023 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:38:29,023 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:28,328 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:28,329 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:40,438 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:40,438 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:40,438 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:40,580 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:39:40,580 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:43:04,566 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:43:04,567 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:43:04,567 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 12:43:46,027 - {'message': "Stock ['4.1!4.1!NIFTY 50', '4.1!4.1!NIFTY BANK', '4.1!4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 12:43:54,702 - {'message': "Stock ['4.1!4.1!NIFTY 50', '4.1!4.1!NIFTY BANK', '4.1!4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:06:28,543 - {'message': "Stock ['4.1!4.1!NIFTY 50', '4.1!4.1!NIFTY BANK', '4.1!4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:06:42,027 - {'message': "Stock ['4.1!4.1!NIFTY 50', '4.1!4.1!NIFTY BANK', '4.1!4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:07:00,672 - {'message': "Stock ['4.1!4.1!NIFTY 50', '4.1!4.1!NIFTY BANK', '4.1!4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:09:07,049 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:17:22,581 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:17:22,581 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:17:33,557 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:17:33,557 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:17:33,558 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:17:33,558 - Exception while subscribing to feeds can only concatenate str (not "bool") to str
+2025-09-04 13:21:04,576 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:21:08,128 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:21:08,129 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:21:16,981 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:21:58,814 - {'message': "Stock ['4.1!2912'] subscribed successfully"}
+2025-09-04 13:21:58,815 - {'message': "Stock ['4.1!2912'] subscribed successfully"}
+2025-09-04 13:22:09,462 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:09,463 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:14,232 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:14,234 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:14,235 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:14,236 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:20,388 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:20,389 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:20,390 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:20,390 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:20,391 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-04 13:22:20,391 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-04 13:22:35,713 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:35,714 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-04 13:22:35,715 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:35,715 - {'message': "Stock ['4.1!3405'] subscribed successfully"}
+2025-09-04 13:22:35,716 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-04 13:22:35,716 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-04 13:22:35,717 - {'message': "Stock ['4.1!25'] subscribed successfully"}
+2025-09-04 13:22:35,718 - {'message': "Stock ['4.1!25'] subscribed successfully"}
+2025-09-04 13:25:41,568 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-04 13:46:35,686 - Could not authenticate credentials. Please check token and keys
+2025-09-04 13:46:35,686 - Exception while subscribing to feeds Could not authenticate credentials. Please check token and keys
+2025-09-04 14:25:18,292 - Could not authenticate credentials. Please check token and keys
+2025-09-04 14:25:18,292 - Exception while subscribing to feeds Could not authenticate credentials. Please check token and keys
+2025-09-04 15:16:59,885 - Could not authenticate credentials. Please check token and keys
+2025-09-04 15:16:59,886 - Exception while subscribing to feeds Could not authenticate credentials. Please check token and keys
+2025-09-05 09:45:27,175 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 09:48:30,179 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 09:48:30,179 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 09:48:55,324 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 09:48:55,325 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 09:48:57,789 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 09:48:57,792 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 10:12:30,399 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 10:25:06,998 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 11:08:18,528 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 11:24:26,563 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 11:58:41,346 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 11:58:41,348 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:02:04,366 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:02:04,368 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:02:04,369 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:02:04,370 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:07:50,735 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:07:50,739 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:07:50,743 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:07:50,745 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:01,703 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:01,704 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:01,705 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:01,705 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:08,728 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:08,729 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:08,731 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:08,732 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:15,752 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:15,763 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:15,765 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:15,766 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:37,693 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:37,694 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:08:37,695 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:08:37,696 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:09:03,697 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:09:03,697 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:09:03,698 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:09:03,699 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:47,700 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:47,702 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:47,705 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:47,706 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:51,693 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:51,694 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:51,695 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:51,696 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:56,700 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:56,701 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:20:56,702 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:20:56,702 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:21:10,844 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:21:17,598 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:21:52,607 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:22:01,700 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:22:01,701 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 12:22:01,701 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:22:01,702 - {'message': "Stock ['4.1!11536'] subscribed successfully"}
+2025-09-05 12:22:03,260 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:23:03,684 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:26:39,837 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:26:48,512 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:26:57,393 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:27:02,331 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:27:49,738 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:27:58,466 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:53:29,059 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:54:56,397 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:58:08,855 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 12:58:46,796 - {'message': "Stock ['4.1!10', '4.1!100', '4.1!10056'] subscribed successfully"}
+2025-09-05 12:59:09,071 - {'message': "Stock ['4.1!10', '4.1!100', '4.1!10056', '4.1!10065', '4.1!10074'] subscribed successfully"}
+2025-09-05 12:59:57,834 - {'message': "Stock ['4.1!10', '4.1!100', '4.1!10056', '4.1!10065', '4.1!10074'] subscribed successfully"}
+2025-09-05 13:11:38,548 - {'message': "Stock ['4.1!10', '4.1!100', '4.1!10056', '4.1!10065', '4.1!10074'] subscribed successfully"}
+2025-09-05 13:12:31,374 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 13:12:57,539 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 13:12:57,540 - {'message': "Stock ['4.1!15261'] subscribed successfully"}
+2025-09-05 13:13:02,792 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 13:14:41,624 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 13:14:41,625 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 13:14:52,973 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 13:14:52,974 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 13:14:52,974 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-05 13:14:52,975 - {'message': "Stock ['4.1!3721'] subscribed successfully"}
+2025-09-05 13:51:31,660 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 13:51:58,328 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:51:58,329 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:52:01,537 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:52:01,541 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:52:03,249 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 13:52:13,773 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:52:13,775 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 13:52:13,776 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 13:52:13,777 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:01:48,939 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:01:48,986 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:01:49,064 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:01:49,127 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:01:49,268 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:01:55,550 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:01:55,551 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:01:55,552 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:01:55,553 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:14:23,229 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:14:33,335 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:14:33,335 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 14:14:33,336 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:14:33,336 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 14:19:24,248 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:23:57,934 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:31:18,393 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:33:05,289 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:33:24,411 - Exception while subscribing to feeds Failed to connect to live stream
+2025-09-05 14:38:08,675 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:39:38,646 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:51:13,601 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 14:55:02,995 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 15:19:50,127 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-05 15:22:19,048 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 15:22:19,049 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-05 15:22:19,050 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 15:22:19,051 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-05 15:26:25,968 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}

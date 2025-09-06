@@ -1,91 +1,158 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 export default function HolidaysPage() {
-	const [dates, setDates] = useState([])
+	const [holidays, setHolidays] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState('')
-	const [year, setYear] = useState('')
-	const [items, setItems] = useState([])
+	const [selectedYear, setSelectedYear] = useState(2025)
+	const [refreshing, setRefreshing] = useState(false)
 
 	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 	const api = useMemo(() => (apiBase || '').replace(/\/$/, ''), [apiBase])
 
+	// Load holidays when component mounts or year changes
 	useEffect(() => {
-		let cancelled = false
-		async function load() {
-			setLoading(true)
-			setError('')
-			try {
-				const res = await fetch(`${api}/api/market/holidays`)
-				const json = await res.json().catch(() => ({}))
-				const arr = Array.isArray(json?.dates) ? json.dates : []
-				const list = Array.isArray(json?.items) ? json.items : []
-				if (!cancelled) {
-					setDates(arr)
-					setItems(list)
-					const years = Array.from(new Set(arr.map(d => String(d).slice(0,4)))).sort()
-					const curr = new Date().getFullYear().toString()
-					setYear(years.includes(curr) ? curr : (years[years.length - 1] || curr))
-				}
-			} catch (err) {
-				if (!cancelled) setError(err?.message || 'Failed to load')
-			} finally {
-				if (!cancelled) setLoading(false)
+		loadHolidays()
+	}, [selectedYear])
+
+	const loadHolidays = async () => {
+		setLoading(true)
+		setError('')
+		try {
+			const response = await fetch(`${api}/api/market/holidays?year=${selectedYear}`)
+			const data = await response.json()
+			
+			if (data.count > 0) {
+				setHolidays(data.items || [])
+			} else {
+				setHolidays([])
+				setError(data.message || `No holidays found for year ${selectedYear}`)
 			}
+		} catch (err) {
+			setError(err?.message || 'Failed to load holidays')
+			setHolidays([])
+		} finally {
+			setLoading(false)
 		}
-		load()
-		return () => { cancelled = true }
-	}, [api])
+	}
+
+	const handleRefresh = async () => {
+		if (selectedYear !== 2025) {
+			setError('Refresh is only available for 2025 (current year)')
+			return
+		}
+
+		setRefreshing(true)
+		setError('')
+		try {
+			const response = await fetch(`${api}/api/market/holidays/refresh`, {
+				method: 'POST'
+			})
+			const data = await response.json()
+			
+			if (data.success) {
+				// Reload holidays after successful refresh
+				await loadHolidays()
+				setError('')
+			} else {
+				setError(data.message || 'Failed to refresh holidays')
+			}
+		} catch (err) {
+			setError(err?.message || 'Failed to refresh holidays')
+		} finally {
+			setRefreshing(false)
+		}
+	}
+
+	const formatDate = (dateStr) => {
+		try {
+			const date = new Date(dateStr)
+			return date.toLocaleDateString('en-IN', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			})
+		} catch {
+			return dateStr
+		}
+	}
 
 	return (
 		<section className="content card" style={{width:'100%', maxWidth:900}}>
-				<h1>Holidays</h1>
-				{loading && <div className="message">Loading…</div>}
-				{error && <div className="message error">{error}</div>}
-				{!loading && !error && (
-					<>
-						<div style={{display:'flex', gap:8, alignItems:'center', margin:'6px 0 10px'}}>
-							<label htmlFor="year" style={{opacity:0.8}}>Year:</label>
-							<select id="year" value={year} onChange={(e) => setYear(e.target.value)}>
-								{Array.from(new Set(dates.map(d => String(d).slice(0,4)))).sort().map(y => (
-									<option key={y} value={y}>{y}</option>
-								))}
-							</select>
-						</div>
-						<div style={{overflowX:'auto'}}>
-							<table className="table" style={{minWidth:480}}>
-								<thead>
-									<tr>
-										<th style={{textAlign:'left'}}>Date</th>
-										<th style={{textAlign:'left'}}>Occasion</th>
-										<th style={{textAlign:'left'}}>Weekday</th>
+			<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+				<h1>NSE Trading Holidays</h1>
+				<div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+					<select 
+						value={selectedYear} 
+						onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+						style={{
+							padding: '8px 12px',
+							border: '1px solid #ccc',
+							borderRadius: '4px',
+							backgroundColor: 'white'
+						}}
+					>
+						{Array.from({length: 15}, (_, i) => 2011 + i).map(year => (
+							<option key={year} value={year}>{year}</option>
+						))}
+					</select>
+					{selectedYear === 2025 && (
+						<button 
+							onClick={handleRefresh}
+							disabled={refreshing}
+							style={{
+								padding: '8px 16px',
+								backgroundColor: refreshing ? '#ccc' : '#007bff',
+								color: 'white',
+								border: 'none',
+								borderRadius: '4px',
+								cursor: refreshing ? 'not-allowed' : 'pointer'
+							}}
+						>
+							{refreshing ? 'Refreshing...' : 'Refresh 2025'}
+						</button>
+					)}
+				</div>
+			</div>
+
+			{loading && <div className="message">Loading holidays for {selectedYear}...</div>}
+			{error && <div className="message error">{error}</div>}
+			
+			{!loading && !error && (
+				<>
+					<div style={{marginBottom: '15px', color: '#666'}}>
+						Showing {holidays.length} holidays for {selectedYear}
+					</div>
+					
+					<div style={{overflowX:'auto'}}>
+						<table className="table" style={{minWidth:500}}>
+							<thead>
+								<tr>
+									<th style={{textAlign:'left'}}>Date</th>
+									<th style={{textAlign:'left'}}>Day</th>
+									<th style={{textAlign:'left'}}>Holiday Name</th>
+								</tr>
+							</thead>
+							<tbody>
+								{holidays.map((holiday, idx) => (
+									<tr key={idx}>
+										<td>{formatDate(holiday.date)}</td>
+										<td>{holiday.day}</td>
+										<td>{holiday.name}</td>
 									</tr>
-								</thead>
-								<tbody>
-									{items.filter(it => String(it?.date || '').startsWith(year)).map((it, idx) => {
-										const iso = String(it.date)
-										const [y, m, d] = iso.split('-')
-										const ddmmyyyy = (d && m && y) ? `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}` : iso
-										const dt = new Date(iso)
-										const weekday = !isNaN(dt) ? dt.toLocaleDateString('en-IN', { weekday: 'long' }) : ''
-										return (
-											<tr key={idx}>
-												<td>{ddmmyyyy}</td>
-												<td>{it?.name || ''}</td>
-												<td>{weekday}</td>
-											</tr>
-										)
-									})}
-									{items.filter(it => String(it?.date || '').startsWith(year)).length === 0 && (
-										<tr><td colSpan={3} style={{opacity:0.7}}>No holidays found</td></tr>
-									)}
-								</tbody>
-							</table>
-						</div>
-					</>
-				)}
+								))}
+								{holidays.length === 0 && (
+									<tr>
+										<td colSpan={3} style={{opacity:0.7, textAlign: 'center', padding: '20px'}}>
+											No holidays found for {selectedYear}
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</table>
+					</div>
+				</>
+			)}
 		</section>
 	)
 }
-
-
