@@ -18,6 +18,10 @@ from ..services.ws_stream_manager import STREAM_MANAGER
 from .quotes import _is_market_open_ist
 
 router = APIRouter(tags=["stream"])
+@router.websocket("/ws/stocks")
+async def ws_stocks(websocket: WebSocket) -> None:
+    # Alias to existing ticks socket for stock/index data
+    return await ws_ticks(websocket)
 
 
 @dataclass
@@ -31,6 +35,251 @@ class ConnectionState:
     subscriptions: Dict[str, Dict[str, str]] | None = None
     min_interval_ms: int = 250
     breeze: Optional[BreezeService] = None
+
+
+@router.websocket("/ws/options")
+async def ws_options(websocket: WebSocket) -> None:
+    """Dedicated WebSocket for option chain data only."""
+    await websocket.accept()
+    # Send a small hello so DevTools shows an initial frame
+    try:
+        await websocket.send_text(json.dumps({"type": "hello", "scope": "options"}))
+    except Exception:
+        pass
+    state = ConnectionState()
+    state.last_sent_ts_by_symbol = {}
+    state.subscriptions = {}
+    # Track this connection's selected expiry (YYYY-MM-DD)
+    state.selected_expiry_iso = ""
+    breeze_ws_connected = False
+    loop = asyncio.get_running_loop()
+    STREAM_MANAGER.set_loop(loop)
+    STREAM_MANAGER.register_client(websocket, loop, is_option_client=True)
+    print(f"📡 Registered options client. Total option clients: {len(STREAM_MANAGER._option_clients)}")
+    
+    # The stream manager will automatically broadcast to this client via _broadcast_options
+    # since we registered it as an option client above
+
+
+    def _ensure_breeze_runtime() -> Optional[BreezeService]:
+        """Ensure a BreezeService is available from runtime or .env fallback."""
+        try:
+            runtime = get_breeze()
+            if runtime is not None:
+                return runtime
+            log_exception(Exception("No active Breeze session found"), context="ws_options.ensure_breeze_runtime")
+        except Exception as exc:
+            log_exception(exc, context="ws_options.ensure_breeze_runtime")
+        return None
+
+    # Per-connection filtered forwarder to ensure only selected expiry ticks are sent
+    async def _forward_filtered_option_tick(tick: Dict[str, Any]) -> None:
+        try:
+            sel = getattr(state, 'selected_expiry_iso', '') or ''
+            if sel:
+                # Extract expiry from tick or alias
+                raw_exp = tick.get('expiry_date') or ''
+                if not raw_exp:
+                    sym = str(tick.get('symbol') or '')
+                    if '|' in sym:
+                        parts = sym.split('|')
+                        if len(parts) >= 2:
+                            raw_exp = parts[1]
+                norm = ''
+                try:
+                    if isinstance(raw_exp, str) and 'T' in raw_exp:
+                        norm = raw_exp[:10]
+                    elif isinstance(raw_exp, str) and '-' in raw_exp and len(raw_exp.split('-')) == 3 and raw_exp.split('-')[1].isalpha():
+                        # DD-Mon-YYYY
+                        from datetime import datetime
+                        norm = datetime.strptime(raw_exp, '%d-%b-%Y').strftime('%Y-%m-%d')
+                    else:
+                        from datetime import datetime
+                        norm = datetime.fromisoformat(str(raw_exp).replace('Z', '+00:00')).date().isoformat()
+                except Exception:
+                    norm = str(raw_exp)[:10]
+                if norm != sel:
+                    return
+            await websocket.send_text(json.dumps(tick))
+        except Exception as exc:
+            log_exception(exc, context="ws_options.forward_filtered")
+
+    # Register this filtered handler
+    STREAM_MANAGER._option_tick_handlers = getattr(STREAM_MANAGER, '_option_tick_handlers', [])
+    STREAM_MANAGER._option_tick_handlers.append(_forward_filtered_option_tick)
+
+    try:
+        while True:
+            msg_text = await websocket.receive_text()
+            try:
+                msg = json.loads(msg_text)
+            except Exception as e:
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "context": "parse",
+                    "message": "Invalid JSON"
+                }))
+                continue
+
+            action = (msg.get("action") or "").lower()
+
+            if action == "subscribe_options":
+                underlying = (msg.get("underlying") or "NIFTY").upper()
+                expiry_date = msg.get("expiry_date")
+                strikes = msg.get("strikes", [])
+                right_req = (msg.get("right") or "both").lower()
+                
+                print(f"📥 Options subscription request: {underlying}, {expiry_date}, strikes={strikes}")
+                
+                if not expiry_date or not strikes:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "subscribe_options",
+                        "message": "expiry_date and strikes required"
+                    }))
+                    continue
+
+                if not _is_market_open_ist():
+                    # If market is closed, send cached last-known values for each requested strike
+                    from ..services.quotes_cache import get_cached_quote
+                    for strike in strikes:
+                        try:
+                            alias = f"{underlying}|{expiry_date}|CALL|{int(strike)}"
+                            cached = get_cached_quote(alias)
+                            if cached:
+                                await websocket.send_text(json.dumps({
+                                    "type": "tick",
+                                    "symbol": alias,
+                                    **cached,
+                                    "note": "market closed; using cache"
+                                }))
+                            alias_put = f"{underlying}|{expiry_date}|PUT|{int(strike)}"
+                            cached_p = get_cached_quote(alias_put)
+                            if cached_p:
+                                await websocket.send_text(json.dumps({
+                                    "type": "tick",
+                                    "symbol": alias_put,
+                                    **cached_p,
+                                    "note": "market closed; using cache"
+                                }))
+                        except Exception:
+                            pass
+                    await websocket.send_text(json.dumps({
+                        "type": "info",
+                        "message": "Market closed; option subscription may not receive live data"
+                    }))
+                    # Continue to subscribe as well to keep flow consistent
+
+                try:
+                    # Ensure Breeze WS is connected before subscribing
+                    try:
+                        STREAM_MANAGER.connect()
+                    except Exception as exc:
+                        log_exception(exc, context="ws_options.ensure_connect")
+                        # Continue; subscribe_option will attempt to connect again if needed
+                    
+                    # Convert ISO expiry date to Breeze format (DD-Mon-YYYY) and compute keep key
+                    from datetime import datetime
+                    try:
+                        if 'T' in expiry_date:
+                            # Parse ISO format: 2025-09-09T06:00:00.000Z
+                            dt = datetime.fromisoformat(expiry_date.replace('Z', '+00:00'))
+                            breeze_expiry = dt.strftime('%d-%b-%Y')
+                        else:
+                            breeze_expiry = expiry_date
+                    except Exception as e:
+                        print(f"❌ Error parsing expiry date {expiry_date}: {e}")
+                        breeze_expiry = expiry_date
+                    
+                    keep_iso = (expiry_date or '')[:10]
+                    # Remember this connection's selected expiry (date-only)
+                    try:
+                        state.selected_expiry_iso = keep_iso
+                    except Exception:
+                        state.selected_expiry_iso = keep_iso
+                    print(f"🔄 Converting expiry: {expiry_date} -> {breeze_expiry} | keep={keep_iso}")
+                    # Ensure only this expiry remains subscribed
+                    try:
+                        STREAM_MANAGER.unsubscribe_options_except(keep_iso)
+                    except Exception:
+                        pass
+                    
+                    # Subscribe to option chain via stream manager
+                    for strike in strikes:
+                        # Subscribe only to requested side(s)
+                        if right_req in ("call", "both"):
+                            STREAM_MANAGER.subscribe_option(
+                                stock_code=underlying,
+                                exchange_code="NFO",
+                                expiry_date=breeze_expiry,
+                                strike_price=str(strike),
+                                right="call",
+                                product_type="options"
+                            )
+                        if right_req in ("put", "both"):
+                            STREAM_MANAGER.subscribe_option(
+                                stock_code=underlying,
+                                exchange_code="NFO",
+                                expiry_date=breeze_expiry,
+                                strike_price=str(strike),
+                                right="put",
+                                product_type="options"
+                            )
+                    
+                    response_msg = {
+                        "type": "subscribed",
+                        "underlying": underlying,
+                        "expiry_date": expiry_date,
+                        "strikes": strikes,
+                        "message": f"Subscribed to {len(strikes)} strikes for {underlying} options"
+                    }
+                    print(f"✅ Options subscription successful: {response_msg}")
+                    await websocket.send_text(json.dumps(response_msg))
+                except Exception as exc:
+                    log_exception(exc, context="ws_options.subscribe_options")
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "subscribe_options",
+                        "message": str(exc)
+                    }))
+
+            elif action == "unsubscribe_options":
+                try:
+                    # Unsubscribe all option subscriptions
+                    STREAM_MANAGER.unsubscribe_all_options()
+                    await websocket.send_text(json.dumps({
+                        "type": "unsubscribed",
+                        "message": "All option subscriptions removed"
+                    }))
+                except Exception as exc:
+                    log_exception(exc, context="ws_options.unsubscribe_options")
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "unsubscribe_options",
+                        "message": str(exc)
+                    }))
+            else:
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "context": "action",
+                    "message": "Unknown action. Use 'subscribe_options' or 'unsubscribe_options'"
+                }))
+
+    except WebSocketDisconnect:
+        try:
+            pass
+        except Exception as exc:
+            log_exception(exc, context="ws_options.disconnect_cleanup")
+    finally:
+        with contextlib.suppress(Exception):
+            # Remove this connection's handler
+            if hasattr(STREAM_MANAGER, '_option_tick_handlers'):
+                try:
+                    STREAM_MANAGER._option_tick_handlers.remove(_forward_filtered_option_tick)
+                except ValueError:
+                    pass
+            STREAM_MANAGER.unregister_client(websocket)
+            await websocket.close()
 
 
 @router.websocket("/ws/ticks")

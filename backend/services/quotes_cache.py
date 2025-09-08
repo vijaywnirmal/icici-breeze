@@ -12,6 +12,9 @@ from ..utils.response import log_exception
 
 TABLE = "ltp_cache"
 
+# In-memory fallback cache when PostgreSQL is not configured/available
+_MEM_CACHE: Dict[str, Dict[str, Any]] = {}
+
 
 def upsert_quote(symbol: str, payload: Dict[str, Any]) -> None:
 	"""Upsert a cached quote for a symbol in PostgreSQL ltp_cache."""
@@ -19,6 +22,11 @@ def upsert_quote(symbol: str, payload: Dict[str, Any]) -> None:
 		ensure_tables()
 		with get_conn() as conn:
 			if conn is None:
+				# Fallback to in-memory cache
+				_MEM_CACHE[symbol.upper()] = {
+					**payload,
+					"updated_at": datetime.utcnow().isoformat() + "Z",
+				}
 				return
 			conn.execute(
 				text(
@@ -50,6 +58,14 @@ def upsert_quote(symbol: str, payload: Dict[str, Any]) -> None:
 				},
 			)
 	except Exception as exc:
+		# On any DB error, still keep an in-memory copy so UI can show last-known
+		try:
+			_MEM_CACHE[symbol.upper()] = {
+				**payload,
+				"updated_at": datetime.utcnow().isoformat() + "Z",
+			}
+		except Exception:
+			pass
 		log_exception(exc, context="quotes_cache.upsert_quote", symbol=symbol)
 
 
@@ -58,14 +74,16 @@ def get_cached_quote(symbol: str) -> Optional[Dict[str, Any]]:
 	try:
 		with get_conn() as conn:
 			if conn is None:
-				return None
+				# Fallback to in-memory cache
+				return _MEM_CACHE.get(symbol.upper())
 			res = conn.execute(
 				text(f"SELECT ltp, close, change_pct, bid, ask, volume, data FROM {TABLE} WHERE symbol = :symbol LIMIT 1"), 
 				{"symbol": symbol.upper()}
 			)
 			row = res.fetchone()
 			if not row:
-				return None
+				# Try memory cache as a secondary fallback
+				return _MEM_CACHE.get(symbol.upper())
 			
 			# Return structured data with individual columns
 			result = {
@@ -87,6 +105,13 @@ def get_cached_quote(symbol: str) -> Optional[Dict[str, Any]]:
 			
 			return result
 	except Exception as exc:
+		# As a last resort, use memory cache
+		try:
+			cached = _MEM_CACHE.get(symbol.upper())
+			if cached:
+				return cached
+		except Exception:
+			pass
 		log_exception(exc, context="quotes_cache.get_cached_quote", symbol=symbol)
 		return None
 
@@ -96,6 +121,11 @@ def delete_quote(symbol: str) -> None:
 	try:
 		with get_conn() as conn:
 			if conn is None:
+				# Remove from in-memory cache too
+				try:
+					_MEM_CACHE.pop(symbol.upper(), None)
+				except Exception:
+					pass
 				return
 			conn.execute(text(f"DELETE FROM {TABLE} WHERE symbol = :symbol"), {"symbol": symbol.upper()})
 	except Exception as exc:

@@ -64,46 +64,77 @@ export default function App() {
 	return (
 		<main className="container">
 			<section className="card">
-				<h1>Sign in</h1>
+				<div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
+					<h1 style={{ color: 'var(--text)', fontFamily: 'var(--font-sans)', marginBottom: 'var(--space-2)' }}>
+						Breeze Trading
+					</h1>
+					<p style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>
+						Sign in to continue
+					</p>
+				</div>
+				
 				<form onSubmit={onSubmit}>
-					<label htmlFor="apiKey">API Key *</label>
-					<input 
-						id="apiKey" 
-						type="text" 
-						placeholder="Enter your Breeze API Key" 
-						value={apiKey} 
-						onChange={(e) => setApiKey(e.target.value)}
-						required 
-					/>
+					<div>
+						<label htmlFor="apiKey">API Key</label>
+						<input 
+							id="apiKey" 
+							type="text" 
+							placeholder="Enter API Key" 
+							value={apiKey} 
+							onChange={(e) => setApiKey(e.target.value)}
+							required 
+						/>
+					</div>
 
-					<label htmlFor="apiSecret">API Secret *</label>
-					<input 
-						id="apiSecret" 
-						type="password" 
-						placeholder="Enter your Breeze API Secret" 
-						value={apiSecret} 
-						onChange={(e) => setApiSecret(e.target.value)}
-						required 
-					/>
+					<div>
+						<label htmlFor="apiSecret">API Secret</label>
+						<input 
+							id="apiSecret" 
+							type="password" 
+							placeholder="Enter API Secret" 
+							value={apiSecret} 
+							onChange={(e) => setApiSecret(e.target.value)}
+							required 
+						/>
+					</div>
 
-					<label htmlFor="sessionKey">Session Key *</label>
-					<input 
-						id="sessionKey" 
-						type="password" 
-						placeholder="Enter your Session Key" 
-						value={sessionKey} 
-						onChange={(e) => setSessionKey(e.target.value)}
-						required 
-					/>
+					<div>
+						<label htmlFor="sessionKey">Session Key</label>
+						<input 
+							id="sessionKey" 
+							type="password" 
+							placeholder="Enter Session Key" 
+							value={sessionKey} 
+							onChange={(e) => setSessionKey(e.target.value)}
+							required 
+						/>
+					</div>
 
 					<button type="submit" disabled={loading}>
 						{loading && <span className="spinner" aria-hidden="true"></span>}
 						<span>{loading ? 'Signing in...' : 'Sign in'}</span>
 					</button>
 				</form>
-				<div className={`message ${status === 'error' ? 'error' : status === 'success' ? 'success' : ''}`} role="status" aria-live="polite">
-					{message}
-				</div>
+				
+				{message && (
+					<div 
+						style={{
+							padding: 'var(--space-3)',
+							borderRadius: 'var(--radius)',
+							marginTop: 'var(--space-4)',
+							border: '1px solid',
+							borderColor: status === 'error' ? 'var(--danger)' : status === 'success' ? 'var(--success)' : 'var(--border)',
+							backgroundColor: 'var(--panel)',
+							color: status === 'error' ? 'var(--danger)' : status === 'success' ? 'var(--success)' : 'var(--text)',
+							fontFamily: 'var(--font-sans)',
+							fontSize: '14px'
+						}}
+						role="status" 
+						aria-live="polite"
+					>
+						{message}
+					</div>
+				)}
 			</section>
 		</main>
 	)

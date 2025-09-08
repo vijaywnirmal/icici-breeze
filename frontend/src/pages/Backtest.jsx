@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from 'react'
+import { Card, CardHeader, CardContent, CardFooter } from '../components/ui/Card'
+import Button from '../components/ui/Button'
 
 export default function BacktestPage() {
 	const [symbol, setSymbol] = useState('NIFTY')
@@ -58,89 +60,224 @@ export default function BacktestPage() {
 	}
 
 	return (
-		<section className="content card" style={{width:'100%', maxWidth:1100}}>
-			<h1>Backtest</h1>
-			<form onSubmit={onRun} className="grid" style={{gridTemplateColumns:'repeat(6, minmax(120px, 1fr))', gap:12}}>
-				<div>
-					<label>Symbol</label>
-					<input value={symbol} onChange={(e) => setSymbol(e.target.value)} placeholder="NIFTY" />
-				</div>
-				<div>
-					<label>Start</label>
-					<input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-				</div>
-				<div>
-					<label>End</label>
-					<input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
-				</div>
-				<div>
-					<label>Fast MA</label>
-					<input type="number" min={2} value={fast} onChange={(e) => setFast(Number(e.target.value))} />
-				</div>
-				<div>
-					<label>Slow MA</label>
-					<input type="number" min={3} value={slow} onChange={(e) => setSlow(Number(e.target.value))} />
-				</div>
-				<div>
-					<label>Capital (₹)</label>
-					<input type="number" min={0} step={1000} value={capital} onChange={(e) => setCapital(Number(e.target.value))} />
-				</div>
-				<div style={{alignSelf:'end'}}>
-					<button type="submit" disabled={loading}>
-						{loading ? 'Running…' : 'Run Backtest'}
-					</button>
-				</div>
-			</form>
+		<div className="content">
+			<div className="mb-8">
+				<h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+					Strategy Backtest
+				</h1>
+				<p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+					Test your trading strategies with historical market data
+				</p>
+			</div>
 
-			{error && <div className="message error" style={{marginTop:12}}>{error}</div>}
+			<Card variant="elevated" className="mb-8">
+				<CardHeader>
+					<h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>
+						📊 Backtest Configuration
+					</h2>
+				</CardHeader>
+				<CardContent>
+					<form onSubmit={onRun} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div>
+							<label htmlFor="symbol">Symbol</label>
+							<input 
+								id="symbol"
+								value={symbol} 
+								onChange={(e) => setSymbol(e.target.value)} 
+								placeholder="NIFTY" 
+							/>
+						</div>
+						<div>
+							<label htmlFor="start">Start Date</label>
+							<input 
+								id="start"
+								type="date" 
+								value={start} 
+								onChange={(e) => setStart(e.target.value)} 
+							/>
+						</div>
+						<div>
+							<label htmlFor="end">End Date</label>
+							<input 
+								id="end"
+								type="date" 
+								value={end} 
+								onChange={(e) => setEnd(e.target.value)} 
+							/>
+						</div>
+						<div>
+							<label htmlFor="fast">Fast MA Period</label>
+							<input 
+								id="fast"
+								type="number" 
+								min={2} 
+								value={fast} 
+								onChange={(e) => setFast(Number(e.target.value))} 
+							/>
+						</div>
+						<div>
+							<label htmlFor="slow">Slow MA Period</label>
+							<input 
+								id="slow"
+								type="number" 
+								min={3} 
+								value={slow} 
+								onChange={(e) => setSlow(Number(e.target.value))} 
+							/>
+						</div>
+						<div>
+							<label htmlFor="capital">Initial Capital (₹)</label>
+							<input 
+								id="capital"
+								type="number" 
+								min={0} 
+								step={1000} 
+								value={capital} 
+								onChange={(e) => setCapital(Number(e.target.value))} 
+							/>
+						</div>
+					</form>
+				</CardContent>
+				<CardFooter>
+					<Button 
+						type="submit" 
+						onClick={onRun}
+						loading={loading}
+						variant="primary"
+						size="lg"
+						style={{ width: 'auto' }}
+					>
+						{loading ? 'Running Backtest...' : '🚀 Run Backtest'}
+					</Button>
+				</CardFooter>
+			</Card>
 
-			{summary && (
-				<div className="card" style={{marginTop:16}}>
-					<h3>Summary</h3>
-					<div className="grid" style={{gridTemplateColumns:'repeat(4, 1fr)', gap:8}}>
-						<div><div className="muted">Trades</div><div style={{fontWeight:600}}>{summary.trades}</div></div>
-						<div><div className="muted">Net PnL</div><div style={{fontWeight:600}}>₹ {Number(summary.net_pnl || 0).toFixed(2)}</div></div>
-						<div><div className="muted">Return</div><div style={{fontWeight:600}}>{Number(summary.return_pct || 0).toFixed(2)}%</div></div>
-						<div><div className="muted">Max DD</div><div style={{fontWeight:600}}>{Number(summary.max_drawdown || 0).toFixed(2)}%</div></div>
-					</div>
-				</div>
+			{error && (
+				<Card variant="danger" className="mb-8">
+					<CardContent>
+						<div className="flex items-center space-x-3">
+							<div className="text-2xl">⚠️</div>
+							<div>
+								<h3 className="font-semibold text-red-400">Error</h3>
+								<p style={{ color: 'var(--danger)' }}>{error}</p>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
 			)}
 
-			<div className="card" style={{marginTop:16}}>
-				<h3>Trades {backtestId ? `(ID: ${backtestId})` : ''}</h3>
-				<div style={{overflowX:'auto'}}>
-					<table className="table" style={{minWidth:720}}>
+			{summary && (
+				<Card variant="success" className="mb-8">
+					<CardHeader>
+						<h2 className="text-xl font-semibold flex items-center space-x-2" style={{ color: 'var(--text)' }}>
+							<span>📈</span>
+							<span>Backtest Results</span>
+						</h2>
+					</CardHeader>
+					<CardContent>
+						<div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+							<div className="text-center">
+								<div className="text-2xl font-bold mb-1" style={{ color: 'var(--success)' }}>
+									{summary.trades}
+								</div>
+								<div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+									Total Trades
+								</div>
+							</div>
+							<div className="text-center">
+								<div className="text-2xl font-bold mb-1" style={{ 
+									color: Number(summary.net_pnl || 0) >= 0 ? 'var(--success)' : 'var(--danger)' 
+								}}>
+									₹{Number(summary.net_pnl || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+								</div>
+								<div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+									Net P&L
+								</div>
+							</div>
+							<div className="text-center">
+								<div className="text-2xl font-bold mb-1" style={{ 
+									color: Number(summary.return_pct || 0) >= 0 ? 'var(--success)' : 'var(--danger)' 
+								}}>
+									{Number(summary.return_pct || 0).toFixed(2)}%
+								</div>
+								<div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+									Return
+								</div>
+							</div>
+							<div className="text-center">
+								<div className="text-2xl font-bold mb-1" style={{ color: 'var(--warning)' }}>
+									{Number(summary.max_drawdown || 0).toFixed(2)}%
+								</div>
+								<div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+									Max Drawdown
+								</div>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+		<Card>
+			<CardHeader>
+				<h2 className="text-xl font-semibold flex items-center space-x-2" style={{ color: 'var(--text)' }}>
+					<span>📋</span>
+					<span>Trade History {backtestId && `(ID: ${backtestId})`}</span>
+				</h2>
+			</CardHeader>
+			<CardContent>
+				<div className="overflow-x-auto">
+					<table className="table w-full">
 						<thead>
-							<tr>
-								<th>#</th>
-								<th>Entry</th>
-								<th>Exit</th>
-								<th>Entry Price</th>
-								<th>Exit Price</th>
-								<th>PnL</th>
-								<th>PnL %</th>
+							<tr style={{ backgroundColor: 'var(--panel-light)' }}>
+								<th className="text-left py-3 px-4">#</th>
+								<th className="text-left py-3 px-4">Entry Date</th>
+								<th className="text-left py-3 px-4">Exit Date</th>
+								<th className="text-right py-3 px-4">Entry Price</th>
+								<th className="text-right py-3 px-4">Exit Price</th>
+								<th className="text-right py-3 px-4">P&L</th>
+								<th className="text-right py-3 px-4">P&L %</th>
 							</tr>
 						</thead>
 						<tbody>
-							{trades.map((t, i) => (
-								<tr key={i}>
-									<td>{t.trade_no || i+1}</td>
-									<td>{t.entry_date ? new Date(t.entry_date).toLocaleDateString('en-IN') : ''}</td>
-									<td>{t.exit_date ? new Date(t.exit_date).toLocaleDateString('en-IN') : ''}</td>
-									<td>{Number(t.entry_price || 0).toFixed(2)}</td>
-									<td>{Number(t.exit_price || 0).toFixed(2)}</td>
-									<td>{Number(t.pnl || 0).toFixed(2)}</td>
-									<td>{Number(t.pnl_pct || 0).toFixed(2)}%</td>
+							{trades.length > 0 ? trades.map((t, i) => (
+								<tr key={i} className="border-t hover:bg-panel-light/50 transition-colors">
+									<td className="py-3 px-4 font-medium">{t.trade_no || i+1}</td>
+									<td className="py-3 px-4" style={{ color: 'var(--text-secondary)' }}>
+										{t.entry_date ? new Date(t.entry_date).toLocaleDateString('en-IN') : ''}
+									</td>
+									<td className="py-3 px-4" style={{ color: 'var(--text-secondary)' }}>
+										{t.exit_date ? new Date(t.exit_date).toLocaleDateString('en-IN') : ''}
+									</td>
+									<td className="py-3 px-4 text-right font-mono">
+										₹{Number(t.entry_price || 0).toFixed(2)}
+									</td>
+									<td className="py-3 px-4 text-right font-mono">
+										₹{Number(t.exit_price || 0).toFixed(2)}
+									</td>
+									<td className="py-3 px-4 text-right font-mono font-semibold" style={{
+										color: Number(t.pnl || 0) >= 0 ? 'var(--success)' : 'var(--danger)'
+									}}>
+										₹{Number(t.pnl || 0).toFixed(2)}
+									</td>
+									<td className="py-3 px-4 text-right font-mono font-semibold" style={{
+										color: Number(t.pnl_pct || 0) >= 0 ? 'var(--success)' : 'var(--danger)'
+									}}>
+										{Number(t.pnl_pct || 0).toFixed(2)}%
+									</td>
 								</tr>
-							))}
-							{trades.length === 0 && (
-								<tr><td colSpan={7} style={{opacity:0.7}}>No trades</td></tr>
+							)) : (
+								<tr>
+									<td colSpan="7" className="py-8 text-center" style={{ color: 'var(--text-secondary)' }}>
+										No trades to display. Run a backtest to see results.
+									</td>
+								</tr>
 							)}
 						</tbody>
 					</table>
 				</div>
-			</div>
-		</section>
+			</CardContent>
+		</Card>
+	</div>
 	)
 }
 

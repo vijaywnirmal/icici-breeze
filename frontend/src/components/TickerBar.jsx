@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import OptionChainGrid from './OptionChainGrid'
+import GenericOptionChainGrid from './GenericOptionChainGrid'
+import { INDEX_CONFIGS } from '../config/indexConfigs'
 
-const WS_PATH = '/ws/ticks'
+const WS_PATH = '/ws/stocks'
 
 export default function TickerBar() {
 	// Define the NSE indexes with their Breeze tokens
@@ -14,6 +15,7 @@ export default function TickerBar() {
 	const [indexData, setIndexData] = useState({})
 	const [wsConnected, setWsConnected] = useState(false)
 	const [showOptionChain, setShowOptionChain] = useState(false)
+	const [selectedIndexConfig, setSelectedIndexConfig] = useState(null)
 
 	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 	const wsBase = import.meta.env.VITE_API_BASE_WS || ''
@@ -64,8 +66,17 @@ export default function TickerBar() {
 		return { change, close, last, percentChange }
 	}
 
-	const handleNiftyClick = () => {
-		setShowOptionChain(true)
+	const handleIndexClick = (indexName) => {
+		const config = INDEX_CONFIGS[indexName]
+		if (config) {
+			setSelectedIndexConfig(config)
+			setShowOptionChain(true)
+		}
+	}
+
+	const handleCloseOptionChain = () => {
+		setShowOptionChain(false)
+		setSelectedIndexConfig(null)
 	}
 
 
@@ -296,20 +307,20 @@ export default function TickerBar() {
 
 		return (
 		<div style={{position: 'relative'}}>
-			{/* Scrollable Ticker Bar - Similar to the image */}
+			{/* Minimalistic Ticker Bar */}
 			<div 
 				className="ticker-scroll"
 				style={{
 					display: 'flex',
 					alignItems: 'center',
-					background: '#0b0f14',
-					border: '1px solid rgba(255,255,255,0.08)',
-					borderRadius: '8px',
-					padding: '12px 16px',
+					background: 'var(--panel)',
+					border: '1px solid var(--border)',
+					borderRadius: 'var(--radius)',
+					padding: 'var(--space-4)',
 					width: '100%',
 					overflowX: 'auto',
 					overflowY: 'hidden',
-					gap: '24px'
+					gap: 'var(--space-6)'
 				}}
 			>
 				{nseIndexes.map((index, i) => {
@@ -318,7 +329,7 @@ export default function TickerBar() {
 					const displayPrice = data.last
 					const change = derived.change
 					const percentChange = derived.percentChange
-					const color = change > 0 ? '#22c55e' : change < 0 ? '#ef4444' : '#9ca3af'
+					const color = change > 0 ? 'var(--success)' : change < 0 ? 'var(--danger)' : 'var(--text-muted)'
 					const displayName = index.name
 					
 					return (
@@ -326,27 +337,35 @@ export default function TickerBar() {
 							<div style={{
 								display: 'flex',
 								alignItems: 'center',
-								gap: '10px',
-								cursor: index.name === 'NIFTY' ? 'pointer' : 'default',
+								gap: 'var(--space-3)',
+								cursor: INDEX_CONFIGS[index.name] ? 'pointer' : 'default',
 								minWidth: 'fit-content',
-								whiteSpace: 'nowrap'
-							}} onClick={index.name === 'NIFTY' ? handleNiftyClick : undefined}>
+								whiteSpace: 'nowrap',
+								padding: 'var(--space-2) var(--space-3)',
+								borderRadius: 'var(--radius)',
+								...(INDEX_CONFIGS[index.name] && {
+									backgroundColor: 'var(--panel-hover)'
+								})
+							}} onClick={
+								INDEX_CONFIGS[index.name] ? () => handleIndexClick(index.name) : undefined
+							}>
 								{/* Index Name */}
 								<div style={{
-									fontWeight: 700,
+									fontWeight: 600,
 									fontSize: '14px',
-									color: '#e5e7eb',
-									letterSpacing: '0.3px'
+									color: 'var(--text)',
+									fontFamily: 'var(--font-sans)'
 								}}>
 									{displayName}
 								</div>
-								{/* Current Price (LTP) - value only */}
+								{/* Current Price (LTP) */}
 								<div style={{
-									fontSize: '16px',
-									fontWeight: 700,
-									color: '#f3f4f6'
+									fontSize: '14px',
+									fontWeight: 500,
+									color: 'var(--text)',
+									fontFamily: 'var(--font-mono)'
 								}}>
-									{displayPrice ? formatNumber(displayPrice) : '--'}
+									₹{displayPrice ? formatNumber(displayPrice) : '--'}
 								</div>
 								{/* Change (absolute and %) - values only */}
 								{change !== null ? (
@@ -413,11 +432,20 @@ export default function TickerBar() {
 				})}
 			</div>
 
-			{/* Option Chain Modal */}
-			<OptionChainGrid 
-				isVisible={showOptionChain}
-				onClose={() => setShowOptionChain(false)}
-			/>
+			{/* Generic Option Chain Modal */}
+			{selectedIndexConfig && (
+				<GenericOptionChainGrid 
+					isVisible={showOptionChain}
+					onClose={handleCloseOptionChain}
+					indexConfig={selectedIndexConfig}
+					underlyingPrice={selectedIndexConfig ? (() => {
+						const token = selectedIndexConfig.symbol === 'NIFTY' ? '4.1!NIFTY 50' : 
+									selectedIndexConfig.symbol === 'BANKNIFTY' ? '4.1!NIFTY BANK' : '4.1!NIFTY FIN SERVICE'
+						const data = getIndexData(token)
+						return data.last || data.close
+					})() : null}
+				/>
+			)}
 		</div>
 	)
 }

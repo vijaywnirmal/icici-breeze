@@ -109,7 +109,7 @@ export default function StockSearch() {
 			wsConnection.close()
 		}
 
-		const ws = new WebSocket(`${wsBase}/ws/ticks`)
+		const ws = new WebSocket(`${wsBase}/ws/stocks`)
 		setWsConnection(ws)
 
 		ws.onopen = () => {

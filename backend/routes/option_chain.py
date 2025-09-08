@@ -7,14 +7,15 @@ from sqlalchemy import text
 
 from ..utils.postgres import get_conn
 from ..utils.response import success_response, error_response, log_exception
-from ..utils.session import get_breeze
 from ..services.ws_stream_manager import STREAM_MANAGER
+from .quotes import _is_market_open_ist
+from ..utils.session import get_breeze
 
 router = APIRouter(prefix="/api", tags=["option-chain"])
 
 
 def get_next_expiry_date() -> str:
-    """Get the next Tuesday expiry date for options."""
+    """Get the next Tuesday expiry date for options (weekly for Nifty 50)."""
     today = datetime.now()
     
     # Find next Tuesday
@@ -26,140 +27,494 @@ def get_next_expiry_date() -> str:
     return next_tuesday.strftime("%Y-%m-%dT06:00:00.000Z")
 
 
+def get_monthly_expiry_date() -> str:
+    """Get the last Tuesday of the current month for Bank Nifty and FIN NIFTY options."""
+    today = datetime.now()
+    
+    # Get the last day of current month
+    if today.month == 12:
+        next_month = today.replace(year=today.year + 1, month=1, day=1)
+    else:
+        next_month = today.replace(month=today.month + 1, day=1)
+    
+    last_day_of_month = next_month - timedelta(days=1)
+    
+    # Find the last Tuesday of the month
+    # Start from the last day and work backwards to find the last Tuesday
+    current_date = last_day_of_month
+    while current_date.weekday() != 1:  # Tuesday is 1
+        current_date -= timedelta(days=1)
+    
+    # If the last Tuesday has already passed this month, get the last Tuesday of next month
+    if current_date < today:
+        if today.month == 12:
+            next_month = today.replace(year=today.year + 1, month=1, day=1)
+        else:
+            next_month = today.replace(month=today.month + 1, day=1)
+        
+        next_month_last_day = next_month - timedelta(days=1)
+        current_date = next_month_last_day
+        while current_date.weekday() != 1:  # Tuesday is 1
+            current_date -= timedelta(days=1)
+    
+    return current_date.strftime("%Y-%m-%dT06:00:00.000Z")
+
+
+def round_to_nearest_50(price: float) -> int:
+    """Round price to the nearest 50."""
+    return int(round(price / 50) * 50)
+
+
+def round_to_nearest_100(price: float) -> int:
+    """Round price to the nearest 100."""
+    return int(round(price / 100) * 100)
+
+
+def calculate_nifty_strikes(nifty_price: float) -> Dict[str, Any]:
+    """
+    Calculate 7 strike prices based on current Nifty price:
+    - 1 ATM (At The Money) - closest to current price
+    - 3 ITM (In The Money) - below ATM for calls, above ATM for puts
+    - 3 OTM (Out The Money) - above ATM for calls, below ATM for puts
+    
+    All strikes are rounded to nearest 50.
+    """
+    # Round current price to nearest 50 to get ATM strike
+    atm_strike = round_to_nearest_50(nifty_price)
+    
+    # Calculate strikes
+    strikes = []
+    
+    # 3 ITM strikes (below ATM)
+    for i in range(3, 0, -1):
+        itm_strike = atm_strike - (i * 50)
+        strikes.append(itm_strike)
+    
+    # ATM strike
+    strikes.append(atm_strike)
+    
+    # 3 OTM strikes (above ATM)
+    for i in range(1, 4):
+        otm_strike = atm_strike + (i * 50)
+        strikes.append(otm_strike)
+    
+    # Sort strikes
+    strikes.sort()
+    
+    # Create call and put data structures
+    calls = []
+    puts = []
+    
+    for strike in strikes:
+        # Determine if ITM, ATM, or OTM for calls
+        if strike < atm_strike:
+            call_type = "ITM"
+        elif strike == atm_strike:
+            call_type = "ATM"
+        else:
+            call_type = "OTM"
+        
+        # Determine if ITM, ATM, or OTM for puts
+        if strike > atm_strike:
+            put_type = "ITM"
+        elif strike == atm_strike:
+            put_type = "ATM"
+        else:
+            put_type = "OTM"
+        
+        # Create call option data
+        calls.append({
+            "strike_price": strike,
+            "type": call_type,
+            "right": "call",
+            "ltp": 0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0,
+            "change_percent": 0,
+            "best_bid_price": 0,
+            "best_offer_price": 0,
+            "last_traded_time": None,
+            "token": None,
+        })
+        
+        # Create put option data
+        puts.append({
+            "strike_price": strike,
+            "type": put_type,
+            "right": "put",
+            "ltp": 0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0,
+            "change_percent": 0,
+            "best_bid_price": 0,
+            "best_offer_price": 0,
+            "last_traded_time": None,
+            "token": None,
+        })
+    
+    return {
+        "strikes": strikes,
+        "atm_strike": atm_strike,
+        "calls": calls,
+        "puts": puts,
+        "nifty_price": nifty_price
+    }
+
+
+def calculate_finnifty_strikes(finnifty_price: float) -> Dict[str, Any]:
+    """
+    Calculate 7 strike prices based on current FIN NIFTY price:
+    - 1 ATM (At The Money) - closest to current price
+    - 3 ITM (In The Money) - below ATM for calls, above ATM for puts
+    - 3 OTM (Out The Money) - above ATM for calls, below ATM for puts
+    
+    All strikes are rounded to nearest 50.
+    """
+    # Round current price to nearest 50 to get ATM strike
+    atm_strike = round_to_nearest_50(finnifty_price)
+    
+    # Calculate strikes
+    strikes = []
+    
+    # 3 ITM strikes (below ATM)
+    for i in range(3, 0, -1):
+        itm_strike = atm_strike - (i * 50)
+        strikes.append(itm_strike)
+    
+    # ATM strike
+    strikes.append(atm_strike)
+    
+    # 3 OTM strikes (above ATM)
+    for i in range(1, 4):
+        otm_strike = atm_strike + (i * 50)
+        strikes.append(otm_strike)
+    
+    # Create calls and puts data
+    calls = []
+    puts = []
+    
+    for strike in strikes:
+        # Create call option data
+        call_data = {
+            "strike_price": strike,
+            "last_price": 0.0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0.0,
+            "change_percent": 0.0
+        }
+        calls.append(call_data)
+        
+        # Create put option data
+        put_data = {
+            "strike_price": strike,
+            "last_price": 0.0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0.0,
+            "change_percent": 0.0
+        }
+        puts.append(put_data)
+    
+    return {
+        "calls": calls,
+        "puts": puts,
+        "underlying_price": finnifty_price,
+        "atm_strike": atm_strike
+    }
+
+
+def calculate_banknifty_strikes(banknifty_price: float) -> Dict[str, Any]:
+    """
+    Calculate 7 strike prices based on current Bank Nifty price:
+    - 1 ATM (At The Money) - closest to current price
+    - 3 ITM (In The Money) - below ATM for calls, above ATM for puts
+    - 3 OTM (Out The Money) - above ATM for calls, below ATM for puts
+    
+    All strikes are rounded to nearest 100.
+    """
+    # Round current price to nearest 100 to get ATM strike
+    atm_strike = round_to_nearest_100(banknifty_price)
+    
+    # Calculate strikes
+    strikes = []
+    
+    # 3 ITM strikes (below ATM)
+    for i in range(3, 0, -1):
+        itm_strike = atm_strike - (i * 100)
+        strikes.append(itm_strike)
+    
+    # ATM strike
+    strikes.append(atm_strike)
+    
+    # 3 OTM strikes (above ATM)
+    for i in range(1, 4):
+        otm_strike = atm_strike + (i * 100)
+        strikes.append(otm_strike)
+    
+    # Sort strikes
+    strikes.sort()
+    
+    # Create call and put data structures
+    calls = []
+    puts = []
+    
+    for strike in strikes:
+        # Determine if ITM, ATM, or OTM for calls
+        if strike < atm_strike:
+            call_type = "ITM"
+        elif strike == atm_strike:
+            call_type = "ATM"
+        else:
+            call_type = "OTM"
+        
+        # Determine if ITM, ATM, or OTM for puts
+        if strike > atm_strike:
+            put_type = "ITM"
+        elif strike == atm_strike:
+            put_type = "ATM"
+        else:
+            put_type = "OTM"
+        
+        # Create call option data
+        calls.append({
+            "strike_price": strike,
+            "type": call_type,
+            "right": "call",
+            "ltp": 0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0,
+            "change_percent": 0,
+            "best_bid_price": 0,
+            "best_offer_price": 0,
+            "last_traded_time": None,
+            "token": None,
+        })
+        
+        # Create put option data
+        puts.append({
+            "strike_price": strike,
+            "type": put_type,
+            "right": "put",
+            "ltp": 0,
+            "volume": 0,
+            "open_interest": 0,
+            "change": 0,
+            "change_percent": 0,
+            "best_bid_price": 0,
+            "best_offer_price": 0,
+            "last_traded_time": None,
+            "token": None,
+        })
+    
+    return {
+        "strikes": strikes,
+        "atm_strike": atm_strike,
+        "calls": calls,
+        "puts": puts,
+        "banknifty_price": banknifty_price
+    }
+
+
+@router.get("/option-chain/nifty-strikes")
+def get_nifty_strikes(
+    nifty_price: Optional[float] = Query(None, description="Current Nifty 50 price (if not provided, will fetch from Breeze)")
+) -> Dict[str, Any]:
+    """Get Nifty 50 option chain data with real market data."""
+    try:
+        # Get current Nifty price
+        current_price = nifty_price
+        if current_price is None:
+            # Fetch from Breeze if not provided
+            breeze = get_breeze()
+            if breeze:
+                try:
+                    nifty_quote = breeze.client.get_quotes(
+                        stock_code="NIFTY",
+                        exchange_code="NSE",
+                        product_type="cash"
+                    )
+                    if nifty_quote and isinstance(nifty_quote, dict) and nifty_quote.get("Success"):
+                        success_data = nifty_quote.get("Success", [])
+                        if isinstance(success_data, list) and success_data:
+                            current_price = success_data[0].get("ltp", 24741)
+                    elif nifty_quote and isinstance(nifty_quote, list) and nifty_quote:
+                        current_price = nifty_quote[0].get("ltp", 24741)
+                except Exception as e:
+                    log_exception(e, context="option_chain.get_nifty_price")
+                    current_price = 24741  # Fallback to yesterday's close
+            else:
+                current_price = 24741  # Fallback to yesterday's close
+        
+        # Ensure we have a valid price
+        if not current_price or current_price <= 0:
+            current_price = 24741
+        
+        # Calculate strikes for the option chain
+        # The websocket subscription will populate real-time data
+        strike_data = calculate_nifty_strikes(current_price)
+        expiry_date = get_next_expiry_date()
+        is_open = _is_market_open_ist()
+        
+        # Always return calculated strikes - websocket will update with real data
+        options_data = {
+            "calls": strike_data["calls"],
+            "puts": strike_data["puts"],
+            "expiry_date": expiry_date,
+            "underlying": "NIFTY 50",
+            "underlying_price": current_price,
+            "atm_strike": strike_data["atm_strike"],
+            "strikes": strike_data["strikes"],
+            "market_open": is_open,
+        }
+        
+        return success_response("Nifty 50 option chain data", **options_data)
+        
+    except Exception as exc:
+        log_exception(exc, context="option_chain.get_nifty_strikes")
+        return error_response("Failed to fetch Nifty option chain", error=str(exc))
+
+
+@router.get("/option-chain/banknifty-strikes")
+def get_banknifty_strikes(
+    banknifty_price: Optional[float] = Query(None, description="Current Bank Nifty price (if not provided, will fetch from Breeze)")
+) -> Dict[str, Any]:
+    """Get calculated Bank Nifty strike prices (7 strikes: ATM + 3 ITM + 3 OTM)."""
+    try:
+        # Get current Bank Nifty price
+        current_price = banknifty_price
+        if current_price is None:
+            # Fetch from Breeze if not provided
+            breeze = get_breeze()
+            if breeze:
+                try:
+                    banknifty_quote = breeze.client.get_quotes(
+                        stock_code="BANKNIFTY",
+                        exchange_code="NSE",
+                        product_type="cash"
+                    )
+                    if banknifty_quote and isinstance(banknifty_quote, dict) and banknifty_quote.get("Success"):
+                        success_data = banknifty_quote.get("Success", [])
+                        if isinstance(success_data, list) and success_data:
+                            current_price = success_data[0].get("ltp", 52000)
+                    elif banknifty_quote and isinstance(banknifty_quote, list) and banknifty_quote:
+                        current_price = banknifty_quote[0].get("ltp", 52000)
+                except Exception as e:
+                    log_exception(e, context="option_chain.get_banknifty_price")
+                    current_price = 52000  # Fallback to default Bank Nifty price
+            else:
+                current_price = 52000  # Fallback to default Bank Nifty price
+        
+        # Ensure we have a valid price
+        if not current_price or current_price <= 0:
+            current_price = 52000
+        
+        # Calculate strikes for the option chain
+        # The websocket subscription will populate real-time data
+        strike_data = calculate_banknifty_strikes(current_price)
+        expiry_date = get_monthly_expiry_date()
+        is_open = _is_market_open_ist()
+        
+        # Always return calculated strikes - websocket will update with real data
+        options_data = {
+            "calls": strike_data["calls"],
+            "puts": strike_data["puts"],
+            "expiry_date": expiry_date,
+            "underlying": "BANK NIFTY",
+            "underlying_price": current_price,
+            "atm_strike": strike_data["atm_strike"],
+            "strikes": strike_data["strikes"],
+            "market_open": is_open,
+        }
+        
+        return success_response("Bank Nifty option chain data", **options_data)
+        
+    except Exception as exc:
+        log_exception(exc, context="option_chain.get_banknifty_strikes")
+        return error_response("Failed to calculate Bank Nifty strikes", error=str(exc))
+
+@router.get("/option-chain/finnifty-strikes")
+def get_finnifty_strikes(
+    finnifty_price: Optional[float] = Query(None, description="Current FIN NIFTY price (if not provided, will fetch from Breeze)")
+) -> Dict[str, Any]:
+    """Get calculated FIN NIFTY strike prices (7 strikes: ATM + 3 ITM + 3 OTM)."""
+    try:
+        # Get current FIN NIFTY price
+        current_price = finnifty_price
+        if current_price is None:
+            # Fetch from Breeze if not provided
+            breeze = get_breeze()
+            if breeze:
+                try:
+                    finnifty_quote = breeze.client.get_quotes(
+                        stock_code="FINNIFTY",
+                        exchange_code="NSE",
+                        product_type="cash"
+                    )
+                    if finnifty_quote and isinstance(finnifty_quote, dict) and finnifty_quote.get("Success"):
+                        success_data = finnifty_quote.get("Success", [])
+                        if isinstance(success_data, list) and success_data:
+                            current_price = success_data[0].get("ltp", 20000)
+                    elif finnifty_quote and isinstance(finnifty_quote, list) and finnifty_quote:
+                        current_price = finnifty_quote[0].get("ltp", 20000)
+                except Exception as e:
+                    log_exception(e, context="option_chain.get_finnifty_price")
+                    current_price = 20000  # Fallback to default FIN NIFTY price
+            else:
+                current_price = 20000  # Fallback to default FIN NIFTY price
+        
+        # Ensure we have a valid price
+        if not current_price or current_price <= 0:
+            current_price = 20000
+        
+        # Calculate strikes for the option chain
+        # The websocket subscription will populate real-time data
+        strike_data = calculate_finnifty_strikes(current_price)
+        expiry_date = get_monthly_expiry_date()
+        is_open = _is_market_open_ist()
+        
+        # Always return calculated strikes - websocket will update with real data
+        options_data = {
+            "calls": strike_data["calls"],
+            "puts": strike_data["puts"],
+            "expiry_date": expiry_date,
+            "underlying": "FIN NIFTY",
+            "underlying_price": current_price,
+            "market_open": is_open,
+        }
+        
+        return success_response("FIN NIFTY option chain data", **options_data)
+        
+    except Exception as exc:
+        log_exception(exc, context="option_chain.get_finnifty_strikes")
+        return error_response("Failed to calculate FIN NIFTY strikes", error=str(exc))
+
 @router.get("/option-chain/nifty50")
 def get_nifty50_option_chain(
     expiry_date: Optional[str] = Query(None, description="Expiry date in ISO format"),
     right: Optional[str] = Query(None, description="Option type: call or put"),
     strike_price: Optional[float] = Query(None, description="Strike price filter")
 ) -> Dict[str, Any]:
-    """Get Nifty 50 option chain data."""
+    """Get Nifty 50 option chain data - empty data structure for WebSocket population."""
     try:
-        breeze = get_breeze()
-        if not breeze:
-            return error_response("No active Breeze session found. Please login first.")
-        
         # Use next Tuesday if no expiry date provided
         if not expiry_date:
             expiry_date = get_next_expiry_date()
         
-        # Get both call and put options
+        is_open = _is_market_open_ist()
+
+        # Return empty data structure - will be populated by WebSocket
         options_data = {
             "calls": [],
             "puts": [],
             "expiry_date": expiry_date,
-            "underlying": "NIFTY 50"
+            "underlying": "NIFTY 50",
+            "underlying_price": 24700,  # Default fallback
+            "market_open": is_open,
         }
-        
-        # Get underlying NIFTY price first
-        underlying_price = 24700  # Default fallback
-        try:
-            nifty_quote = breeze.client.get_quotes(
-                stock_code="NIFTY",
-                exchange_code="NSE",
-                product_type="cash"
-            )
-            if nifty_quote and isinstance(nifty_quote, dict) and nifty_quote.get("Success"):
-                success_data = nifty_quote.get("Success", [])
-                if isinstance(success_data, list) and success_data:
-                    underlying_price = success_data[0].get("ltp", 24700)
-        except Exception as e:
-            log_exception(e, context="option_chain.get_underlying_price")
-        
-        # Generate option chain data around the current price
-        try:
-            # Generate strike prices around the current underlying price
-            strike_prices = []
-            current_strike = int(underlying_price / 50) * 50  # Round to nearest 50
-            
-            # Generate strikes from 200 points below to 200 points above
-            for i in range(-4, 5):
-                strike = current_strike + (i * 50)
-                strike_prices.append(strike)
-            
-            # Generate call options
-            calls = []
-            puts = []
-            
-            for strike in strike_prices:
-                # Calculate option prices (simplified Black-Scholes approximation)
-                intrinsic_value_call = max(0, underlying_price - strike)
-                intrinsic_value_put = max(0, strike - underlying_price)
-                
-                # Add some time value and volatility
-                time_value = max(10, abs(underlying_price - strike) * 0.1)
-                
-                call_price = intrinsic_value_call + time_value
-                put_price = intrinsic_value_put + time_value
-                
-                # Generate realistic volume and OI
-                volume = max(100, int(abs(underlying_price - strike) * 2))
-                oi = max(1000, int(abs(underlying_price - strike) * 10))
-                
-                # Call option
-                call_option = {
-                    "stock_code": "NIFTY",
-                    "exchange_code": "NFO",
-                    "product_type": "options",
-                    "right": "call",
-                    "strike_price": strike,
-                    "expiry_date": expiry_date,
-                    "ltp": round(call_price, 2),
-                    "volume": volume,
-                    "open_interest": oi,
-                    "change": round(call_price * 0.01, 2),  # 1% change
-                    "change_percent": 1.0,
-                    "best_bid_price": round(call_price * 0.99, 2),
-                    "best_offer_price": round(call_price * 1.01, 2),
-                    "last_traded_time": "05-Sep-2025 14:40:57"
-                }
-                calls.append(call_option)
-                
-                # Put option
-                put_option = {
-                    "stock_code": "NIFTY",
-                    "exchange_code": "NFO",
-                    "product_type": "options",
-                    "right": "put",
-                    "strike_price": strike,
-                    "expiry_date": expiry_date,
-                    "ltp": round(put_price, 2),
-                    "volume": volume,
-                    "open_interest": oi,
-                    "change": round(put_price * -0.01, 2),  # -1% change
-                    "change_percent": -1.0,
-                    "best_bid_price": round(put_price * 0.99, 2),
-                    "best_offer_price": round(put_price * 1.01, 2),
-                    "last_traded_time": "05-Sep-2025 14:40:57"
-                }
-                puts.append(put_option)
-            
-            # Sort by strike price
-            calls.sort(key=lambda x: x["strike_price"])
-            puts.sort(key=lambda x: x["strike_price"])
-            
-            options_data["calls"] = calls
-            options_data["puts"] = puts
-            options_data["underlying_price"] = underlying_price
-                
-        except Exception as e:
-            log_exception(e, context="option_chain.generate_option_chain")
-            options_data["calls"] = []
-            options_data["puts"] = []
-        
-        # Filter by strike price if provided
-        if strike_price:
-            options_data["calls"] = [
-                opt for opt in options_data["calls"] 
-                if abs(float(opt.get("strike_price", 0)) - strike_price) < 0.01
-            ]
-            options_data["puts"] = [
-                opt for opt in options_data["puts"] 
-                if abs(float(opt.get("strike_price", 0)) - strike_price) < 0.01
-            ]
-        
-        # Sort by strike price
-        options_data["calls"].sort(key=lambda x: float(x.get("strike_price", 0)))
-        options_data["puts"].sort(key=lambda x: float(x.get("strike_price", 0)))
         
         return success_response("Nifty 50 option chain data", **options_data)
         
@@ -169,25 +524,58 @@ def get_nifty50_option_chain(
 
 
 @router.get("/option-chain/expiry-dates")
-def get_expiry_dates() -> Dict[str, Any]:
-    """Get available expiry dates for options."""
+def get_expiry_dates(index: Optional[str] = Query(None, description="Index name: NIFTY, BANKNIFTY, or FINNIFTY")) -> Dict[str, Any]:
+    """Get available expiry dates for options based on index type."""
     try:
-        # Generate next 4 Tuesdays
         today = datetime.now()
         expiry_dates = []
         
-        for i in range(4):
-            # Find next Tuesday
-            days_ahead = 1 - today.weekday()  # Tuesday is 1
-            if days_ahead <= 0:  # Target day already happened this week
-                days_ahead += 7
-            
-            next_tuesday = today + timedelta(days=days_ahead + (i * 7))
-            expiry_dates.append({
-                "date": next_tuesday.strftime("%Y-%m-%d"),
-                "iso_date": next_tuesday.strftime("%Y-%m-%dT06:00:00.000Z"),
-                "display": next_tuesday.strftime("%d %b %Y")
-            })
+        if index and index.upper() in ["BANKNIFTY", "FINNIFTY"]:
+            # For Bank Nifty and FIN NIFTY: monthly expiry (last Tuesday of month)
+            for i in range(4):  # Next 4 months
+                # Calculate the last Tuesday of current month + i months
+                target_month = today.month + i
+                target_year = today.year
+                
+                # Handle year rollover
+                while target_month > 12:
+                    target_month -= 12
+                    target_year += 1
+                
+                # Get last day of target month
+                if target_month == 12:
+                    next_month = datetime(target_year + 1, 1, 1)
+                else:
+                    next_month = datetime(target_year, target_month + 1, 1)
+                
+                last_day_of_month = next_month - timedelta(days=1)
+                
+                # Find the last Tuesday of the month
+                current_date = last_day_of_month
+                while current_date.weekday() != 1:  # Tuesday is 1
+                    current_date -= timedelta(days=1)
+                
+                # Only include if it's in the future
+                if current_date >= today:
+                    expiry_dates.append({
+                        "date": current_date.strftime("%Y-%m-%d"),
+                        "iso_date": current_date.strftime("%Y-%m-%dT06:00:00.000Z"),
+                        "display": current_date.strftime("%d %b %Y")
+                    })
+        else:
+            # For Nifty 50: weekly expiry (next 4 Tuesdays)
+            for i in range(4):
+                # Find next Tuesday
+                days_ahead = 1 - today.weekday()  # Tuesday is 1
+                if days_ahead <= 0:  # Target day already happened this week
+                    days_ahead += 7
+                
+                next_tuesday = today + timedelta(days=days_ahead + (i * 7))
+                expiry_dates.append({
+                    "date": next_tuesday.strftime("%Y-%m-%d"),
+                    "iso_date": next_tuesday.strftime("%Y-%m-%dT06:00:00.000Z"),
+                    "display": next_tuesday.strftime("%d %b %Y")
+                })
         
         return success_response("Available expiry dates", dates=expiry_dates)
         
@@ -198,28 +586,10 @@ def get_expiry_dates() -> Dict[str, Any]:
 
 @router.get("/option-chain/underlying-price")
 def get_underlying_price() -> Dict[str, Any]:
-    """Get current Nifty 50 underlying price."""
+    """Get current Nifty 50 underlying price - placeholder for WebSocket data."""
     try:
-        breeze = get_breeze()
-        if not breeze:
-            return error_response("No active Breeze session found. Please login first.")
-        
-        # Get Nifty 50 quote
-        quote_response = breeze.client.get_quotes(
-            stock_code="NIFTY",
-            exchange_code="NSE",
-            product_type="cash"
-        )
-        
-        if quote_response and isinstance(quote_response, dict):
-            success_data = quote_response.get("Success", {})
-            if success_data:
-                return success_response("Underlying price", price=success_data)
-        elif quote_response and isinstance(quote_response, list) and len(quote_response) > 0:
-            # Handle case where response is a list
-            return success_response("Underlying price", price=quote_response[0])
-        
-        return error_response("Failed to fetch underlying price")
+        # Return default price - will be updated by WebSocket
+        return success_response("Underlying price", price={"ltp": 24700, "close": 24700})
         
     except Exception as exc:
         log_exception(exc, context="option_chain.get_underlying_price")
@@ -241,95 +611,128 @@ def subscribe_option_chain_strikes(
     avoid segment prefix mistakes.
     """
     try:
+        # Skip live WS subscription when market is closed
+        if not _is_market_open_ist():
+            return success_response(
+                "Market closed; live subscription skipped",
+                underlying=stock_code.upper(),
+                expiry_date=expiry_date,
+                right=right,
+                exchange_code=exchange_code,
+                subscribed_count=0,
+                market_open=False,
+            )
+
+        # Get Breeze service
         breeze = get_breeze()
         if not breeze:
             return error_response("No active Breeze session found. Please login first.")
+        
+        if not hasattr(breeze.client, 'session_key') or not breeze.client.session_key:
+            return error_response("Breeze session found but no session key. Please login again.")
 
-        r = (right or "").lower()
-        if r == "call":
-            rights: List[str] = ["call"]
-        elif r == "put":
-            rights = ["put"]
-        else:
-            rights = ["call", "put"]
-
-        def _fetch_chain(opt_right: str) -> List[Dict[str, Any]]:
-            try:
-                resp = breeze.client.get_option_chain_quotes(
-                    stock_code=stock_code,
-                    exchange_code=exchange_code,
-                    product_type=product_type,
-                    right=opt_right,
-                    expiry_date=expiry_date,
-                )
-                if isinstance(resp, dict):
-                    data = resp.get("Success") or resp.get("success") or []
-                    if isinstance(data, list):
-                        return data
-                if isinstance(resp, list):
-                    return resp
-            except Exception as exc:
-                log_exception(exc, context="option_chain.subscribe.fetch", right=opt_right)
-            return []
-
-        chain_rows: List[Dict[str, Any]] = []
-        for rr in rights:
-            chain_rows.extend(_fetch_chain(rr))
-
-        if not chain_rows:
-            return error_response("No option chain data found for given inputs")
-
-        items: List[Dict[str, str]] = []
-        for row in chain_rows:
-            try:
-                token = (row.get("token") or row.get("stock_token") or "").strip()
-                right_val = str(row.get("right") or row.get("option_type") or "").lower()
-                strike_val = str(row.get("strike_price") or row.get("strike") or "").strip()
-                alias_val = f"{stock_code.upper()}|{expiry_date}|{(row.get('right') or row.get('option_type') or '').upper()}|{strike_val}"
-                if token and "!" in token:
-                    items.append({
-                        "token": token,
-                        "alias": alias_val,
-                        "stock_code": str(row.get("stock_code") or stock_code),
-                        "exchange_code": str(row.get("exchange_code") or exchange_code),
-                        "product_type": str(row.get("product_type") or product_type),
-                    })
-                elif right_val and strike_val:
-                    # Fallback to parameter-based subscription (Groww-like)
-                    items.append({
-                        "stock_code": stock_code,
-                        "exchange_code": exchange_code,
-                        "product_type": "options",
-                        "right": right_val,
-                        "strike_price": strike_val,
-                        "expiry_date": expiry_date,
-                        "interval": "1minute",
-                        "alias": alias_val,
-                    })
-            except Exception:
-                continue
-
-        if not items:
-            return error_response("No subscribable strikes found in option chain response")
-
-        if isinstance(limit, int) and limit > 0:
-            items = items[:limit]
-
+        # Subscribe to option chain data via websocket
         try:
-            STREAM_MANAGER.subscribe_many(items)
-        except Exception as exc:
-            log_exception(exc, context="option_chain.subscribe.stream_manager")
-            return error_response("Subscription failed", error=str(exc))
+            # Convert expiry date format for Breeze API
+            from datetime import datetime
+            expiry_dt = datetime.fromisoformat(expiry_date.replace('Z', '+00:00'))
+            breeze_expiry = expiry_dt.strftime("%d-%b-%Y")  # Format: "13-Feb-2025"
+            
+            # Debug logging (commented out to reduce terminal noise)
+            # print(f"🔍 Option Chain Subscription Debug:")
+            # print(f"   Stock Code: {stock_code}")
+            # print(f"   Exchange Code: {exchange_code}")
+            # print(f"   Expiry Date: {expiry_date} -> {breeze_expiry}")
+            # print(f"   Right: {right}")
+            # print(f"   Limit: {limit}")
+            
+            # Calculate strike prices around current underlying price
+            # Get current underlying price first
+            underlying_price = 24741  # Default NIFTY price
+            try:
+                underlying_quote = breeze.client.get_quotes(
+                    stock_code=stock_code,
+                    exchange_code="NSE",
+                    product_type="cash"
+                )
+                if underlying_quote and underlying_quote.get("Success"):
+                    success_data = underlying_quote.get("Success", [])
+                    if success_data:
+                        underlying_price = success_data[0].get("ltp", underlying_price)
+            except Exception as e:
+                log_exception(e, context="option_chain.get_underlying_price")
+            
+            # Calculate strikes around current price
+            if stock_code.upper() == "NIFTY":
+                # NIFTY strikes are in 50-point intervals
+                atm_strike = round(underlying_price / 50) * 50
+                strikes = [atm_strike - 150, atm_strike - 100, atm_strike - 50, 
+                          atm_strike, atm_strike + 50, atm_strike + 100, atm_strike + 150]
+            elif stock_code.upper() == "BANKNIFTY":
+                # BANKNIFTY strikes are in 100-point intervals
+                atm_strike = round(underlying_price / 100) * 100
+                strikes = [atm_strike - 300, atm_strike - 200, atm_strike - 100,
+                          atm_strike, atm_strike + 100, atm_strike + 200, atm_strike + 300]
+            else:
+                # Default to 50-point intervals
+                atm_strike = round(underlying_price / 50) * 50
+                strikes = [atm_strike - 150, atm_strike - 100, atm_strike - 50,
+                          atm_strike, atm_strike + 50, atm_strike + 100, atm_strike + 150]
+            
+            subscribed_count = 0
+            
+            # Get the websocket stream manager to handle subscriptions
+            from ..services.ws_stream_manager import STREAM_MANAGER
+            
+            # Subscribe to each strike for both calls and puts
+            for strike in strikes[:limit] if limit else strikes:
+                try:
+                    # Subscribe to CALL option
+                    if right in ["both", "call"]:
+                        # Use the websocket stream manager to subscribe
+                        STREAM_MANAGER.subscribe_option(
+                            stock_code=stock_code,
+                            exchange_code=exchange_code,
+                            expiry_date=breeze_expiry,
+                            strike_price=str(strike),
+                            right="call",
+                            product_type=product_type
+                        )
+                        subscribed_count += 1
+                    
+                    # Subscribe to PUT option
+                    if right in ["both", "put"]:
+                        # Use the websocket stream manager to subscribe
+                        STREAM_MANAGER.subscribe_option(
+                            stock_code=stock_code,
+                            exchange_code=exchange_code,
+                            expiry_date=breeze_expiry,
+                            strike_price=str(strike),
+                            right="put",
+                            product_type=product_type
+                        )
+                        subscribed_count += 1
+                        
+                except Exception as e:
+                    log_exception(e, context="option_chain.subscribe_strike", strike=strike)
+                    continue
+            
+            return success_response(
+                "Option chain subscribed successfully via websocket",
+                underlying=stock_code.upper(),
+                expiry_date=expiry_date,
+                right=right,
+                exchange_code=exchange_code,
+                subscribed_count=subscribed_count,
+                strikes=strikes,
+                underlying_price=underlying_price,
+                market_open=True
+            )
+            
+        except Exception as e:
+            log_exception(e, context="option_chain.subscribe_option_chain")
+            return error_response("Failed to subscribe to option chain", error=str(e))
 
-        return success_response(
-            "Subscribed to option chain strikes",
-            underlying=stock_code.upper(),
-            expiry_date=expiry_date,
-            right=right,
-            exchange_code=exchange_code,
-            subscribed_count=len(items),
-            sample_tokens=[it.get("token") for it in items[:10]],
-        )
     except Exception as exc:
         log_exception(exc, context="option_chain.subscribe_option_chain_strikes")
         return error_response("Failed to subscribe option chain strikes", error=str(exc))

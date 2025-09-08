@@ -18,19 +18,20 @@ createRoot(document.getElementById('root')).render(
 		<Routes>
 			<Route path="/" element={<App />} />
 			<Route path="/home" element={
-				<div className="layout">
-					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
-						<HomePage />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<HomePage />
 				</div>
 			} />
 			<Route path="/holidays" element={
 				<div className="layout">
 					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
+					<div className="main-content">
+						<div className="ticker-container">
+							<TickerBar />
+						</div>
 						<HolidaysPage />
 					</div>
 				</div>
@@ -38,8 +39,10 @@ createRoot(document.getElementById('root')).render(
 			<Route path="/backtest" element={
 				<div className="layout">
 					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
+					<div className="main-content">
+						<div className="ticker-container">
+							<TickerBar />
+						</div>
 						<BacktestPage />
 					</div>
 				</div>
@@ -47,8 +50,10 @@ createRoot(document.getElementById('root')).render(
 			<Route path="/builder" element={
 				<div className="layout">
 					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
+					<div className="main-content">
+						<div className="ticker-container">
+							<TickerBar />
+						</div>
 						<StrategyBuilder />
 					</div>
 				</div>
@@ -56,8 +61,10 @@ createRoot(document.getElementById('root')).render(
 			<Route path="/results" element={
 				<div className="layout">
 					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
+					<div className="main-content">
+						<div className="ticker-container">
+							<TickerBar />
+						</div>
 						<BacktestResults />
 					</div>
 				</div>
@@ -65,8 +72,10 @@ createRoot(document.getElementById('root')).render(
 			<Route path="/live-trading" element={
 				<div className="layout">
 					<Sidebar />
-					<div>
-						<div style={{padding:'18px'}}><TickerBar /></div>
+					<div className="main-content">
+						<div className="ticker-container">
+							<TickerBar />
+						</div>
 						<LiveTrading />
 					</div>
 				</div>

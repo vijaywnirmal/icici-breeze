@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 from .utils.config import settings
 from .utils.ssl_config import configure_ssl_context
@@ -16,7 +17,7 @@ from .routes.nse_indexes import router as nse_indexes_router
 from .routes.bulk_websocket import router as bulk_websocket_router
 from .routes.option_chain import router as option_chain_router
 from .utils.instruments_scheduler import DailyInstrumentsUpdater
-from .utils.session import get_breeze, is_session_valid
+from .utils.session import get_breeze, is_session_valid, bootstrap_from_breeze_file
 
 
 # Load environment variables from .env at startup
@@ -24,6 +25,9 @@ load_dotenv()
 
 # Configure SSL context to handle handshake failures
 configure_ssl_context()
+
+# Configure logging: keep access logs quiet, preserve important startup/error logs
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 app = FastAPI(title=settings.app_name)
 
@@ -61,7 +65,11 @@ updater: DailyInstrumentsUpdater | None = None
 async def _startup() -> None:
     global updater
     
-    # Removed saved-session check/logs per request
+    # Bootstrap Breeze session from .breeze_session.json to survive --reload
+    try:
+        bootstrap_from_breeze_file()
+    except Exception:
+        pass
     
     # Start instruments updater
     try:
@@ -93,7 +101,7 @@ def health_check() -> dict:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("src.app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend.app:app", host="0.0.0.0", port=8000, reload=True)
 
 
 

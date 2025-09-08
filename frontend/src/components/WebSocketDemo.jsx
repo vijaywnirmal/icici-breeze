@@ -34,7 +34,7 @@ const WebSocketDemo = () => {
             return
         }
 
-        const wsUrl = apiBase.replace('http', 'ws') + '/ws/ticks'
+        const wsUrl = apiBase.replace('http', 'ws') + '/ws/stocks'
         const ws = new WebSocket(wsUrl)
         wsRef.current = ws
 

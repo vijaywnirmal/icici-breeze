@@ -28,7 +28,13 @@ def get_breeze() -> Optional[BreezeService]:
 	if _BREEZE is not None:
 		return _BREEZE
 	
-	# File-based restore disabled
+	# Try to restore from file if not in memory
+	try:
+		if bootstrap_from_breeze_file():
+			return _BREEZE
+	except Exception:
+		pass
+	
 	return None
 
 
@@ -53,7 +59,7 @@ def is_session_valid() -> bool:
 	try:
 		# Try to make a simple API call to validate the session
 		client = breeze.client
-		if hasattr(client, 'session_token') and client.session_token:
+		if hasattr(client, 'session_key') and client.session_key:
 			# Try to get customer details to validate session
 			client.get_customer_details()
 			return True
@@ -63,6 +69,32 @@ def is_session_valid() -> bool:
 		return False
 	
 	return False
+
+
+def bootstrap_from_breeze_file(file_path: str | None = None) -> bool:
+	"""Initialize Breeze session from .breeze_session.json if available.
+
+	This enables seamless session across backend --reload without persisting our
+	own session file. Expects JSON with keys: api_key, api_secret, session_token.
+	"""
+	try:
+		path = Path(file_path or ".breeze_session.json")
+		if not path.exists():
+			return False
+		data = json.loads(path.read_text())
+		api_key = (data.get("api_key") or "").strip()
+		api_secret = (data.get("api_secret") or "").strip()
+		session_token = (data.get("session_token") or "").strip()
+		if not api_key or not api_secret or not session_token:
+			return False
+		service = BreezeService(api_key=api_key)
+		res = service.login_and_fetch_profile(api_secret=api_secret, session_key=session_token)
+		if res and res.success:
+			set_breeze(service)
+			return True
+		return False
+	except Exception:
+		return False
 
 
 # Simple in-memory cache for customer details keyed by api_session token

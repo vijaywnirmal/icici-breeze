@@ -16,7 +16,7 @@ WS_BASE = "ws://localhost:8000"
 
 def test_search_api():
     """Test the stock search API endpoint."""
-    print("🔍 Testing Stock Search API...")
+    print("[SEARCH] Testing Stock Search API...")
     
     try:
         # Test search for popular stocks
@@ -159,7 +159,7 @@ def test_bulk_websocket_api():
 
 async def main():
     """Run all tests."""
-    print("🚀 Starting Trading Platform Tests")
+    print("[START] Starting Trading Platform Tests")
     print("=" * 50)
     
     # Test API endpoints

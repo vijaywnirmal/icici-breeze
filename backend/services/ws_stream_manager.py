@@ -4,11 +4,13 @@ import asyncio
 import json
 from typing import Any, Dict, Optional, Set
 import re
+import time
 
 from ..utils.response import log_exception
 from ..utils.config import settings
 from ..utils.session import get_breeze
 from .breeze_service import BreezeService
+from .quotes_cache import upsert_quote
 
 
 class BreezeSocketService:
@@ -18,6 +20,7 @@ class BreezeSocketService:
         self._breeze: Optional[BreezeService] = None
         self._connected = False
         self._clients: Set[Any] = set()
+        self._option_clients: Set[Any] = set()  # Separate clients for options
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._subscriptions: Dict[str, Dict[str, str]] = {}
 
@@ -48,9 +51,23 @@ class BreezeSocketService:
             # Register tick handler BEFORE establishing the WS connection
             def on_ticks(ticks: Dict[str, Any]) -> None:
                 try:
+                    # Debug logging removed for cleanliness
+                    
                     # Normalize minimal payload
+                    # Prefer stock_code for options to build consistent alias keys
                     raw_sym = ticks.get("stock_code") or ticks.get("symbol") or ""
                     raw_sym_u = str(raw_sym).upper()
+                    # Normalize common index names to canonical codes used by frontend
+                    base_sym = raw_sym_u
+                    try:
+                        if "NIFTY" in raw_sym_u and "BANK" not in raw_sym_u and "FIN" not in raw_sym_u:
+                            base_sym = "NIFTY"
+                        elif "BANK" in raw_sym_u and "NIFTY" in raw_sym_u:
+                            base_sym = "BANKNIFTY"
+                        elif "FIN" in raw_sym_u and "NIFTY" in raw_sym_u:
+                            base_sym = "FINNIFTY"
+                    except Exception:
+                        base_sym = raw_sym_u
                     raw_token = ticks.get("stock_token") or ticks.get("token") or ""
                     raw_token_u = str(raw_token).upper()
                     # Prefer alias mapping by token, then by stock_code/symbol
@@ -72,11 +89,42 @@ class BreezeSocketService:
                         if expiry_raw and strike_raw and right_raw:
                             right_u = str(right_raw).upper()
                             right_txt = "CALL" if right_u in ("CE", "CALL") else ("PUT" if right_u in ("PE", "PUT") else right_u)
-                            alias_from_tick = f"{raw_sym_u}|{expiry_raw}|{right_txt}|{strike_raw}"
+                            # Format expiry date consistently for alias mapping
+                            from datetime import datetime
+                            try:
+                                if isinstance(expiry_raw, str):
+                                    # Try to parse different date formats
+                                    for fmt in ["%d-%b-%Y", "%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%dT%H:%M:%S.%fZ"]:
+                                        try:
+                                            parsed_date = datetime.strptime(expiry_raw, fmt)
+                                            # Keep only date part as ISO and append the fixed Z time part the API returns
+                                            formatted_expiry = parsed_date.strftime("%Y-%m-%dT06:00:00.000Z")
+                                            break
+                                        except ValueError:
+                                            continue
+                                    else:
+                                        # If no format matches, try to extract date part
+                                        formatted_expiry = str(expiry_raw)
+                                else:
+                                    formatted_expiry = str(expiry_raw)
+                            except:
+                                formatted_expiry = str(expiry_raw)
+                            
+                            # Normalize strike to int to match frontend
+                            try:
+                                strike_norm = int(float(strike_raw))
+                            except Exception:
+                                strike_norm = strike_raw
+                            alias_from_tick = f"{base_sym}|{formatted_expiry}|{right_txt}|{strike_norm}"
+                            
+                            # Debug logging for option chain data (commented out to reduce terminal noise)
+                            # if raw_sym_u and raw_sym_u.upper() in ["NIFTY", "BANKNIFTY", "FINNIFTY"]:
+                            #     print(f"🔍 Option Chain Debug: {raw_sym_u}|{formatted_expiry}|{right_txt}|{strike_raw}")
+                            #     print(f"   Raw expiry: {expiry_raw}, Strike: {strike_raw}, Right: {right_raw}")
                     except Exception:
                         alias_from_tick = None
 
-                    symbol = alias_from_tick or alias or raw_sym_u or raw_token_u
+                    symbol = alias_from_tick or alias or base_sym or raw_token_u
                     if symbol.endswith(".NS"):
                         symbol = symbol[:-3]
                     payload = {
@@ -88,24 +136,151 @@ class BreezeSocketService:
                         "expiry_date": ticks.get("expiry_date") or ticks.get("expiry"),
                         "strike_price": ticks.get("strike_price") or ticks.get("strike"),
                         "right_type": ticks.get("right_type") or ticks.get("right") or ticks.get("option_type"),
+                        # Duplicate as 'right' so frontend fallback logic can work without alias
+                        "right": ticks.get("right") or ticks.get("right_type") or ticks.get("option_type"),
                         "ltp": ticks.get("last") or ticks.get("ltp") or ticks.get("close") or ticks.get("open"),
                         "close": ticks.get("close"),
                         "bid": ticks.get("bPrice") or ticks.get("best_bid_price"),
                         "ask": ticks.get("sPrice") or ticks.get("best_ask_price"),
                         "change_pct": ticks.get("change") or ticks.get("pChange"),
                         "timestamp": ticks.get("ltt") or ticks.get("datetime") or ticks.get("timestamp"),
+                        # Add option chain specific fields
+                        "volume": ticks.get("ltq") or ticks.get("volume") or ticks.get("total_quantity_traded"),
+                        "open_interest": ticks.get("OI") or ticks.get("open_interest") or ticks.get("oi"),
+                        "ttv": ticks.get("ttv"),  # Total Trade Volume for OI calculation
+                        "last": ticks.get("last") or ticks.get("ltp"),
                     }
+                    # Upsert cache for last-known values (used when market is closed)
+                    try:
+                        upsert_quote(symbol, payload)
+                    except Exception:
+                        pass
+
                     if self._loop is not None:
-                        asyncio.run_coroutine_threadsafe(self._broadcast(payload), self._loop)
+                        # Check if this is an option tick - treat as option if it has strike and right
+                        has_strike = ticks.get("strike_price") is not None or ticks.get("strike") is not None
+                        has_right = ticks.get("right_type") is not None or ticks.get("right") is not None or ticks.get("option_type") is not None
+                        is_option_tick = has_strike and has_right
+                        
+                        # Debug logging removed for cleanliness
+                        
+                        if is_option_tick:
+                            # Route to option clients only; filter by each client's selected expiry if provided
+                            asyncio.run_coroutine_threadsafe(self._broadcast_options(payload), self._loop)
+                            
+                            # Also call option tick handlers if they exist
+                            option_handlers = getattr(self, '_option_tick_handlers', [])
+                            for handler in option_handlers:
+                                try:
+                                    asyncio.run_coroutine_threadsafe(handler(payload), self._loop)
+                                except Exception as exc:
+                                    # Swallow handler errors to avoid noisy logs
+                                    pass
+                        else:
+                            # Route to regular clients only
+                            asyncio.run_coroutine_threadsafe(self._broadcast(payload), self._loop)
                 except Exception as exc:
                     log_exception(exc, context="BreezeSocketService.on_ticks")
 
             svc.client.on_ticks = on_ticks
-            # Now open the websocket connection
-            svc.client.ws_connect()
-            self._connected = True
+            # Now open the websocket connection with retries
+            max_attempts = 5
+            backoff_seconds = 1.5
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    svc.client.ws_connect()
+                    self._connected = True
+                    break
+                except Exception as ws_exc:
+                    log_exception(ws_exc, context="BreezeSocketService.ws_connect", attempt=attempt)
+                    if attempt == max_attempts:
+                        raise
+                    time.sleep(backoff_seconds * attempt)
         except Exception as exc:
             log_exception(exc, context="BreezeSocketService.connect")
+            raise
+
+    def subscribe_option(self, stock_code: str, exchange_code: str, expiry_date: str, strike_price: str, right: str, product_type: str) -> None:
+        """Subscribe to option chain data."""
+        print(f"🔔 Subscribing to option: {stock_code} {expiry_date} {strike_price} {right}")
+        svc = self._ensure_breeze()
+        if not svc:
+            raise RuntimeError("No Breeze session available")
+        if not self._connected:
+            self.connect()
+        
+        try:
+            # Subscribe using Breeze API
+            # Important: omit interval for real-time exchange quotes; passing
+            # an interval throttles updates to bar cadence (e.g., 1minute)
+            resp = svc.client.subscribe_feeds(
+                exchange_code=exchange_code,
+                stock_code=stock_code,
+                expiry_date=expiry_date,
+                strike_price=strike_price,
+                right=right,
+                product_type=product_type,
+                get_market_depth=False,
+                get_exchange_quotes=True
+            )
+            print(f"✅ Option subscription response: {resp}")
+            # Lightweight confirmation log
+            try:
+                info = {
+                    "exchange_code": exchange_code,
+                    "stock_code": stock_code,
+                    "expiry_date": expiry_date,
+                    "strike_price": strike_price,
+                    "right": right,
+                    "product_type": product_type,
+                }
+                print(f"[WS] Subscribed option: {json.dumps(info)} | resp={resp}")
+            except Exception:
+                pass
+            
+            # Create alias for mapping (match frontend alias exactly)
+            # Normalize expiry to ISO for alias; keep original format for API
+            from datetime import datetime
+            iso_expiry = str(expiry_date)
+            try:
+                if isinstance(expiry_date, str):
+                    # Common inputs: "13-Feb-2025", "2025-09-10T06:00:00.000Z", "2025-09-10"
+                    parsed = None
+                    for fmt in ("%d-%b-%Y", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%d"):
+                        try:
+                            parsed = datetime.strptime(expiry_date, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    if parsed:
+                        iso_expiry = parsed.strftime("%Y-%m-%dT06:00:00.000Z")
+                    else:
+                        # If it already contains 'T', assume ISO-like
+                        iso_expiry = expiry_date
+            except Exception:
+                iso_expiry = str(expiry_date)
+
+            right_u = right.upper()
+            right_txt = "CALL" if right_u in ("CE", "CALL") else "PUT"
+            strike_norm = int(float(strike_price))
+            alias_iso = f"{stock_code.upper()}|{iso_expiry}|{right_txt}|{strike_norm}"
+            alias_raw = f"{stock_code.upper()}|{expiry_date}|{right_txt}|{strike_norm}"
+            
+            # Store subscription for alias mapping (key by ALIAS and by EXPIRY+RIGHT+STRIKE)
+            for alias in (alias_iso, alias_raw, f"{stock_code.upper()}|{iso_expiry}|{right_txt}|{strike_norm}"):
+                self._subscriptions[alias] = {
+                    "exchange_code": exchange_code,
+                    "product_type": product_type,
+                    "alias": alias,
+                    "stock_code": stock_code,
+                    "expiry_date": iso_expiry,
+                    "strike_price": strike_norm,
+                    "right": right
+                }
+            
+        except Exception as exc:
+            log_exception(exc, context="BreezeSocketService.subscribe_option", 
+                         stock_code=stock_code, strike_price=strike_price, right=right)
             raise
 
     def subscribe(self, stock_code: str, exchange_code: str = "NSE", product_type: str = "cash") -> None:
@@ -155,18 +330,21 @@ class BreezeSocketService:
             provided_alias = str(it.get("alias") or "").strip()
             raw_token = it.get("token")
             # Only process token if it's a valid string and not empty/undefined
-            if raw_token and str(raw_token) not in ("", "undefined", "null"):
-                raw_token_str = str(raw_token)
-                # Normalize token to X.Y!TOKEN. Default NSE (4.1!) when exchange_code missing
-                ex = str(it.get("exchange_code") or "NSE").upper()
-                token = raw_token_str
-                if not re.match(r"^\d+\.\d+!.+$", token):
-                    prefix = "4.1!" if ex == "NSE" else "1.1!"
-                    token = f"{prefix}{raw_token_str}"
-                token_list.append(token)
-                # Preserve alias mapping for token → display code
-                alias = provided_alias or (str(code).upper() if code else token.upper())
-                self._subscriptions[token.upper()] = {"exchange_code": "TOKEN", "product_type": "cash", "alias": alias}
+            if raw_token and not isinstance(raw_token, bool) and str(raw_token) not in ("", "undefined", "null"):
+                try:
+                    raw_token_str = str(raw_token)
+                    # Normalize token to X.Y!TOKEN. Default NSE (4.1!) when exchange_code missing
+                    ex = str(it.get("exchange_code") or "NSE").upper()
+                    token = raw_token_str
+                    if not re.match(r"^\d+\.\d+!.+$", token):
+                        prefix = "4.1!" if ex == "NSE" else "1.1!"
+                        token = f"{prefix}{raw_token_str}"
+                    token_list.append(token)
+                    # Preserve alias mapping for token → display code
+                    alias = provided_alias or (str(code).upper() if code else token.upper())
+                    self._subscriptions[token.upper()] = {"exchange_code": "TOKEN", "product_type": "cash", "alias": alias}
+                except Exception as exc:
+                    log_exception(exc, context="BreezeSocketService.subscribe_many.token_processing", token=raw_token)
             elif code:
                 prod = str(it.get("product_type") or "cash").lower()
                 if prod == "options" and (it.get("expiry_date") or it.get("expiry")) and it.get("strike_price") and (it.get("right") or it.get("right_type")):
@@ -188,6 +366,8 @@ class BreezeSocketService:
                     existing = self._subscriptions.get(t)
                     alias = existing.get("alias") if isinstance(existing, dict) else None
                     self._subscriptions[t] = {"exchange_code": "TOKEN", "product_type": "cash", **({"alias": alias} if alias else {})}
+            except IndexError as exc:
+                log_exception(exc, context="BreezeSocketService.subscribe_many.tokens.index_error", tokens=token_list)
             except Exception as exc:
                 log_exception(exc, context="BreezeSocketService.subscribe_many.tokens")
 
@@ -263,14 +443,18 @@ class BreezeSocketService:
             except Exception:
                 continue
 
-    def register_client(self, ws: Any, loop: asyncio.AbstractEventLoop | None = None) -> None:
+    def register_client(self, ws: Any, loop: asyncio.AbstractEventLoop | None = None, is_option_client: bool = False) -> None:
         if loop is not None:
             self._loop = loop
-        self._clients.add(ws)
+        if is_option_client:
+            self._option_clients.add(ws)
+        else:
+            self._clients.add(ws)
 
     def unregister_client(self, ws: Any) -> None:
         try:
             self._clients.discard(ws)
+            self._option_clients.discard(ws)
         except Exception:
             pass
 
@@ -289,7 +473,75 @@ class BreezeSocketService:
             except Exception:
                 pass
 
+    async def _broadcast_options(self, payload: Dict[str, Any]) -> None:
+        """Broadcast only to option clients."""
+        data = json.dumps(payload)
+        coros = []
+        for ws in list(self._option_clients):
+            try:
+                coros.append(ws.send_text(data))
+            except Exception:
+                # Drop dead clients lazily
+                self._option_clients.discard(ws)
+        if coros:
+            try:
+                await asyncio.gather(*coros, return_exceptions=True)
+            except Exception:
+                pass
+
+    def unsubscribe_all_options(self) -> None:
+        """Unsubscribe all option-related subscriptions."""
+        svc = self._breeze
+        if not svc:
+            return
+        
+        option_subs = {k: v for k, v in self._subscriptions.items() 
+                      if v.get("product_type") == "options"}
+        
+        for alias, sub in option_subs.items():
+            try:
+                svc.client.unsubscribe_feeds(
+                    exchange_code=sub.get("exchange_code", "NFO"),
+                    stock_code=sub.get("stock_code", "NIFTY"),
+                    expiry_date=sub.get("expiry_date"),
+                    strike_price=sub.get("strike_price"),
+                    right=sub.get("right"),
+                    product_type="options",
+                    get_market_depth=False,
+                    get_exchange_quotes=True
+                )
+            except Exception as exc:
+                log_exception(exc, context="BreezeSocketService.unsubscribe_all_options", alias=alias)
+            finally:
+                self._subscriptions.pop(alias, None)
+
+    def unsubscribe_options_except(self, expiry_date_iso: str) -> None:
+        """Unsubscribe option subs for expiries other than expiry_date_iso (YYYY-MM-DD)."""
+        svc = self._breeze
+        if not svc:
+            return
+        keep = (expiry_date_iso or '').strip()[:10]
+        option_subs = {k: v for k, v in self._subscriptions.items() if v.get("product_type") == "options"}
+        for alias, sub in option_subs.items():
+            exp = (sub.get("expiry_date") or '').strip()
+            exp10 = exp[:10]
+            if exp10 and exp10 == keep:
+                continue
+            try:
+                svc.client.unsubscribe_feeds(
+                    exchange_code=sub.get("exchange_code", "NFO"),
+                    stock_code=sub.get("stock_code", "NIFTY"),
+                    expiry_date=sub.get("expiry_date"),
+                    strike_price=sub.get("strike_price"),
+                    right=sub.get("right"),
+                    product_type="options",
+                    get_market_depth=False,
+                    get_exchange_quotes=True
+                )
+            except Exception as exc:
+                log_exception(exc, context="BreezeSocketService.unsubscribe_options_except", alias=alias)
+            finally:
+                self._subscriptions.pop(alias, None)
+
 
 STREAM_MANAGER = BreezeSocketService()
-
-
