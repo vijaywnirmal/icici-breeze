@@ -19,21 +19,29 @@ router = APIRouter(prefix="/api", tags=["home"])
 
 @router.get("/instruments/status")
 def instruments_status() -> Dict[str, Any]:
-    """Return static list of indices supported for streaming (MVP)."""
-
-    indices: List[Dict[str, str]] = [
-        {
-            "display_name": "NIFTY 50",
-            "stock_code": "NIFTY",
-            "exchange_code": "NSE",
-            "product_type": "cash",
+    """Return dynamic list of indices supported for streaming."""
+    try:
+        # Get indices from Breeze service if available
+        breeze = get_breeze()
+        if breeze and hasattr(breeze, 'get_indices'):
+            indices = breeze.get_indices()
+        else:
+            # Fallback to empty list if no Breeze service
+            indices = []
+        
+        return {
+            "indices": indices,
+            "last_updated": datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")).isoformat(),
+            "source": "breeze_api" if breeze else "no_data",
         }
-    ]
-    return {
-        "indices": indices,
-        "last_updated": datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")).isoformat(),
-        "source": "MVP-static",
-    }
+    except Exception as exc:
+        log_exception(exc, context="home.instruments_status")
+        return {
+            "indices": [],
+            "last_updated": datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")).isoformat(),
+            "source": "error",
+            "error": str(exc)
+        }
 
 
 

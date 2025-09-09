@@ -8,7 +8,6 @@ import BacktestPage from './pages/Backtest.jsx'
 import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
 import LiveTrading from './pages/LiveTrading.jsx'
-import Sidebar from './components/Sidebar.jsx'
 import TickerBar from './components/TickerBar.jsx'
 import CustomerProfile from './components/CustomerProfile.jsx'
 import './styles.css'
@@ -26,58 +25,43 @@ createRoot(document.getElementById('root')).render(
 				</div>
 			} />
 			<Route path="/holidays" element={
-				<div className="layout">
-					<Sidebar />
-					<div className="main-content">
-						<div className="ticker-container">
-							<TickerBar />
-						</div>
-						<HolidaysPage />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<HolidaysPage />
 				</div>
 			} />
 			<Route path="/backtest" element={
-				<div className="layout">
-					<Sidebar />
-					<div className="main-content">
-						<div className="ticker-container">
-							<TickerBar />
-						</div>
-						<BacktestPage />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<BacktestPage />
 				</div>
 			} />
 			<Route path="/builder" element={
-				<div className="layout">
-					<Sidebar />
-					<div className="main-content">
-						<div className="ticker-container">
-							<TickerBar />
-						</div>
-						<StrategyBuilder />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<StrategyBuilder />
 				</div>
 			} />
 			<Route path="/results" element={
-				<div className="layout">
-					<Sidebar />
-					<div className="main-content">
-						<div className="ticker-container">
-							<TickerBar />
-						</div>
-						<BacktestResults />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<BacktestResults />
 				</div>
 			} />
 			<Route path="/live-trading" element={
-				<div className="layout">
-					<Sidebar />
-					<div className="main-content">
-						<div className="ticker-container">
-							<TickerBar />
-						</div>
-						<LiveTrading />
+				<div className="full-screen-layout">
+					<div className="ticker-container">
+						<TickerBar />
 					</div>
+					<LiveTrading />
 				</div>
 			} />
 			<Route path="*" element={<Navigate to="/" replace />} />

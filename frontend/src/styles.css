@@ -7,10 +7,12 @@
 	--bg: #0a0a0a;
 	--panel: #111111;
 	--panel-hover: #1a1a1a;
+	--panel-light: #1a1a1a;
 	--text: #ffffff;
 	--text-secondary: #a0a0a0;
 	--text-muted: #666666;
 	--accent: #2563eb;
+	--accent-strong: #1d4ed8;
 	--success: #10b981;
 	--danger: #ef4444;
 	--warning: #f59e0b;
@@ -28,16 +30,36 @@
 	--font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 	--font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
 	
-	/* Spacing */
+	/* Spacing - Perfect 8px grid system */
 	--space-1: 4px;
 	--space-2: 8px;
 	--space-3: 12px;
 	--space-4: 16px;
+	--space-5: 20px;
 	--space-6: 24px;
 	--space-8: 32px;
+	--space-10: 40px;
+	--space-12: 48px;
+	--space-16: 64px;
+	--space-20: 80px;
+	--space-24: 96px;
 	
 	/* Border Radius */
 	--radius: 6px;
+	--radius-sm: 4px;
+	--radius-lg: 8px;
+	--radius-xl: 12px;
+	
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+	
+	/* Transitions */
+	--transition-fast: 0.15s ease;
+	--transition-normal: 0.2s ease;
+	--transition-slow: 0.3s ease;
 }
 
 /* Hide scrollbar for ticker */
@@ -110,14 +132,15 @@ p {
 	margin: 0 0 var(--space-4);
 }
 
-/* Form Elements */
+/* Form Elements - Using Design System */
 label {
 	display: block;
-	margin: var(--space-4) 0 var(--space-2);
+	margin-bottom: var(--space-2);
 	color: var(--text);
 	font-family: var(--font-sans);
 	font-size: 14px;
 	font-weight: 500;
+	line-height: 1.4;
 }
 
 input[type="text"],
@@ -125,6 +148,9 @@ input[type="password"],
 input[type="email"],
 input[type="number"],
 input[type="date"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
 select,
 textarea {
 	width: 100%;
@@ -137,7 +163,8 @@ textarea {
 	font-family: var(--font-sans);
 	font-size: 14px;
 	outline: none;
-	transition: border-color 0.2s ease;
+	transition: var(--transition-normal);
+	box-sizing: border-box;
 }
 
 input[type="text"]:focus,
@@ -145,12 +172,47 @@ input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="number"]:focus,
 input[type="date"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
 select:focus,
 textarea:focus {
 	border-color: var(--accent);
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Button Styles */
+input[type="text"]:disabled,
+input[type="password"]:disabled,
+input[type="email"]:disabled,
+input[type="number"]:disabled,
+input[type="date"]:disabled,
+input[type="search"]:disabled,
+input[type="tel"]:disabled,
+input[type="url"]:disabled,
+select:disabled,
+textarea:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background: var(--panel-hover);
+}
+
+textarea {
+	height: auto;
+	min-height: var(--size-lg);
+	padding: var(--space-3);
+	resize: vertical;
+}
+
+select {
+	cursor: pointer;
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+	background-position: right var(--space-3) center;
+	background-repeat: no-repeat;
+	background-size: 16px;
+	padding-right: var(--space-10);
+}
+
+/* Button Styles - Using Design System */
 button[type="submit"], 
 .btn,
 button {
@@ -164,20 +226,31 @@ button {
 	font-weight: 500;
 	font-size: 14px;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: var(--transition-normal);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: var(--space-2);
-	margin-top: var(--space-6);
-	width: 100%;
+	text-decoration: none;
+	box-sizing: border-box;
+	position: relative;
+	overflow: hidden;
 }
 
 button[type="submit"]:hover, 
 .btn:hover,
 button:hover { 
-	background: var(--panel-hover);
-	color: var(--accent);
+	background: var(--accent-strong);
+	border-color: var(--accent-strong);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-md);
+}
+
+button[type="submit"]:active, 
+.btn:active,
+button:active {
+	transform: translateY(0);
+	box-shadow: var(--shadow-sm);
 }
 
 button[type="submit"]:disabled,
@@ -185,6 +258,15 @@ button[type="submit"]:disabled,
 button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+
+button[type="submit"]:focus,
+.btn:focus,
+button:focus {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* Button Variants */
@@ -508,9 +590,7 @@ button:disabled {
 
 /* Customer Profile Styles */
 .customer-profile {
-	position: absolute;
-	top: 20px;
-	right: 20px;
+	position: relative;
 	z-index: 100;
 }
 

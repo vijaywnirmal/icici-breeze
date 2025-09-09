@@ -10,7 +10,7 @@ export default function GenericOptionChainGrid({
 	const [optionData, setOptionData] = useState({ calls: [], puts: [], underlying: null })
 	const [expiryDates, setExpiryDates] = useState([])
 	const [selectedExpiry, setSelectedExpiry] = useState('')
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(true) // Start with loading true
 	const [error, setError] = useState('')
 	const [underlyingPrice, setUnderlyingPrice] = useState(realUnderlyingPrice ? { last_price: realUnderlyingPrice, close: realUnderlyingPrice } : null)
 	const [selectedStrike, setSelectedStrike] = useState(null)
@@ -27,8 +27,49 @@ export default function GenericOptionChainGrid({
 	const [flashTick, setFlashTick] = useState(0)
 	const [userSelectedExpiry, setUserSelectedExpiry] = useState(false)
 	const [didAutoSubscribe, setDidAutoSubscribe] = useState(false)
+	const currentExpiryRef = useRef('')
+	const subscriptionIdRef = useRef(0)
 
 	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+
+	// Robust date conversion function
+	const convertToISODate = (dateStr) => {
+		if (!dateStr || typeof dateStr !== 'string') return ''
+		
+		// Handle ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ)
+		if (dateStr.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+			// Extract just the date part (YYYY-MM-DD)
+			const datePart = dateStr.slice(0, 10)
+			console.log('🔍 convertToISODate:', { input: dateStr, output: datePart })
+			return datePart
+		}
+		
+		// Handle DD-Mon-YYYY format
+		if (dateStr.includes('-') && dateStr.split('-').length === 3) {
+			const parts = dateStr.split('-')
+			if (parts.length === 3 && parts[1].length === 3) {
+				const [dd, mon, yyyy] = parts
+				const months = {
+					Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+					Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
+				}
+				if (months[mon]) {
+					return `${yyyy}-${months[mon]}-${dd.padStart(2, '0')}`
+				}
+			}
+		}
+		
+		// Handle DD/MM/YYYY format
+		if (dateStr.includes('/') && dateStr.split('/').length === 3) {
+			const parts = dateStr.split('/')
+			if (parts.length === 3) {
+				const [dd, mm, yyyy] = parts
+				return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`
+			}
+		}
+		
+		return dateStr.slice(0, 10) // Fallback to first 10 characters
+	}
 
 	// Update underlying price when real price changes
 	useEffect(() => {
@@ -47,29 +88,81 @@ export default function GenericOptionChainGrid({
 		}
 	}, [isVisible])
 
-	// Load option chain when component becomes visible or underlying price changes
-	useEffect(() => {
-		if (isVisible) {
-			loadOptionChain()
-		}
-	}, [isVisible, selectedExpiry])
-
-	// Trigger subscription when expiry changes
+	// Load option chain when component becomes visible or expiry changes
 	useEffect(() => {
 		if (isVisible && selectedExpiry) {
+			console.log('🔄 Expiry changed to:', selectedExpiry)
+			console.log('🔄 Raw selectedExpiry type:', typeof selectedExpiry, 'value:', selectedExpiry)
+			
+			// Update current expiry ref and increment subscription ID immediately
+			currentExpiryRef.current = selectedExpiry
+			subscriptionIdRef.current += 1
+			
+		// Clear all option data and reset state completely FIRST
+		// But keep the underlying price to prevent blank screen
+		const currentUnderlying = optionData.underlying || underlyingPrice
+		setOptionData({ 
+			calls: [], 
+			puts: [], 
+			underlying: currentUnderlying, 
+			expiry_date: selectedExpiry 
+		})
+			
+			// Clear all cached data immediately
+			lastLtpRef.current.clear()
+			flashRef.current.clear()
+			pendingMiniRef.current.clear()
+			aliasToSideStrike.current.clear()
+			
+			// Reset subscription flags
+			tokenSubscribed.current = false
+			setDidAutoSubscribe(false)
+			
 			// Unsubscribe previous option subscriptions (if any)
 			try {
 				if (wsRef.current && wsRef.current.readyState === 1) {
 					wsRef.current.send(JSON.stringify({ action: 'unsubscribe_options' }))
+					console.log('📤 Sent unsubscribe message for previous expiry')
+					
+					// Listen for unsubscribe confirmation
+					const handleUnsubscribeResponse = (event) => {
+						const data = JSON.parse(event.data)
+						if (data.type === 'unsubscribed') {
+							console.log('✅ Unsubscribe confirmed:', data.message)
+							wsRef.current.removeEventListener('message', handleUnsubscribeResponse)
+						}
+					}
+					wsRef.current.addEventListener('message', handleUnsubscribeResponse)
 				}
-			} catch {}
-			// Reset and clear current rows to avoid mixing expiries
-			tokenSubscribed.current = false
-			setDidAutoSubscribe(false)
-			setOptionData((prev) => ({ ...prev, calls: [], puts: [], expiry_date: selectedExpiry }))
-			// Subscription will occur after fresh data loads
+			} catch (e) {
+				console.error('❌ Error unsubscribing:', e)
+			}
+			
+			// Load fresh option chain data for the new expiry
+			console.log('📥 Loading option chain for expiry:', selectedExpiry)
+			loadOptionChain()
+			
+			// Trigger subscription after a longer delay to ensure unsubscription is processed
+			setTimeout(() => {
+				console.log('🚀 Triggering immediate subscription for expiry:', selectedExpiry)
+				console.log('🔍 Current state before subscription:', {
+					tokenSubscribed: tokenSubscribed.current,
+					didAutoSubscribe: didAutoSubscribe,
+					currentExpiry: currentExpiryRef.current,
+					selectedExpiry: selectedExpiry
+				})
+				trySubscribeOptionChain()
+			}, 800)
+			
+			// Fallback: If no data appears after 3 seconds, try to reload
+			setTimeout(() => {
+				if (optionData.calls.length === 0 && optionData.puts.length === 0) {
+					console.log('⚠️ No data after 3 seconds, attempting reload...')
+					loadOptionChain()
+				}
+			}, 3000)
 		}
-	}, [selectedExpiry])
+	}, [isVisible, selectedExpiry])
 
 	// WS connect/disconnect lifecycle
 	useEffect(() => {
@@ -84,20 +177,21 @@ export default function GenericOptionChainGrid({
 		const ws = new WebSocket(wsUrl)
 		wsRef.current = ws
 		ws.onopen = () => {
+			console.log('🔌 Options WebSocket connected')
 			// Subscribe immediately if we have context; else retry shortly
 			try {
 				if (selectedExpiry) {
-					if ((optionData.calls || []).length > 0 || (optionData.puts || []).length > 0) {
-						subscribeToOptions()
-					} else {
-						setTimeout(() => {
-							if (wsRef.current && wsRef.current.readyState === 1) {
-								subscribeToOptions()
-							}
-						}, 600)
-					}
+					console.log('🎯 WebSocket opened with selected expiry:', selectedExpiry)
+					// Trigger subscription after a short delay to ensure everything is ready
+					setTimeout(() => {
+						if (wsRef.current && wsRef.current.readyState === 1) {
+							trySubscribeOptionChain()
+						}
+					}, 300)
 				}
-			} catch {}
+			} catch (e) {
+				console.error('❌ Error in WebSocket onopen:', e)
+			}
 		}
 		ws.onmessage = (ev) => {
 			try {
@@ -122,28 +216,81 @@ export default function GenericOptionChainGrid({
 				// Prefer alias mapping, else derive using option fields
 				const sym = String(data.symbol || '')
 				const alias = sym.includes('|') ? sym : null
-				// Filter ticks not matching the selected expiry
-				if (selectedExpiry) {
-					let tickExpRaw = String(data.expiry_date || '')
-					if ((!tickExpRaw || tickExpRaw.length < 9) && alias) {
-						const ap = alias.split('|')
-						if (ap.length >= 2) tickExpRaw = ap[1]
-					}
-					let isoTickExp = tickExpRaw
-					// Convert 'DD-Mon-YYYY' to 'YYYY-MM-DD', or keep ISO
-					if (tickExpRaw && tickExpRaw.includes('-') && tickExpRaw.split('-').length === 3 && tickExpRaw.length >= 9 && tickExpRaw.length <= 20) {
-						const parts = tickExpRaw.split('-')
-						if (parts[1] && parts[1].length === 3) {
-							const [dd, mon, yyyy] = parts
-							const months = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' }
-							if (months[mon]) isoTickExp = `${yyyy}-${months[mon]}-${dd}`
-						}
-					}
-					const selDate = selectedExpiry.slice(0,10)
-					if (isoTickExp && isoTickExp.slice(0,10) !== selDate) {
-						return
+				// Robust expiry filtering with multiple validation layers
+				const currentExpiry = currentExpiryRef.current || selectedExpiry
+				if (!currentExpiry) {
+					console.log('❌ No current expiry set, ignoring tick')
+					return
+				}
+				
+				// Check if this message belongs to the current subscription
+				const messageSubscriptionId = data.subscription_id || 0
+				const currentSubscriptionId = subscriptionIdRef.current
+				if (messageSubscriptionId > 0 && messageSubscriptionId !== currentSubscriptionId) {
+					console.log('❌ Message from old subscription, ignoring:', {
+						messageId: messageSubscriptionId,
+						currentId: currentSubscriptionId
+					})
+					return
+				}
+				
+				// Extract expiry from multiple possible sources
+				let tickExpiry = ''
+				
+				// Try direct expiry_date field first
+				if (data.expiry_date) {
+					tickExpiry = convertToISODate(String(data.expiry_date))
+				}
+				
+				// Try alias-based expiry extraction
+				if (!tickExpiry && alias) {
+					const aliasParts = alias.split('|')
+					if (aliasParts.length >= 2) {
+						tickExpiry = convertToISODate(aliasParts[1])
 					}
 				}
+				
+				// Try symbol-based expiry extraction (fallback)
+				if (!tickExpiry && data.symbol && data.symbol.includes('|')) {
+					const symbolParts = data.symbol.split('|')
+					if (symbolParts.length >= 2) {
+						tickExpiry = convertToISODate(symbolParts[1])
+					}
+				}
+				
+				// Convert current expiry to comparable format
+				const currentExpiryDate = convertToISODate(currentExpiry)
+				
+				// Debug logging for expiry comparison
+				console.log('🔍 Expiry comparison:', {
+					rawCurrentExpiry: currentExpiry,
+					currentExpiryDate: currentExpiryDate,
+					rawTickExpiry: tickExpiry,
+					rawSymbol: data.symbol,
+					alias: alias,
+					expiry_date: data.expiry_date,
+					matches: tickExpiry === currentExpiryDate
+				})
+				
+				// Strict expiry validation
+				if (!tickExpiry || tickExpiry !== currentExpiryDate) {
+					console.log('❌ Expiry mismatch - ignoring tick:', {
+						currentExpiry: currentExpiryDate,
+						tickExpiry: tickExpiry,
+						alias: alias,
+						symbol: data.symbol,
+						expiry_date: data.expiry_date,
+						rawSymbol: data.symbol
+					})
+					return
+				}
+				
+				// Additional debug logging for successful matches
+				console.log('✅ Tick passed expiry validation:', {
+					currentExpiry: currentExpiryDate,
+					tickExpiry: tickExpiry,
+					symbol: data.symbol
+				})
 				let side, strike
 				if (alias && aliasToSideStrike.current.has(alias)) {
 					({ side, strike } = aliasToSideStrike.current.get(alias))
@@ -282,6 +429,7 @@ export default function GenericOptionChainGrid({
 
 	const loadExpiryDates = async () => {
 		try {
+			setLoading(true)
 			const response = await fetch(`${apiBase}/api/option-chain/expiry-dates?index=${indexConfig.symbol}`)
 			const data = await response.json()
 			if (data.success) {
@@ -293,6 +441,8 @@ export default function GenericOptionChainGrid({
 			}
 		} catch (err) {
 			console.error('Failed to load expiry dates:', err)
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -309,6 +459,7 @@ export default function GenericOptionChainGrid({
 	}
 
 	const loadOptionChain = async () => {
+		console.log('🚀 loadOptionChain called with expiry:', selectedExpiry)
 		setLoading(true)
 		setError('')
 		
@@ -318,18 +469,57 @@ export default function GenericOptionChainGrid({
 			if (selectedExpiry) params.set('expiry_date', selectedExpiry)
 			if (realUnderlyingPrice) params.set(`${indexConfig.symbol.toLowerCase()}_price`, String(realUnderlyingPrice))
 			const qs = params.toString() ? `?${params.toString()}` : ''
-			const response = await fetch(`${apiBase}${indexConfig.apiEndpoint}${qs}`)
+			const url = `${apiBase}${indexConfig.apiEndpoint}${qs}`
+			console.log('📡 Fetching option chain from:', url)
+			const response = await fetch(url)
 			const data = await response.json()
+			console.log('📊 Option chain response:', data)
 			
 			if (data.success) {
-				// Temporarily set raw data; will prune to ATM below
+				// Create initial option data structure with empty strikes
+				const currentUnderlying = (underlyingPrice?.last_price || underlyingPrice?.close || indexConfig.defaultPrice || 0)
+				let initialStrikes = []
+				
+				if (indexConfig.symbol === 'NIFTY' || indexConfig.symbol === 'FINNIFTY') {
+					const base = Math.round(currentUnderlying / 50) * 50
+					initialStrikes = [base - 150, base - 100, base - 50, base, base + 50, base + 100, base + 150]
+				} else if (indexConfig.symbol === 'BANKNIFTY') {
+					const base = Math.round(currentUnderlying / 100) * 100
+					initialStrikes = [base - 300, base - 200, base - 100, base, base + 100, base + 200, base + 300]
+				} else {
+					const base = Math.round(currentUnderlying / 50) * 50
+					initialStrikes = [base - 150, base - 100, base - 50, base, base + 50, base + 100, base + 150]
+				}
+				
+				// Create initial empty option data
+				const initialCalls = initialStrikes.map(strike => ({
+					strike_price: strike,
+					last_price: null,
+					ltp: null,
+					volume: 0,
+					open_interest: 0,
+					oi: 0,
+					change_pct: null
+				}))
+				
+				const initialPuts = initialStrikes.map(strike => ({
+					strike_price: strike,
+					last_price: null,
+					ltp: null,
+					volume: 0,
+					open_interest: 0,
+					oi: 0,
+					change_pct: null
+				}))
+				
 				setOptionData({
-					calls: data.calls || [],
-					puts: data.puts || [],
+					calls: initialCalls,
+					puts: initialPuts,
 					underlying: data.underlying,
 					expiry_date: data.expiry_date
 				})
 				setLastUpdate(new Date())
+				console.log('📊 Created initial option data with strikes:', initialStrikes)
 				
 				// Ensure we have an expiry selected before subscribing
 				if ((!selectedExpiry || selectedExpiry === '') && data.expiry_date) {
@@ -416,8 +606,11 @@ export default function GenericOptionChainGrid({
 				})
 				// Auto-subscribe after fresh data arrives for this expiry
 				if (!didAutoSubscribe && selectedExpiry) {
-					trySubscribeOptionChain()
-					setDidAutoSubscribe(true)
+					// Small delay to ensure data is fully loaded
+					setTimeout(() => {
+						trySubscribeOptionChain()
+						setDidAutoSubscribe(true)
+					}, 100)
 				}
 			} else {
 				// Avoid clearing current grid if we already have data; surface soft error
@@ -435,14 +628,26 @@ export default function GenericOptionChainGrid({
 		}
 	}
 
-	function trySubscribeOptionChain() {
-		if (!wsRef.current || wsRef.current.readyState !== 1) return
-		if (tokenSubscribed.current) return
+	async function trySubscribeOptionChain() {
+		if (!wsRef.current || wsRef.current.readyState !== 1) {
+			console.log('❌ WebSocket not ready for subscription')
+			return
+		}
+		if (tokenSubscribed.current) {
+			console.log('❌ Already subscribed, skipping')
+			return
+		}
 		
-		// Get the current expiry date (prefer selected, fallback to API-provided)
-		const currentExpiry = selectedExpiry || optionData.expiry_date
+		// Get the current expiry date with strict validation
+		const currentExpiry = currentExpiryRef.current || selectedExpiry || optionData.expiry_date
+		
+		// Check if we're already subscribed to this exact expiry
+		if (currentExpiry && optionData.expiry_date === currentExpiry) {
+			console.log('❌ Already subscribed to this expiry:', currentExpiry)
+			return
+		}
 		if (!currentExpiry) {
-			console.warn('No expiry date available for subscription')
+			console.warn('❌ No expiry date available for subscription')
 			// Retry shortly; expiry often arrives right after initial grid load
 			setTimeout(() => {
 				trySubscribeOptionChain()
@@ -450,53 +655,89 @@ export default function GenericOptionChainGrid({
 			return
 		}
 		
-		// Get only ATM strike from current data
-		const allStrikes = [...new Set([...optionData.calls, ...optionData.puts].map(r => r.strike_price))]
-		const currentUnderlying = (underlyingPrice?.last_price || underlyingPrice?.close || 0)
-		let atm = null
-		let bestDiff = Infinity
-		for (const s of allStrikes) {
-			const d = Math.abs(Number(s) - Number(currentUnderlying))
-			if (d < bestDiff) { atm = s; bestDiff = d }
+		// Validate that the expiry hasn't changed since we started this subscription
+		if (currentExpiryRef.current && currentExpiryRef.current !== currentExpiry) {
+			console.log('❌ Expiry changed during subscription, aborting:', {
+				expected: currentExpiryRef.current,
+				actual: currentExpiry
+			})
+			return
 		}
+		
+		// Calculate strikes based on underlying price and index config
+		const currentUnderlying = (underlyingPrice?.last_price || underlyingPrice?.close || indexConfig.defaultPrice || 0)
 		let strikes = []
-		if (atm != null) {
-			const base = Math.round(Number(atm))
-			const step = 50
+		
+		if (indexConfig.symbol === 'NIFTY' || indexConfig.symbol === 'FINNIFTY') {
+			// 50-point intervals for NIFTY and FINNIFTY
+			const base = Math.round(currentUnderlying / 50) * 50
+			strikes = [base - 150, base - 100, base - 50, base, base + 50, base + 100, base + 150]
+		} else if (indexConfig.symbol === 'BANKNIFTY') {
+			// 100-point intervals for BANKNIFTY
+			const base = Math.round(currentUnderlying / 100) * 100
+			strikes = [base - 300, base - 200, base - 100, base, base + 100, base + 200, base + 300]
+		} else {
+			// Default to 50-point intervals
+			const base = Math.round(currentUnderlying / 50) * 50
 			strikes = [base - 150, base - 100, base - 50, base, base + 50, base + 100, base + 150]
 		}
+		
+		console.log('🎯 Calculated strikes for subscription:', {
+			strikes: strikes,
+			underlying: currentUnderlying,
+			expiry: currentExpiry,
+			indexConfig: indexConfig.symbol
+		})
+		
 		if (strikes.length === 0) {
-			console.warn('No strikes available for subscription')
+			console.warn('❌ No strikes available for subscription')
 			return
 		}
 		
 		// Send subscription via WebSocket
 		try {
 			// Unsubscribe any leftovers then subscribe both sides
-			try { wsRef.current.send(JSON.stringify({ action: 'unsubscribe_options' })) } catch {}
+			try { 
+				wsRef.current.send(JSON.stringify({ action: 'unsubscribe_options' })) 
+				console.log('📤 Unsubscribed from previous option subscriptions')
+				// Add a small delay to ensure unsubscription is processed
+				await new Promise(resolve => setTimeout(resolve, 200))
+			} catch (e) {
+				console.error('❌ Error unsubscribing:', e)
+			}
+			
+			const subscriptionId = subscriptionIdRef.current
+			
+			// Subscribe to CALL options
 			wsRef.current.send(JSON.stringify({
 				action: 'subscribe_options',
 				underlying: indexConfig.symbol,
 				expiry_date: currentExpiry,
 				strikes: strikes,
-				right: 'call'
+				right: 'call',
+				subscription_id: subscriptionId
 			}))
+			
+			// Subscribe to PUT options
 			wsRef.current.send(JSON.stringify({
 				action: 'subscribe_options',
 				underlying: indexConfig.symbol,
 				expiry_date: currentExpiry,
 				strikes: strikes,
-				right: 'put'
+				right: 'put',
+				subscription_id: subscriptionId
 			}))
 			
 			tokenSubscribed.current = true
-			console.log('Option chain subscription sent:', { 
+			console.log('✅ Option chain subscription sent:', {
 				underlying: indexConfig.symbol, 
 				expiry_date: currentExpiry, 
-				strikes: strikes.length 
+				strikes: strikes.length,
+				strikes_list: strikes,
+				subscription_id: subscriptionId
 			})
 		} catch (error) {
-			console.error('Option chain subscription error:', error)
+			console.error('❌ Option chain subscription error:', error)
 		}
 	}
 
@@ -553,7 +794,7 @@ export default function GenericOptionChainGrid({
 	// Alignment helpers for numeric columns
 	const innerColsTemplate = '88px 88px 64px'
 	const numCellStyle = {
-		textAlign: 'right',
+		textAlign: 'center',
 		fontVariantNumeric: 'tabular-nums',
 		fontFeatureSettings: 'tnum'
 	}
@@ -622,6 +863,18 @@ export default function GenericOptionChainGrid({
 								<span style={{ color: '#9aa4b2', fontSize: '14px' }}>
 									Underlying: <strong style={{ color: '#e6e9ef' }}>₹{formatPrice(underlyingPrice.last_price || underlyingPrice.close)}</strong>
 								</span>
+								{selectedExpiry && (
+									<span style={{ 
+										color: '#57d38c', 
+										fontSize: '14px',
+										backgroundColor: 'rgba(87, 211, 140, 0.1)',
+										padding: '4px 8px',
+										borderRadius: '4px',
+										border: '1px solid rgba(87, 211, 140, 0.3)'
+									}}>
+										📅 Expiry: {new Date(selectedExpiry).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+									</span>
+								)}
 								{lastUpdate && (
 									<span style={{
 										color: '#9aa4b2',
@@ -712,9 +965,25 @@ export default function GenericOptionChainGrid({
 					backgroundColor: '#0b0f14',
 					opacity: 1
 				}}>
+					{/* Loading/Empty State */}
+					{(loading || !selectedExpiry) && (
+						<div style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>
+							{!selectedExpiry ? 'Loading expiry dates...' : 'Loading option chain data...'}
+						</div>
+					)}
+					
+					{!loading && selectedExpiry && optionData.calls.length === 0 && optionData.puts.length === 0 && (
+						<div style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>
+							<div>No option data available for selected expiry</div>
+							<div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
+								Please select a different expiry date
+							</div>
+						</div>
+					)}
+					
 					{/* Fixed Headers */}
 					<div style={{
-						display: 'grid',
+						display: (!loading && selectedExpiry && (optionData.calls.length > 0 || optionData.puts.length > 0)) ? 'grid' : 'none',
 						gridTemplateColumns: '1fr 1px 96px 1px 1fr',
 						gap: '0',
 						fontSize: '12px',
@@ -746,6 +1015,7 @@ export default function GenericOptionChainGrid({
 								display: 'grid',
 								gridTemplateColumns: innerColsTemplate,
 								gap: '1px',
+								alignItems: 'center',
 								padding: '8px 0',
 								backgroundColor: 'rgba(87, 211, 140, 0.08)',
 								fontSize: '12px',
@@ -807,6 +1077,7 @@ export default function GenericOptionChainGrid({
 								display: 'grid',
 								gridTemplateColumns: innerColsTemplate,
 								gap: '1px',
+								alignItems: 'center',
 								padding: '8px 0',
 								backgroundColor: 'rgba(255, 92, 92, 0.08)',
 								fontSize: '12px',
@@ -843,17 +1114,33 @@ export default function GenericOptionChainGrid({
 							{optionData.calls.length > 0 && optionData.puts.length > 0 ? (
 							<>
 								{/* Data Rows */}
-								{optionData.calls.map((call, index) => {
-									const put = optionData.puts[index]
+								{optionData.calls
+									.map((call, index) => ({ call, put: optionData.puts[index], originalIndex: index }))
+									.filter(({ call, put }) => {
+										// Only show rows that have meaningful data
+										return call && put && (
+											call.ltp > 0 || call.oi > 0 || 
+											put.ltp > 0 || put.oi > 0 ||
+											call.strike_price || put.strike_price
+										)
+									})
+									.sort((a, b) => {
+										// Sort by strike price in ascending order (lowest to highest)
+										const strikeA = parseFloat(a.call.strike_price) || 0
+										const strikeB = parseFloat(b.call.strike_price) || 0
+										return strikeA - strikeB
+									})
+									.map(({ call, put, originalIndex }, index) => {
 									const currentUnderlying = underlyingPrice?.last_price || underlyingPrice?.close
 									return (
-										<React.Fragment key={index}>
+										<React.Fragment key={originalIndex}>
 											{/* Calls Data */}
 											<div
 												style={{
 													display: 'grid',
 													gridTemplateColumns: innerColsTemplate,
 													gap: '1px',
+													alignItems: 'center',
 													backgroundColor: isATMStrike(call.strike_price, currentUnderlying) 
 														? 'rgba(251, 191, 36, 0.15)' // Highlight ATM with yellow background
 														: 'rgba(255,255,255,0.02)',
@@ -861,9 +1148,9 @@ export default function GenericOptionChainGrid({
 													padding: '8px 0',
 													fontSize: '12px',
 													border: isATMStrike(call.strike_price, currentUnderlying)
-														? '1px solid rgba(251, 191, 36, 0.3)' // Yellow border for ATM
+														? '1px solid rgba(251, 191, 36, 0.5)' // Yellow border for ATM
 														: '1px solid rgba(87, 211, 140, 0.1)',
-													borderRight: 'none',
+													borderRight: isATMStrike(call.strike_price, currentUnderlying) ? '1px solid rgba(251, 191, 36, 0.5)' : 'none',
 													borderTop: 'none'
 												}}
 											>
@@ -915,10 +1202,10 @@ export default function GenericOptionChainGrid({
 													borderRadius: selectedStrike === call.strike_price ? '4px' : '0',
 													fontSize: '12px',
 													border: isATMStrike(call.strike_price, currentUnderlying)
-														? '1px solid rgba(251, 191, 36, 0.4)' // Yellow border for ATM
+														? '1px solid rgba(251, 191, 36, 0.5)' // Yellow border for ATM
 														: '1px solid rgba(255,255,255,0.1)',
-													borderLeft: 'none',
-													borderRight: 'none',
+													borderLeft: isATMStrike(call.strike_price, currentUnderlying) ? '1px solid rgba(251, 191, 36, 0.5)' : 'none',
+													borderRight: isATMStrike(call.strike_price, currentUnderlying) ? '1px solid rgba(251, 191, 36, 0.5)' : 'none',
 													borderTop: 'none'
 												}}
 											>
@@ -937,6 +1224,7 @@ export default function GenericOptionChainGrid({
 													display: 'grid',
 													gridTemplateColumns: innerColsTemplate,
 													gap: '1px',
+													alignItems: 'center',
 													backgroundColor: isATMStrike(put.strike_price, currentUnderlying) 
 														? 'rgba(251, 191, 36, 0.15)' // Highlight ATM with yellow background
 														: 'rgba(255,255,255,0.02)',
@@ -944,9 +1232,9 @@ export default function GenericOptionChainGrid({
 													padding: '8px 0',
 													fontSize: '12px',
 													border: isATMStrike(put.strike_price, currentUnderlying)
-														? '1px solid rgba(251, 191, 36, 0.3)' // Yellow border for ATM
+														? '1px solid rgba(251, 191, 36, 0.5)' // Yellow border for ATM
 														: '1px solid rgba(255, 92, 92, 0.1)',
-													borderLeft: 'none',
+													borderLeft: isATMStrike(put.strike_price, currentUnderlying) ? '1px solid rgba(251, 191, 36, 0.5)' : 'none',
 													borderTop: 'none'
 												}}
 											>

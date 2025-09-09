@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Card, CardHeader, CardContent } from '../components/ui/Card'
 import Button from '../components/ui/Button'
+import Typography from '../components/ui/Typography'
 import { useNavigate } from 'react-router-dom'
 
 export default function HomePage() {
@@ -77,10 +78,15 @@ export default function HomePage() {
 
 	if (loading) {
 		return (
-			<div className="content">
-				<Card>
+			<div className="content" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+				<Card variant="elevated">
 					<CardContent>
-						<div className="flex items-center justify-center py-12">
+						<div style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							padding: 'var(--space-12)'
+						}}>
 							<div className="spinner" style={{ width: '32px', height: '32px' }}></div>
 						</div>
 					</CardContent>
@@ -90,11 +96,11 @@ export default function HomePage() {
 	}
 
 	return (
-		<div style={{
-			flex: 1,
-			padding: 'var(--space-8)',
-			background: 'var(--bg)',
-			overflow: 'auto'
+		<div className="content" style={{
+			width: '100%',
+			maxWidth: '1200px',
+			margin: '0 auto',
+			padding: 'var(--space-8)'
 		}}>
 			{/* Header Section */}
 			<div style={{
@@ -104,23 +110,12 @@ export default function HomePage() {
 				marginBottom: 'var(--space-8)'
 			}}>
 				<div>
-					<h1 style={{ 
-						color: 'var(--text)', 
-						fontFamily: 'var(--font-sans)', 
-						fontSize: '32px',
-						fontWeight: 700,
-						marginBottom: 'var(--space-2)' 
-					}}>
+					<Typography variant="h1" style={{ marginBottom: 'var(--space-2)' }}>
 						{firstName ? `Welcome back, ${firstName}` : 'Breeze Trading Platform'}
-					</h1>
-					<p style={{ 
-						color: 'var(--text-secondary)', 
-						fontFamily: 'var(--font-sans)',
-						fontSize: '16px',
-						margin: 0
-					}}>
+					</Typography>
+					<Typography variant="body1" color="secondary" style={{ margin: 0 }}>
 						Your comprehensive trading and strategy development platform
-					</p>
+					</Typography>
 				</div>
 				
 				{/* Quick Links */}
@@ -131,7 +126,7 @@ export default function HomePage() {
 							variant="secondary"
 							size="sm"
 							onClick={link.action || (() => navigate(link.path))}
-							style={{ width: 'auto', marginTop: 0 }}
+							style={{ width: 'auto' }}
 						>
 							<span style={{ marginRight: 'var(--space-1)' }}>{link.icon}</span>
 							{link.title}
@@ -150,6 +145,7 @@ export default function HomePage() {
 				{mainFeatures.map((feature, index) => (
 					<Card
 						key={index}
+						variant="elevated"
 						style={{
 							cursor: 'pointer',
 							minHeight: '180px',
@@ -186,28 +182,14 @@ export default function HomePage() {
 										{feature.icon}
 									</div>
 									<div style={{ flex: 1 }}>
-										<h2 style={{
-											color: 'var(--text)',
-											fontFamily: 'var(--font-sans)',
-											fontSize: '24px',
-											fontWeight: 600,
-											marginBottom: 'var(--space-2)',
-											margin: 0
-										}}>
+										<Typography variant="h2" style={{ margin: 0 }}>
 											{feature.title}
-										</h2>
+										</Typography>
 									</div>
 								</div>
-								<p style={{
-									color: 'var(--text-secondary)',
-									fontFamily: 'var(--font-sans)',
-									fontSize: '16px',
-									lineHeight: 1.5,
-									margin: 0,
-									flex: 1
-								}}>
+								<Typography variant="body1" color="secondary" style={{ flex: 1, margin: 0 }}>
 									{feature.description}
-								</p>
+								</Typography>
 								<div style={{
 									display: 'flex',
 									alignItems: 'center',
@@ -218,7 +200,6 @@ export default function HomePage() {
 										size="sm"
 										style={{
 											width: 'auto',
-											marginTop: 0,
 											borderColor: feature.color,
 											color: feature.color
 										}}
@@ -244,25 +225,23 @@ export default function HomePage() {
 					{ title: 'Total Backtests', value: '12', color: 'var(--warning)' },
 					{ title: 'Success Rate', value: '78%', color: '#8b5cf6' }
 				].map((stat, index) => (
-					<Card key={index}>
+					<Card key={index} variant="elevated">
 						<CardContent>
 							<div style={{ textAlign: 'center', padding: 'var(--space-2)' }}>
-								<div style={{
-									fontSize: '28px',
-									fontWeight: 700,
-									color: stat.color,
-									fontFamily: 'var(--font-mono)',
-									marginBottom: 'var(--space-1)'
-								}}>
+								<Typography 
+									variant="h2" 
+									style={{ 
+										color: stat.color,
+										fontFamily: 'var(--font-mono)',
+										marginBottom: 'var(--space-1)',
+										fontSize: '28px'
+									}}
+								>
 									{stat.value}
-								</div>
-								<div style={{
-									fontSize: '14px',
-									color: 'var(--text-secondary)',
-									fontFamily: 'var(--font-sans)'
-								}}>
+								</Typography>
+								<Typography variant="caption" color="secondary">
 									{stat.title}
-								</div>
+								</Typography>
 							</div>
 						</CardContent>
 					</Card>

@@ -140,35 +140,6 @@ def evaluate_strategy(strategy: Strategy, data: Dict[str, pd.DataFrame]) -> pd.D
 	return df_sig
 
 
-# --- Example test harness ---
-def _build_example_data() -> Dict[str, pd.DataFrame]:
-	idx = pd.to_datetime([
-		"2024-01-01 09:15:00",
-		"2024-01-01 09:20:00",
-		"2024-01-01 09:25:00",
-	])
-	df_nifty = pd.DataFrame({
-		"RSI": [30.0, 18.0, 25.0],
-	}, index=idx)
-	df_opt = pd.DataFrame({
-		"RSI": [35.0, 19.0, 28.0],
-	}, index=idx)
-	return {"NIFTY": df_nifty, "NIFTY_OPTIONS": df_opt}
-
-
-def _example_strategy_and() -> Strategy:
-	from .strategy_schema import Strategy
-	return Strategy.from_dict(EXAMPLE_STRATEGY)
-
-
-def _run_example() -> pd.DataFrame:
-	data = _build_example_data()
-	strat = _example_strategy_and()
-	return evaluate_strategy(strat, data)
-
-
-if __name__ == "__main__":
-	df = _run_example()
-	print(df)
+# Test functions removed - use actual data and strategies instead
 
 

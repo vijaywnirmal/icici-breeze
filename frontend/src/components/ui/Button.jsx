@@ -64,12 +64,35 @@ export function Button({ children, as: As = 'button', variant = 'primary', size 
 				fontWeight: 500,
 				cursor: loading || props.disabled ? 'not-allowed' : 'pointer',
 				opacity: loading || props.disabled ? 0.5 : 1,
-				transition: 'all 0.2s ease',
+				transition: 'var(--transition-normal)',
+				textDecoration: 'none',
+				boxSizing: 'border-box',
+				position: 'relative',
+				overflow: 'hidden',
+				outline: 'none',
 				...getSizeStyles(),
 				...getVariantStyles(),
 				...props.style
 			}}
 			disabled={loading || props.disabled}
+			onMouseEnter={(e) => {
+				if (!loading && !props.disabled) {
+					e.target.style.transform = 'translateY(-1px)'
+					e.target.style.boxShadow = 'var(--shadow-md)'
+				}
+			}}
+			onMouseLeave={(e) => {
+				if (!loading && !props.disabled) {
+					e.target.style.transform = 'translateY(0)'
+					e.target.style.boxShadow = 'none'
+				}
+			}}
+			onFocus={(e) => {
+				e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'
+			}}
+			onBlur={(e) => {
+				e.target.style.boxShadow = 'none'
+			}}
 			{...props}
 		>
 			{loading && (

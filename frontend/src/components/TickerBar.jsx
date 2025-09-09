@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import GenericOptionChainGrid from './GenericOptionChainGrid'
+import CustomerProfile from './CustomerProfile'
 import { INDEX_CONFIGS } from '../config/indexConfigs'
 
 const WS_PATH = '/ws/stocks'
@@ -137,19 +138,7 @@ export default function TickerBar() {
 						setIndexData(prev => ({ ...prev, ...newIndexData }))
 					} else if (indexJson && !indexJson.success) {
 						console.log('Index data fetch failed:', indexJson.message)
-						// Set placeholder data to show the ticker structure
-						const placeholderData = {}
-						nseIndexes.forEach(index => {
-							placeholderData[index.token] = {
-								last: null,
-								change: null,
-								close: null,
-								stock_name: index.name,
-								timestamp: null,
-								status: 'no_data'
-							}
-						})
-						setIndexData(placeholderData)
+						// Don't set placeholder data - let the UI handle empty state gracefully
 					}
 					
 				}
@@ -313,6 +302,7 @@ export default function TickerBar() {
 				style={{
 					display: 'flex',
 					alignItems: 'center',
+					justifyContent: 'space-between',
 					background: 'var(--panel)',
 					border: '1px solid var(--border)',
 					borderRadius: 'var(--radius)',
@@ -323,6 +313,15 @@ export default function TickerBar() {
 					gap: 'var(--space-6)'
 				}}
 			>
+				{/* Index data */}
+				<div style={{
+					display: 'flex',
+					alignItems: 'center',
+					gap: 'var(--space-6)',
+					flex: 1,
+					overflowX: 'auto',
+					overflowY: 'hidden'
+				}}>
 				{nseIndexes.map((index, i) => {
 					const data = getIndexData(index.token)
 					const derived = getDerivedData(index.token)
@@ -391,13 +390,6 @@ export default function TickerBar() {
 											</div>
 										)}
 									</div>
-								) : data.status === 'no_data' ? (
-									<div style={{
-										fontSize: '12px',
-										color: '#9ca3af'
-									}}>
-										Login required
-									</div>
 								) : (
 									<div style={{
 										fontSize: '12px',
@@ -430,6 +422,10 @@ export default function TickerBar() {
 						</React.Fragment>
 					)
 				})}
+				</div>
+
+				{/* Profile Button */}
+				<CustomerProfile />
 			</div>
 
 			{/* Generic Option Chain Modal */}

@@ -1,5 +1,11 @@
 import React, { useMemo } from 'react'
 import { create } from 'zustand'
+import { Card, CardHeader, CardContent } from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Label from '../components/ui/Label'
+import Typography from '../components/ui/Typography'
 
 type Condition = {
 	indicator: string
@@ -94,86 +100,223 @@ export default function StrategyBuilder() {
 	}
 
 	return (
-		<div className="content card" style={{display:'grid', gridTemplateColumns:'1fr 420px', gap:16, width:'100%', maxWidth:1200}}>
-			<div>
-				<h1>Strategy Builder</h1>
-				<div className="grid" style={{gridTemplateColumns:'repeat(3, minmax(160px, 1fr))', gap:12}}>
-					<div>
-						<label>Name</label>
-						<input value={name} onChange={(e) => setMeta({ name: e.target.value })} />
+		<div className="content" style={{
+			display: 'grid',
+			gridTemplateColumns: '1fr 420px',
+			gap: 'var(--space-6)',
+			width: '100%',
+			maxWidth: '1200px',
+			margin: '0 auto'
+		}}>
+			{/* Main Strategy Builder */}
+			<Card variant="elevated">
+				<CardHeader>
+					<Typography variant="h1">Strategy Builder</Typography>
+				</CardHeader>
+				<CardContent>
+					{/* Strategy Meta Information */}
+					<div style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(3, 1fr)',
+						gap: 'var(--space-4)',
+						marginBottom: 'var(--space-8)'
+					}}>
+						<div>
+							<Label required>Strategy Name</Label>
+							<Input 
+								value={name} 
+								onChange={(e) => setMeta({ name: e.target.value })}
+								placeholder="Enter strategy name"
+							/>
+						</div>
+						<div>
+							<Label>Description</Label>
+							<Input 
+								value={description} 
+								onChange={(e) => setMeta({ description: e.target.value })}
+								placeholder="Enter description"
+							/>
+						</div>
+						<div>
+							<Label>Universe</Label>
+							<Select 
+								multiple 
+								value={universe} 
+								onChange={(e) => setMeta({ universe: Array.from(e.target.selectedOptions).map(o => o.value) })}
+							>
+								{symbols.map(s => <option key={s} value={s}>{s}</option>)}
+							</Select>
+						</div>
 					</div>
-					<div>
-						<label>Description</label>
-						<input value={description} onChange={(e) => setMeta({ description: e.target.value })} />
-					</div>
-					<div>
-						<label>Universe</label>
-						<select multiple value={universe} onChange={(e) => setMeta({ universe: Array.from(e.target.selectedOptions).map(o => o.value) })}>
-							{symbols.map(s => <option key={s} value={s}>{s}</option>)}
-						</select>
-					</div>
-				</div>
 
-				<h3 style={{marginTop:16, display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-					<span>Conditions</span>
-					<span style={{display:'inline-flex', gap:8}}>
-						<select onChange={(e) => e.target.value && loadTemplate(e.target.value)} defaultValue="">
-							<option value="" disabled>Choose a template…</option>
-							<option value="Moving Average Crossover">Moving Average Crossover</option>
-							<option value="RSI Overbought/Oversold">RSI Overbought/Oversold</option>
-							<option value="Breakout">Breakout</option>
-						</select>
-					</span>
-				</h3>
-				{conditions.map((c, idx) => (
-					<div key={idx} className="grid" style={{gridTemplateColumns:'repeat(5, minmax(120px, 1fr)) auto', gap:8, margin:'8px 0'}}>
-						<select value={c.indicator} onChange={(e) => updateCondition(idx, { indicator: e.target.value })}>
-							{indicators.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={c.symbol} onChange={(e) => updateCondition(idx, { symbol: e.target.value })}>
-							{symbols.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={c.timeframe} onChange={(e) => updateCondition(idx, { timeframe: e.target.value })}>
-							{timeframes.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={c.operator} onChange={(e) => updateCondition(idx, { operator: e.target.value })}>
-							{operators.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<input value={String(c.value)} onChange={(e) => updateCondition(idx, { value: e.target.value })} />
-						<button onClick={() => removeCondition(idx)}>Remove</button>
+					{/* Conditions Section */}
+					<div style={{ marginBottom: 'var(--space-8)' }}>
+						<div style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							marginBottom: 'var(--space-4)'
+						}}>
+							<Typography variant="h3">Conditions</Typography>
+							<div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+								<Select 
+									onChange={(e) => e.target.value && loadTemplate(e.target.value)} 
+									defaultValue=""
+									style={{ width: '200px' }}
+								>
+									<option value="" disabled>Choose a template…</option>
+									<option value="Moving Average Crossover">Moving Average Crossover</option>
+									<option value="RSI Overbought/Oversold">RSI Overbought/Oversold</option>
+									<option value="Breakout">Breakout</option>
+								</Select>
+							</div>
+						</div>
+						
+						{conditions.map((c, idx) => (
+							<Card key={idx} variant="default" style={{ marginBottom: 'var(--space-3)' }}>
+								<CardContent>
+									<div style={{
+										display: 'grid',
+										gridTemplateColumns: 'repeat(5, 1fr) auto',
+										gap: 'var(--space-3)',
+										alignItems: 'end'
+									}}>
+										<div>
+											<Label>Indicator</Label>
+											<Select value={c.indicator} onChange={(e) => updateCondition(idx, { indicator: e.target.value })}>
+												{indicators.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Symbol</Label>
+											<Select value={c.symbol} onChange={(e) => updateCondition(idx, { symbol: e.target.value })}>
+												{symbols.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Timeframe</Label>
+											<Select value={c.timeframe} onChange={(e) => updateCondition(idx, { timeframe: e.target.value })}>
+												{timeframes.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Operator</Label>
+											<Select value={c.operator} onChange={(e) => updateCondition(idx, { operator: e.target.value })}>
+												{operators.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Value</Label>
+											<Input 
+												value={String(c.value)} 
+												onChange={(e) => updateCondition(idx, { value: e.target.value })}
+												placeholder="Threshold"
+											/>
+										</div>
+										<Button 
+											variant="danger" 
+											size="sm" 
+											onClick={() => removeCondition(idx)}
+											style={{ height: 'var(--size-md)' }}
+										>
+											Remove
+										</Button>
+									</div>
+								</CardContent>
+							</Card>
+						))}
+						
+						<Button variant="outline" onClick={addCondition} style={{ width: 'auto' }}>
+							+ Add Condition
+						</Button>
 					</div>
-				))}
-				<button onClick={addCondition}>Add Condition</button>
 
-				<h3 style={{marginTop:16}}>Actions</h3>
-				{actions.map((a, idx) => (
-					<div key={idx} className="grid" style={{gridTemplateColumns:'repeat(5, minmax(120px, 1fr)) auto', gap:8, margin:'8px 0'}}>
-						<select value={a.signal} onChange={(e) => updateAction(idx, { signal: e.target.value as any })}>
-							{signals.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={a.instrument} onChange={(e) => updateAction(idx, { instrument: e.target.value })}>
-							{instruments.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={a.expiry} onChange={(e) => updateAction(idx, { expiry: e.target.value as any })}>
-							{expiries.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<select value={a.strike} onChange={(e) => updateAction(idx, { strike: e.target.value })}>
-							{strikes.map(x => <option key={x} value={x}>{x}</option>)}
-						</select>
-						<button onClick={() => removeAction(idx)}>Remove</button>
+					{/* Actions Section */}
+					<div style={{ marginBottom: 'var(--space-8)' }}>
+						<Typography variant="h3" style={{ marginBottom: 'var(--space-4)' }}>Actions</Typography>
+						
+						{actions.map((a, idx) => (
+							<Card key={idx} variant="default" style={{ marginBottom: 'var(--space-3)' }}>
+								<CardContent>
+									<div style={{
+										display: 'grid',
+										gridTemplateColumns: 'repeat(4, 1fr) auto',
+										gap: 'var(--space-3)',
+										alignItems: 'end'
+									}}>
+										<div>
+											<Label>Signal</Label>
+											<Select value={a.signal} onChange={(e) => updateAction(idx, { signal: e.target.value as any })}>
+												{signals.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Instrument</Label>
+											<Select value={a.instrument} onChange={(e) => updateAction(idx, { instrument: e.target.value })}>
+												{instruments.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Expiry</Label>
+											<Select value={a.expiry} onChange={(e) => updateAction(idx, { expiry: e.target.value as any })}>
+												{expiries.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<div>
+											<Label>Strike</Label>
+											<Select value={a.strike} onChange={(e) => updateAction(idx, { strike: e.target.value })}>
+												{strikes.map(x => <option key={x} value={x}>{x}</option>)}
+											</Select>
+										</div>
+										<Button 
+											variant="danger" 
+											size="sm" 
+											onClick={() => removeAction(idx)}
+											style={{ height: 'var(--size-md)' }}
+										>
+											Remove
+										</Button>
+									</div>
+								</CardContent>
+							</Card>
+						))}
+						
+						<Button variant="outline" onClick={addAction} style={{ width: 'auto' }}>
+							+ Add Action
+						</Button>
 					</div>
-				))}
-				<button onClick={addAction}>Add Action</button>
 
-				<div style={{marginTop:16}}>
-					<button onClick={onSave}>Save Strategy</button>
-				</div>
-			</div>
+					{/* Save Button */}
+					<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+						<Button variant="primary" onClick={onSave} size="lg">
+							💾 Save Strategy
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
 
-			<aside>
-				<h3>Preview JSON</h3>
-				<pre style={{whiteSpace:'pre-wrap', background:'#0f141d', padding:12, borderRadius:8, fontSize:12}}>{pretty}</pre>
-			</aside>
+			{/* JSON Preview Sidebar */}
+			<Card variant="elevated">
+				<CardHeader>
+					<Typography variant="h3">Preview JSON</Typography>
+				</CardHeader>
+				<CardContent>
+					<pre style={{
+						whiteSpace: 'pre-wrap',
+						background: 'var(--panel-hover)',
+						padding: 'var(--space-4)',
+						borderRadius: 'var(--radius)',
+						fontSize: '12px',
+						fontFamily: 'var(--font-mono)',
+						color: 'var(--text)',
+						border: '1px solid var(--border)',
+						overflow: 'auto',
+						maxHeight: '500px'
+					}}>
+						{pretty}
+					</pre>
+				</CardContent>
+			</Card>
 		</div>
 	)
 }

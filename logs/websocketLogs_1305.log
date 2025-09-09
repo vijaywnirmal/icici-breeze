@@ -4346,3 +4346,860 @@
 2025-09-08 15:48:52,397 - {'message': 'Stock NIFTY subscribed successfully'}
 2025-09-08 15:48:52,398 - {'message': 'Stock NIFTY subscribed successfully'}
 2025-09-08 15:48:52,399 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,364 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,366 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,366 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,367 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,368 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,368 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,369 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,380 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,381 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,381 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,382 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,383 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,383 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:28,384 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:31,131 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,132 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:31,133 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 04:35:33,875 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,876 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,877 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,878 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,879 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,880 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,881 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,896 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,899 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,899 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,900 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,900 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,901 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 04:35:33,901 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:25,123 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:20:31,290 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,291 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,292 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,292 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,293 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,293 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,293 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,295 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,295 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,296 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,296 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,297 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,297 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:20:31,298 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:26,264 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:24:27,680 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:24:50,622 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,624 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,625 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,626 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,626 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,627 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,628 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,630 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,630 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,631 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,631 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,632 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,632 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:24:50,633 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:25:06,776 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:26:32,880 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:26:41,074 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:26:42,191 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,192 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,193 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,194 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,195 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,196 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,196 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,198 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,199 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,200 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,200 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,201 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,202 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:26:42,202 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:27:51,187 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:28:09,097 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,099 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,100 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,101 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,101 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,102 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,103 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,104 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,105 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,105 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,107 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,110 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,113 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:09,114 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,677 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:11,678 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:28:22,902 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:30:57,203 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,206 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,208 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,210 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,212 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,213 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,215 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,218 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,219 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,221 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,222 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,223 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,225 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:57,226 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:30:59,113 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,113 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,114 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:30:59,115 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:02,382 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,383 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,385 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,386 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,387 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,388 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,389 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,391 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,392 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,393 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,393 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,394 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,395 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:02,396 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:31:08,249 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,249 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,249 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,250 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,251 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,252 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,252 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,252 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:31:08,252 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:32:57,902 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:32:59,967 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,968 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,968 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,969 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,970 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,971 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,971 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,980 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,982 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,984 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,985 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,986 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,987 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:32:59,987 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:33:05,356 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,356 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,356 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,357 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,358 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:33:05,359 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:34:18,413 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:34:22,423 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:35:05,434 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:35:05,435 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:35:05,436 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:35:05,436 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:35:05,442 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:35:05,456 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:35:05,461 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:35:35,498 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:36:02,924 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:36:02,925 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:36:02,926 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:36:02,926 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:36:02,927 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:40:26,736 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,737 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,738 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,739 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,739 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,740 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,740 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,741 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,742 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,743 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,744 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,745 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,746 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:26,746 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,599 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,600 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,602 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,602 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,602 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,602 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,602 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,603 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,604 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:34,802 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,802 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,803 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,803 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,804 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,804 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,805 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,805 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,806 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,806 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,807 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,807 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,808 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:34,808 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:39,912 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:40:39,913 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:40:39,913 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:40:39,915 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:40:39,929 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:40:41,093 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,093 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,094 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,095 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:41,210 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,210 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,211 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,212 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,213 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,214 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,215 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,219 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,219 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,220 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,221 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,221 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,222 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:41,222 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:43,738 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:40:43,739 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:40:43,739 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:40:43,740 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:40:43,746 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:40:45,018 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,019 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,020 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,021 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,021 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,021 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,021 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:40:45,163 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,163 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,164 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,165 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,165 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,166 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,167 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,169 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,170 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,170 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,171 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,172 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,172 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:40:45,173 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,431 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,431 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,431 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,431 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,431 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,432 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:43:40,648 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,649 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,651 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,652 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,653 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,654 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,655 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,657 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,658 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,659 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,660 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,661 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,662 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:43:40,662 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:34,479 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,480 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,480 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,480 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,480 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,480 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,481 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,482 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,483 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,483 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,483 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:34,483 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:47:36,382 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,384 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,386 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,389 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,392 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,395 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,396 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,399 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,401 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,402 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,404 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,405 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,405 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,406 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,408 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,409 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,410 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,410 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,411 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,412 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,413 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,414 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,415 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,416 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,416 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,417 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,417 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:47:36,418 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:48:49,383 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,384 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:48:49,385 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:49:13,431 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:49:13,432 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:49:13,432 - {'message': "Stock ['4.1!4963'] subscribed successfully"}
+2025-09-09 11:49:13,433 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:49:13,433 - {'message': "Stock ['4.1!2885'] subscribed successfully"}
+2025-09-09 11:52:12,678 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:52:21,143 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,144 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,144 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,145 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,145 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,146 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,146 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,148 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,148 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,149 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,149 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,150 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,150 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:21,151 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,921 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:24,922 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:52:25,923 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,924 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,925 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,926 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,926 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,927 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,927 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,929 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,929 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,930 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,930 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,931 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,931 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:52:25,932 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:52,562 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:54:55,075 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,076 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,077 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,077 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,078 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,078 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,079 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,079 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,080 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,080 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,081 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,081 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,082 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:54:55,083 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:06,783 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,784 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,785 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,785 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,785 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,785 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,785 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:06,786 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:55:07,786 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,787 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,787 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,788 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,789 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,789 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,790 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,791 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,792 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,793 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,793 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,794 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,795 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:07,795 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:41,649 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:55:44,372 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,373 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,374 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,397 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,430 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,453 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,514 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,539 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,540 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,541 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,541 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,542 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,543 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:55:44,544 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:10,386 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,386 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,386 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,386 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,387 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,388 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:10,388 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:56:11,388 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,388 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,389 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,389 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,389 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,390 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,391 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,392 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,393 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,393 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,393 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,394 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,394 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:56:11,395 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:57:05,443 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:58:42,156 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,157 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,158 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:58:42,491 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,491 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,492 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,492 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,493 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,493 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,494 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,495 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,496 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,496 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,497 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,497 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,497 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:58:42,498 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:45,455 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,721 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,722 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,723 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,723 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:52,723 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 11:59:53,046 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,047 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,048 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,048 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,050 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,050 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,051 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,052 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,053 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,054 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,054 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,055 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,056 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 11:59:53,056 - {'message': 'Stock NIFTY subscribed successfully'}
+2025-09-09 12:00:05,483 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,484 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,484 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,484 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,484 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,485 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,486 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,486 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,486 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,489 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,489 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,490 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,491 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,491 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,492 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,492 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,493 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,493 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,493 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,494 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,495 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:05,495 - Error while unsubscribing to feeds : can only concatenate str (not "int") to str
+2025-09-09 12:00:14,394 - {'message': "Stock ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY FIN SERVICE'] subscribed successfully"}

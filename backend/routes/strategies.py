@@ -124,11 +124,21 @@ def run_strategy_backtest(payload: StrategyBacktestPayload) -> Dict[str, Any]:
 		bars = get_ohlc_daily(payload.symbol, payload.start_date, payload.end_date)
 		if not bars:
 			return error_response("No OHLC data available for given range")
-		# Convert to DataFrame with at least a 'close' column and index as datetime
+		# Convert to DataFrame with OHLCV data and compute indicators
 		idx = pd.to_datetime([b.date for b in bars])
-		close = [b.close for b in bars]
-		df = pd.DataFrame({"close": close, "RSI": close}, index=idx)  # placeholder: RSI column expected by example
-		# Note: For real use, compute indicators from src/services/indicators.py and add to df
+		df = pd.DataFrame({
+			"close": [b.close for b in bars],
+			"open": [b.open for b in bars],
+			"high": [b.high for b in bars],
+			"low": [b.low for b in bars],
+			"volume": [b.volume for b in bars] if hasattr(b, 'volume') else [0] * len(bars)
+		}, index=idx)
+		
+		# Compute technical indicators
+		from ..services.indicators import compute_rsi, compute_sma
+		df['RSI'] = compute_rsi(df['close'])
+		df['SMA_20'] = compute_sma(df['close'], 20)
+		df['SMA_50'] = compute_sma(df['close'], 50)
 
 		data = {payload.symbol: df}
 		signals_df = evaluate_strategy(strat, data)

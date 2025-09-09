@@ -106,6 +106,7 @@ def get_nse_indexes(api_session: Optional[str] = Query(None)) -> Dict[str, Any]:
         ]
         
         formatted_indexes = []
+        api_failures = 0
         
         for index_config in indexes_config:
             try:
@@ -114,19 +115,27 @@ def get_nse_indexes(api_session: Optional[str] = Query(None)) -> Dict[str, Any]:
                     import time
                     time.sleep(1.0)  # 1 second delay between calls
                 
-                # Call Breeze get_quotes API
-                response = breeze.client.get_quotes(
-                    stock_code=index_config['stock_code'],
-                    exchange_code=index_config['exchange_code'],
-                    expiry_date=index_config['expiry_date'],
-                    product_type=index_config['product_type'],
-                    right=index_config['right'],
-                    strike_price=index_config['strike_price']
-                )
+                # Call Breeze get_quotes API with proper error handling
+                try:
+                    response = breeze.client.get_quotes(
+                        stock_code=index_config['stock_code'],
+                        exchange_code=index_config['exchange_code'],
+                        expiry_date=index_config['expiry_date'],
+                        product_type=index_config['product_type'],
+                        right=index_config['right'],
+                        strike_price=index_config['strike_price']
+                    )
+                except Exception as api_exc:
+                    # Handle API errors (503, authentication issues, etc.)
+                    api_failures += 1
+                    log_exception(api_exc, context=f"get_nse_indexes.api_call.{index_config['stock_code']}")
+                    print(f"⚠️ API call failed for {index_config['stock_code']}: {str(api_exc)}")
+                    continue  # Skip this index and try the next one
                 
                 # Check for error responses
                 if isinstance(response, dict) and response.get('Error'):
                     log_exception(Exception(f"API Error for {index_config['stock_code']}: {response.get('Error')}"), context="get_nse_indexes.api_error")
+                    continue  # Skip this index and try the next one
                 
                 if isinstance(response, dict) and response.get('Success'):
                     success_data = response['Success']
@@ -175,9 +184,45 @@ def get_nse_indexes(api_session: Optional[str] = Query(None)) -> Dict[str, Any]:
                 log_exception(index_exc, context="get_nse_indexes.index", symbol=index_config['name'])
                 continue
         
+        # If all API calls failed, try to return cached data as fallback
+        if api_failures > 0 and len(formatted_indexes) == 0:
+            try:
+                from ..services.quotes_cache import get_cached_quote
+                cached_indexes = []
+                
+                # Check for cached data for each index
+                index_tokens = ['4.1!NIFTY 50', '4.1!NIFTY BANK', '4.1!NIFTY IT']
+                index_names = ['NIFTY', 'BANKNIFTY', 'FINNIFTY']
+                
+                for token, name in zip(index_tokens, index_names):
+                    cached = get_cached_quote(token)
+                    if isinstance(cached, dict):
+                        cached_indexes.append({
+                            'token': token,
+                            'name': name,
+                            'last': cached.get('ltp'),
+                            'change': None,  # We don't have change in cache
+                            'percentChange': cached.get('change_pct'),
+                            'close': cached.get('close'),
+                            'timestamp': cached.get('updated_at'),
+                            'stock_name': name,
+                            'status': 'cached'
+                        })
+                
+                if cached_indexes:
+                    return success_response({
+                        'indexes': cached_indexes,
+                        'count': len(cached_indexes),
+                        'source': 'cache',
+                        'message': f'API unavailable ({api_failures} failures) - using cached data'
+                    })
+            except Exception as cache_exc:
+                log_exception(cache_exc, context="get_nse_indexes.cache_fallback")
+        
         return success_response({
             'indexes': formatted_indexes,
-            'count': len(formatted_indexes)
+            'count': len(formatted_indexes),
+            'api_failures': api_failures
         })
         
     except Exception as exc:

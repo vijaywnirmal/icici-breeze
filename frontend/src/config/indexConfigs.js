@@ -4,7 +4,7 @@ export const NIFTY_CONFIG = {
 	displayName: 'NIFTY 50',
 	symbol: 'NIFTY',
 	exchangeCode: 'NFO',
-	apiEndpoint: '/api/option-chain/nifty-strikes',
+	apiEndpoint: '/api/option-chain/nifty50',
 	atmThreshold: 25, // ATM if within 25 points (for 50-point intervals)
 	defaultPrice: 24741,
 	interval: 50 // Strike price interval
@@ -14,7 +14,7 @@ export const BANKNIFTY_CONFIG = {
 	displayName: 'BANK NIFTY',
 	symbol: 'BANKNIFTY',
 	exchangeCode: 'NFO',
-	apiEndpoint: '/api/option-chain/banknifty-strikes',
+	apiEndpoint: '/api/option-chain/banknifty50',
 	atmThreshold: 50, // ATM if within 50 points (for 100-point intervals)
 	defaultPrice: 52000,
 	interval: 100 // Strike price interval
@@ -25,7 +25,7 @@ export const FINNIFTY_CONFIG = {
 	displayName: 'FIN NIFTY',
 	symbol: 'FINNIFTY',
 	exchangeCode: 'NFO',
-	apiEndpoint: '/api/option-chain/finnifty-strikes',
+	apiEndpoint: '/api/option-chain/finnifty50',
 	atmThreshold: 25, // ATM if within 25 points (for 50-point intervals)
 	defaultPrice: 20000,
 	interval: 50 // Strike price interval

@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+from typing import Optional
 
 from .utils.config import settings
 from .utils.ssl_config import configure_ssl_context
@@ -58,24 +60,26 @@ app.include_router(bulk_websocket_router)
 app.include_router(option_chain_router)
 
 
-updater: DailyInstrumentsUpdater | None = None
+updater: Optional[DailyInstrumentsUpdater] = None
 
 
 @app.on_event("startup")
 async def _startup() -> None:
     global updater
-    
+    # Check for critical env vars
+    if not os.getenv("APP_NAME"):
+        logging.warning("Critical environment variable APP_NAME is missing.")
     # Bootstrap Breeze session from .breeze_session.json to survive --reload
     try:
         bootstrap_from_breeze_file()
-    except Exception:
-        pass
-    
+    except Exception as e:
+        logging.error(f"Error bootstrapping Breeze session: {e}")
     # Start instruments updater
     try:
         updater = DailyInstrumentsUpdater()
         await updater.start()
-    except Exception:
+    except Exception as e:
+        logging.error(f"Error starting DailyInstrumentsUpdater: {e}")
         updater = None
 
 
@@ -85,8 +89,8 @@ async def _shutdown() -> None:
     if updater is not None:
         try:
             await updater.stop()
-        except Exception:
-            pass
+        except Exception as e:
+            logging.error(f"Error stopping DailyInstrumentsUpdater: {e}")
 
 
 @app.get("/health")

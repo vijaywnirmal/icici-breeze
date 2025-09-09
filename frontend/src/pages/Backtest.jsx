@@ -27,7 +27,6 @@ export default function BacktestPage() {
 		setBacktestId('')
 		try {
 			const payload = {
-				user_id: '00000000-0000-0000-0000-000000000001',
 				symbol: symbol.trim().toUpperCase(),
 				start_date: start,
 				end_date: end,

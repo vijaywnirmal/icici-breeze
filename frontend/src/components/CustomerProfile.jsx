@@ -118,6 +118,7 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 			<div className="sidebar-profile" ref={dropdownRef}>
 				<Dropdown
 					trigger={<div className="sidebar-profile-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" stroke="currentColor" strokeWidth="1"/></svg><span>Profile</span></div>}
+					position="top"
 				>
 					{() => (
 						<div className="profile-info">
@@ -138,6 +139,60 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 			</div>
 		)
 	}
+
+	// Top-right profile button for main layout
+	return (
+		<div className="customer-profile" ref={dropdownRef}>
+			<Dropdown
+				trigger={
+					<Button variant="secondary" size="sm" style={{ width: 'auto' }}>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 'var(--space-2)' }}>
+							<path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" stroke="currentColor" strokeWidth="1"/>
+						</svg>
+						{customerData ? getDisplayName() : 'Profile'}
+					</Button>
+				}
+				position="bottom"
+				align="right"
+			>
+				{() => (
+					<div style={{ padding: 'var(--space-4)' }}>
+						{customerData && (
+							<>
+								<div style={{ marginBottom: 'var(--space-4)' }}>
+									<div style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--space-2) 0', fontSize: '13px' }}>
+										<span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>User ID:</span>
+										<span style={{ color: 'var(--text)', textAlign: 'right', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+											{customerData.idirect_userid || customerData.user_id || 'N/A'}
+										</span>
+									</div>
+									<div style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--space-2) 0', fontSize: '13px' }}>
+										<span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Name:</span>
+										<span style={{ color: 'var(--text)', textAlign: 'right', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+											{getDisplayName()}
+										</span>
+									</div>
+								</div>
+								<div style={{ height: '1px', background: 'var(--border)', margin: 'var(--space-4) 0' }}></div>
+							</>
+						)}
+						<DropdownItem onClick={() => navigate('/holidays')}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 'var(--space-2)' }}>
+								<path d="M3 5h18M8 5v14m8-14v14M3 19h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+							</svg>
+							Holidays
+						</DropdownItem>
+						<DropdownItem onClick={handleLogout} style={{ color: 'var(--danger)' }}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 'var(--space-2)' }}>
+								<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+							Logout
+						</DropdownItem>
+					</div>
+				)}
+			</Dropdown>
+		</div>
+	)
 
 	return null
 }

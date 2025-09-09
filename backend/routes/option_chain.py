@@ -523,6 +523,68 @@ def get_nifty50_option_chain(
         return error_response("Failed to fetch option chain data", error=str(exc))
 
 
+@router.get("/option-chain/banknifty50")
+def get_banknifty50_option_chain(
+    expiry_date: Optional[str] = Query(None, description="Expiry date in ISO format"),
+    right: Optional[str] = Query(None, description="Option type: call or put"),
+    strike_price: Optional[float] = Query(None, description="Strike price filter")
+) -> Dict[str, Any]:
+    """Get Bank Nifty option chain data - empty data structure for WebSocket population."""
+    try:
+        # Use monthly expiry if no expiry date provided
+        if not expiry_date:
+            expiry_date = get_monthly_expiry_date()
+        
+        is_open = _is_market_open_ist()
+
+        # Return empty data structure - will be populated by WebSocket
+        options_data = {
+            "calls": [],
+            "puts": [],
+            "expiry_date": expiry_date,
+            "underlying": "BANK NIFTY",
+            "underlying_price": 52000,  # Default fallback
+            "market_open": is_open,
+        }
+        
+        return success_response("Bank Nifty option chain data", **options_data)
+        
+    except Exception as exc:
+        log_exception(exc, context="option_chain.get_banknifty50_option_chain")
+        return error_response("Failed to fetch option chain data", error=str(exc))
+
+
+@router.get("/option-chain/finnifty50")
+def get_finnifty50_option_chain(
+    expiry_date: Optional[str] = Query(None, description="Expiry date in ISO format"),
+    right: Optional[str] = Query(None, description="Option type: call or put"),
+    strike_price: Optional[float] = Query(None, description="Strike price filter")
+) -> Dict[str, Any]:
+    """Get FIN NIFTY option chain data - empty data structure for WebSocket population."""
+    try:
+        # Use monthly expiry if no expiry date provided
+        if not expiry_date:
+            expiry_date = get_monthly_expiry_date()
+        
+        is_open = _is_market_open_ist()
+
+        # Return empty data structure - will be populated by WebSocket
+        options_data = {
+            "calls": [],
+            "puts": [],
+            "expiry_date": expiry_date,
+            "underlying": "FIN NIFTY",
+            "underlying_price": 20000,  # Default fallback
+            "market_open": is_open,
+        }
+        
+        return success_response("FIN NIFTY option chain data", **options_data)
+        
+    except Exception as exc:
+        log_exception(exc, context="option_chain.get_finnifty50_option_chain")
+        return error_response("Failed to fetch option chain data", error=str(exc))
+
+
 @router.get("/option-chain/expiry-dates")
 def get_expiry_dates(index: Optional[str] = Query(None, description="Index name: NIFTY, BANKNIFTY, or FINNIFTY")) -> Dict[str, Any]:
     """Get available expiry dates for options based on index type."""
@@ -555,8 +617,8 @@ def get_expiry_dates(index: Optional[str] = Query(None, description="Index name:
                 while current_date.weekday() != 1:  # Tuesday is 1
                     current_date -= timedelta(days=1)
                 
-                # Only include if it's in the future
-                if current_date >= today:
+                # Only include if it's today or in the future (today's expiry should remain until midnight)
+                if current_date.date() >= today.date():
                     expiry_dates.append({
                         "date": current_date.strftime("%Y-%m-%d"),
                         "iso_date": current_date.strftime("%Y-%m-%dT06:00:00.000Z"),
@@ -565,17 +627,19 @@ def get_expiry_dates(index: Optional[str] = Query(None, description="Index name:
         else:
             # For Nifty 50: weekly expiry (next 4 Tuesdays)
             for i in range(4):
-                # Find next Tuesday
+                # Find next Tuesday (including today if it's Tuesday)
                 days_ahead = 1 - today.weekday()  # Tuesday is 1
-                if days_ahead <= 0:  # Target day already happened this week
+                if days_ahead < 0:  # Target day already happened this week (but not today)
                     days_ahead += 7
                 
                 next_tuesday = today + timedelta(days=days_ahead + (i * 7))
-                expiry_dates.append({
-                    "date": next_tuesday.strftime("%Y-%m-%d"),
-                    "iso_date": next_tuesday.strftime("%Y-%m-%dT06:00:00.000Z"),
-                    "display": next_tuesday.strftime("%d %b %Y")
-                })
+                # Only include if it's today or in the future (today's expiry should remain until midnight)
+                if next_tuesday.date() >= today.date():
+                    expiry_dates.append({
+                        "date": next_tuesday.strftime("%Y-%m-%d"),
+                        "iso_date": next_tuesday.strftime("%Y-%m-%dT06:00:00.000Z"),
+                        "display": next_tuesday.strftime("%d %b %Y")
+                    })
         
         return success_response("Available expiry dates", dates=expiry_dates)
         
