@@ -24,13 +24,58 @@ export default function GenericOptionChainGrid({
 	const miniTimerRef = useRef(null)
 	const lastLtpRef = useRef(new Map())
 	const flashRef = useRef(new Map())
+	const depthRef = useRef(new Map())
 	const [flashTick, setFlashTick] = useState(0)
 	const [userSelectedExpiry, setUserSelectedExpiry] = useState(false)
 	const [didAutoSubscribe, setDidAutoSubscribe] = useState(false)
 	const currentExpiryRef = useRef('')
 	const subscriptionIdRef = useRef(0)
+	const [depthModal, setDepthModal] = useState({ visible: false, strike: null, side: null, call: null, put: null })
+	const [marketStatus, setMarketStatus] = useState(null)
+	const [depthDataAvailable, setDepthDataAvailable] = useState(false)
 
 	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+
+	// Process raw depth data from Breeze API
+	const processRawDepthData = (depthData) => {
+		try {
+			const bids = []
+			const asks = []
+			
+			// Process each depth level (1-5)
+			for (let i = 1; i <= 5; i++) {
+				const buyRateKey = `BestBuyRate-${i}`
+				const buyQtyKey = `BestBuyQty-${i}`
+				const sellRateKey = `BestSellRate-${i}`
+				const sellQtyKey = `BestSellQty-${i}`
+				
+				// Find the row that contains this level's data
+				for (const row of depthData) {
+					if (row[buyRateKey] !== undefined && row[buyQtyKey] !== undefined) {
+						bids.push({
+							price: parseFloat(row[buyRateKey]) || 0,
+							qty: parseFloat(row[buyQtyKey]) || 0
+						})
+					}
+					if (row[sellRateKey] !== undefined && row[sellQtyKey] !== undefined) {
+						asks.push({
+							price: parseFloat(row[sellRateKey]) || 0,
+							qty: parseFloat(row[sellQtyKey]) || 0
+						})
+					}
+				}
+			}
+			
+			// Sort bids (highest first) and asks (lowest first)
+			bids.sort((a, b) => b.price - a.price)
+			asks.sort((a, b) => a.price - b.price)
+			
+			return { bids, asks }
+		} catch (error) {
+			console.error('❌ Error processing raw depth data:', error)
+			return { bids: [], asks: [] }
+		}
+	}
 
 	// Robust date conversion function
 	const convertToISODate = (dateStr) => {
@@ -85,8 +130,52 @@ export default function GenericOptionChainGrid({
 			if (!realUnderlyingPrice) {
 				loadUnderlyingPrice()
 			}
+			checkMarketStatus()
 		}
 	}, [isVisible])
+	
+	// Check market status
+	const checkMarketStatus = async () => {
+		try {
+			const response = await fetch(`${apiBase}/api/market/status`)
+			const data = await response.json()
+			if (data.success) {
+				setMarketStatus(data)
+				console.log('📊 Market status:', data)
+				
+				// Load option prices from API if market is closed
+				if (!data.is_open && selectedExpiry) {
+					setTimeout(() => {
+						loadOptionPricesFromAPI()
+					}, 1000) // Small delay to ensure state is updated
+				}
+			}
+		} catch (err) {
+			console.error('Failed to check market status:', err)
+		}
+	}
+	
+	// Load option prices from API when market is closed
+	const loadOptionPricesFromAPI = async () => {
+		if (marketStatus?.is_open) {
+			console.log('📊 Market is open, skipping API price load')
+			return
+		}
+		
+		console.log('📊 Market is closed, loading option prices from API...')
+		try {
+			// Try to get option prices from Breeze API
+			const response = await fetch(`${apiBase}/api/option-chain/subscribe?stock_code=${indexConfig.symbol}&expiry_date=${selectedExpiry}&right=both&exchange_code=NFO&product_type=options`)
+			const data = await response.json()
+			
+			if (data.success) {
+				console.log('📊 Option prices loaded from API:', data)
+				// The API response will trigger websocket updates if available
+			}
+		} catch (err) {
+			console.error('❌ Failed to load option prices from API:', err)
+		}
+	}
 
 	// Load option chain when component becomes visible or expiry changes
 	useEffect(() => {
@@ -108,11 +197,12 @@ export default function GenericOptionChainGrid({
 			expiry_date: selectedExpiry 
 		})
 			
-			// Clear all cached data immediately
+			// Clear all cached data immediately (but keep depth data for continuity)
 			lastLtpRef.current.clear()
 			flashRef.current.clear()
 			pendingMiniRef.current.clear()
 			aliasToSideStrike.current.clear()
+			// Note: Not clearing depthRef to preserve market depth data across expiry changes
 			
 			// Reset subscription flags
 			tokenSubscribed.current = false
@@ -161,6 +251,14 @@ export default function GenericOptionChainGrid({
 					loadOptionChain()
 				}
 			}, 3000)
+			
+			// Additional fallback: If no websocket data after 5 seconds, try API
+			setTimeout(() => {
+				if (optionData.calls.length === 0 && optionData.puts.length === 0) {
+					console.log('⚠️ No websocket data after 5 seconds, trying API fallback...')
+					loadOptionPricesFromAPI()
+				}
+			}, 5000)
 		}
 	}, [isVisible, selectedExpiry])
 
@@ -171,6 +269,8 @@ export default function GenericOptionChainGrid({
 				try { wsRef.current.close() } catch {}
 				wsRef.current = null
 			}
+			// Clear depth data when component is not visible
+			depthRef.current.clear()
 			return
 		}
 		const wsUrl = (apiBase || '').replace(/^http/, 'ws') + '/ws/options'
@@ -197,6 +297,34 @@ export default function GenericOptionChainGrid({
 			try {
 				const msg = JSON.parse(ev.data)
 				console.log('🔍 Options WebSocket message received:', msg)
+				
+				// Debug market depth data specifically
+				if (msg.type === 'tick' && (msg.bids || msg.asks)) {
+					console.log('📊 Market Depth Data in WebSocket message:', {
+						symbol: msg.symbol,
+						bids: msg.bids,
+						asks: msg.asks,
+						ltp: msg.ltp,
+						timestamp: msg.timestamp,
+						token: msg.token,
+						expiry_date: msg.expiry_date,
+						strike_price: msg.strike_price,
+						right_type: msg.right_type
+					})
+					setDepthDataAvailable(true)
+				}
+				
+				// Also check for market depth data in the depth field
+				if (msg.type === 'tick' && msg.depth && Array.isArray(msg.depth) && msg.depth.length > 0) {
+					console.log('📊 Market Depth Data in depth field:', {
+						symbol: msg.symbol,
+						depth: msg.depth,
+						ltp: msg.ltp,
+						timestamp: msg.timestamp,
+						token: msg.token
+					})
+					setDepthDataAvailable(true)
+				}
 				
 				// Handle subscription confirmation messages
 				if (msg.type === 'subscribed' && msg.underlying) {
@@ -320,8 +448,37 @@ export default function GenericOptionChainGrid({
 				} else if (data.close !== undefined && data.close !== null && !Number.isNaN(Number(data.close))) {
 					ltp = Number(data.close)
 				}
-				if (ltp == null) {
+				// Check for market depth data
+				const hasDepth = Array.isArray(data.bids) || Array.isArray(data.asks) || Array.isArray(data.depth) || Array.isArray(data.best_bids) || Array.isArray(data.best_asks)
+				
+				// Only proceed if we have LTP data OR market depth data
+				// This allows price updates even when market depth is not available
+				if (ltp == null && !hasDepth) {
+					console.log('❌ Skipping tick - no LTP or depth data:', { symbol: data.symbol, ltp, hasDepth })
 					return
+				}
+				
+				// Log when we have valid data to process
+				if (ltp !== null || hasDepth) {
+					console.log('✅ Processing tick data:', { 
+						symbol: data.symbol, 
+						ltp, 
+						hasDepth,
+						side,
+						strike
+					})
+				}
+				
+				// Debug logging for market depth data
+				if (hasDepth) {
+					console.log('📊 Market Depth Data received:', {
+						symbol: data.symbol,
+						bids: data.bids,
+						asks: data.asks,
+						depth: data.depth,
+						best_bids: data.best_bids,
+						best_asks: data.best_asks
+					})
 				}
 				
 				// Extract volume and OI from WebSocket fields
@@ -374,9 +531,52 @@ export default function GenericOptionChainGrid({
 					}
 				}
 				
+				// Process market depth data - prioritize the correct format
+				let bids = null
+				let asks = null
+				
+				// First check for processed bids/asks arrays
+				if (Array.isArray(data.bids) && data.bids.length > 0) {
+					bids = data.bids
+				} else if (Array.isArray(data.best_bids) && data.best_bids.length > 0) {
+					bids = data.best_bids
+				} else if (Array.isArray(data.market_depth_buy) && data.market_depth_buy.length > 0) {
+					bids = data.market_depth_buy
+				}
+				
+				if (Array.isArray(data.asks) && data.asks.length > 0) {
+					asks = data.asks
+				} else if (Array.isArray(data.best_asks) && data.best_asks.length > 0) {
+					asks = data.best_asks
+				} else if (Array.isArray(data.market_depth_sell) && data.market_depth_sell.length > 0) {
+					asks = data.market_depth_sell
+				}
+				
+				// If no processed data, try to process the raw depth field
+				if ((!bids || !asks) && data.depth && Array.isArray(data.depth) && data.depth.length > 0) {
+					console.log('📊 Processing raw depth data:', data.depth)
+					const processedDepth = processRawDepthData(data.depth)
+					if (processedDepth.bids && processedDepth.bids.length > 0) {
+						bids = processedDepth.bids
+					}
+					if (processedDepth.asks && processedDepth.asks.length > 0) {
+						asks = processedDepth.asks
+					}
+				}
+				
 				// Tiny visual throttle with flash (up/down color) without losing ticks
 				const key = `${side}:${Math.round(Number(strike))}`
-				pendingMiniRef.current.set(key, { side, strike: Number(strike), ltp, volume, openInterest, changePct })
+				pendingMiniRef.current.set(key, { 
+					side, 
+					strike: Number(strike), 
+					ltp, 
+					volume, 
+					openInterest, 
+					changePct, 
+					bids, 
+					asks, 
+					timestamp: data.timestamp || data.ltt || data.datetime || null 
+				})
 				if (!miniTimerRef.current) {
 					miniTimerRef.current = setTimeout(() => {
 						miniTimerRef.current = null
@@ -387,7 +587,66 @@ export default function GenericOptionChainGrid({
 							for (const u of staged) {
 								const k = `${u.side}:${Math.round(Number(u.strike))}`
 								const prevLtp = lastLtpRef.current.get(k)
-								lastLtpRef.current.set(k, u.ltp)
+								if (typeof u.ltp === 'number') {
+									lastLtpRef.current.set(k, u.ltp)
+								}
+								try { 
+									// Store market depth data if available
+									if (u && (u.bids || u.asks)) {
+										const depthData = { 
+											bids: u.bids || [], 
+											asks: u.asks || [], 
+											ltp: u.ltp, 
+											timestamp: u.timestamp || new Date().toISOString() 
+										}
+										depthRef.current.set(k, depthData)
+										console.log('📊 Storing depth data:', { 
+											key: k, 
+											depthData, 
+											side: u.side, 
+											strike: u.strike,
+											bidsLength: depthData.bids.length,
+											asksLength: depthData.asks.length
+										})
+										
+										// Update depth modal if it's currently open for this strike
+										if (depthModal.visible && depthModal.strike === u.strike) {
+											const keyCall = `call:${Math.round(Number(u.strike))}`
+											const keyPut = `put:${Math.round(Number(u.strike))}`
+											const callDepth = depthRef.current.get(keyCall) || { bids: [], asks: [] }
+											const putDepth = depthRef.current.get(keyPut) || { bids: [], asks: [] }
+											
+											setDepthModal(prev => ({
+												...prev,
+												call: callDepth,
+												put: putDepth
+											}))
+											console.log('📊 Updated depth modal with new data:', { strike: u.strike, callDepth, putDepth })
+										}
+									} else if (u && u.ltp) {
+										// Store LTP data even without depth for continuity
+										const depthData = { 
+											bids: [], 
+											asks: [], 
+											ltp: u.ltp, 
+											timestamp: u.timestamp || new Date().toISOString() 
+										}
+										depthRef.current.set(k, depthData)
+										console.log('📊 Storing LTP data (no depth):', { 
+											key: k, 
+											ltp: u.ltp, 
+											side: u.side, 
+											strike: u.strike
+										})
+									}
+								} catch (err) {
+									console.error('❌ Error storing depth data:', err)
+								}
+								try {
+									const exp = currentExpiryRef.current || selectedExpiry || optionData.expiry_date || ''
+									const alias = `${indexConfig.symbol}|${exp}|${u.side.toUpperCase()}|${Math.round(Number(u.strike))}`
+									localStorage.setItem(`optltp:${alias}`, JSON.stringify({ ltp: u.ltp, timestamp: new Date().toISOString() }))
+								} catch (_) {}
 								if (typeof prevLtp === 'number') {
 									flashRef.current.set(k, u.ltp > prevLtp ? 'up' : (u.ltp < prevLtp ? 'down' : null))
 								}
@@ -397,15 +656,16 @@ export default function GenericOptionChainGrid({
 								if (idx < 0) {
 									list.push({
 										strike_price: Number(u.strike),
-										last_price: u.ltp,
-										ltp: u.ltp,
+										last_price: (typeof u.ltp === 'number') ? u.ltp : (prevLtp ?? null),
+										ltp: (typeof u.ltp === 'number') ? u.ltp : (prevLtp ?? null),
 										volume: (typeof u.volume === 'number' && u.volume > 0) ? u.volume : 0,
 										open_interest: (typeof u.openInterest === 'number' && u.openInterest > 0) ? u.openInterest : 0,
 										oi: (typeof u.openInterest === 'number' && u.openInterest > 0) ? u.openInterest : 0,
 										change_pct: (typeof u.changePct === 'number') ? u.changePct : null
 									})
 								} else {
-									const updates = { ltp: u.ltp, last_price: u.ltp, last: u.ltp }
+									const updates = {}
+									if (typeof u.ltp === 'number') { updates.ltp = u.ltp; updates.last_price = u.ltp; updates.last = u.ltp }
 									if (u.volume !== null && u.volume !== undefined) { updates.volume = u.volume; updates.ltq = u.volume }
 									if (u.openInterest !== null && u.openInterest !== undefined) { updates.open_interest = u.openInterest; updates.oi = u.openInterest; updates.OI = u.openInterest }
 									if (u.changePct !== null && u.changePct !== undefined) { updates.change_pct = u.changePct }
@@ -475,6 +735,29 @@ export default function GenericOptionChainGrid({
 			const data = await response.json()
 			console.log('📊 Option chain response:', data)
 			
+			// If market is closed and we have empty data, try to load from strikes endpoint
+			if (data.success && (!data.calls || data.calls.length === 0) && (!data.puts || data.puts.length === 0)) {
+				console.log('📊 Empty option chain data, trying to load from strikes endpoint...')
+				try {
+					const strikesUrl = `${apiBase}/api/option-chain/${indexConfig.symbol.toLowerCase()}-strikes`
+					const strikesResponse = await fetch(strikesUrl)
+					const strikesData = await strikesResponse.json()
+					
+					if (strikesData.success && (strikesData.calls || strikesData.puts)) {
+						console.log('📊 Loaded option data from strikes endpoint:', strikesData)
+						// Merge the strikes data with the original data
+						data.calls = strikesData.calls || []
+						data.puts = strikesData.puts || []
+						data.underlying = strikesData.underlying || data.underlying
+						data.underlying_price = strikesData.underlying_price || data.underlying_price
+						data.atm_strike = strikesData.atm_strike
+						data.strikes = strikesData.strikes
+					}
+				} catch (strikesError) {
+					console.error('❌ Failed to load from strikes endpoint:', strikesError)
+				}
+			}
+			
 			if (data.success) {
 				// Create initial option data structure with empty strikes
 				const currentUnderlying = (underlyingPrice?.last_price || underlyingPrice?.close || indexConfig.defaultPrice || 0)
@@ -501,6 +784,20 @@ export default function GenericOptionChainGrid({
 					oi: 0,
 					change_pct: null
 				}))
+
+				// Seed last-known prices from localStorage if available
+				try {
+					const exp = data.expiry_date || selectedExpiry || ''
+					for (let i = 0; i < initialCalls.length; i++) {
+						const s = Math.round(Number(initialCalls[i].strike_price))
+						const alias = `${indexConfig.symbol}|${exp}|CALL|${s}`
+						const cache = JSON.parse(localStorage.getItem(`optltp:${alias}`) || 'null')
+						if (cache && typeof cache.ltp === 'number') {
+							initialCalls[i].ltp = cache.ltp
+							initialCalls[i].last_price = cache.ltp
+						}
+					}
+				} catch (_) {}
 				
 				const initialPuts = initialStrikes.map(strike => ({
 					strike_price: strike,
@@ -511,6 +808,20 @@ export default function GenericOptionChainGrid({
 					oi: 0,
 					change_pct: null
 				}))
+
+				// Seed puts from cache as well
+				try {
+					const exp = data.expiry_date || selectedExpiry || ''
+					for (let i = 0; i < initialPuts.length; i++) {
+						const s = Math.round(Number(initialPuts[i].strike_price))
+						const alias = `${indexConfig.symbol}|${exp}|PUT|${s}`
+						const cache = JSON.parse(localStorage.getItem(`optltp:${alias}`) || 'null')
+						if (cache && typeof cache.ltp === 'number') {
+							initialPuts[i].ltp = cache.ltp
+							initialPuts[i].last_price = cache.ltp
+						}
+					}
+				} catch (_) {}
 				
 				setOptionData({
 					calls: initialCalls,
@@ -736,9 +1047,71 @@ export default function GenericOptionChainGrid({
 				strikes_list: strikes,
 				subscription_id: subscriptionId
 			})
+			// Auto-subscribe to market depth for the same strikes
+			try {
+				await subscribeMarketDepth(strikes)
+			} catch {}
 		} catch (error) {
 			console.error('❌ Option chain subscription error:', error)
 		}
+	}
+
+	// Subscribe to market depth for specific strikes
+	async function subscribeMarketDepth(strikes) {
+		if (!wsRef.current || wsRef.current.readyState !== 1) {
+			console.log('❌ WebSocket not ready for market depth subscription')
+			return
+		}
+		
+		if (!selectedExpiry || !indexConfig?.symbol) {
+			console.log('❌ Missing required data for market depth subscription')
+			return
+		}
+		
+		console.log('📊 Subscribing to market depth for strikes:', strikes)
+		
+		try {
+			// Subscribe to market depth for CALL options
+			wsRef.current.send(JSON.stringify({
+				action: 'subscribe_market_depth',
+				underlying: indexConfig.symbol,
+				expiry_date: selectedExpiry,
+				strikes: strikes,
+				right: 'call'
+			}))
+			
+			// Subscribe to market depth for PUT options
+			wsRef.current.send(JSON.stringify({
+				action: 'subscribe_market_depth',
+				underlying: indexConfig.symbol,
+				expiry_date: selectedExpiry,
+				strikes: strikes,
+				right: 'put'
+			}))
+			
+			console.log('✅ Market depth subscription sent for strikes:', strikes)
+		} catch (error) {
+			console.error('❌ Market depth subscription error:', error)
+		}
+	}
+
+	// Subscribe to market depth for a single strike (when user clicks on it) - side-specific
+	const subscribeMarketDepthForStrikeSide = (strike, side) => {
+		if (!wsRef.current || wsRef.current.readyState !== 1) {
+			return
+		}
+		if (!selectedExpiry || !indexConfig?.symbol) {
+			return
+		}
+		try {
+			wsRef.current.send(JSON.stringify({
+				action: 'subscribe_market_depth',
+				underlying: indexConfig.symbol,
+				expiry_date: selectedExpiry,
+				strikes: [strike],
+				right: side === 'call' ? 'call' : 'put'
+			}))
+		} catch {}
 	}
 
 	const formatPrice = (price) => {
@@ -787,9 +1160,35 @@ export default function GenericOptionChainGrid({
 		return diff <= indexConfig.atmThreshold
 	}
 
-	const handleStrikeClick = (strike) => {
-		setSelectedStrike(selectedStrike === strike ? null : strike)
+	const handleStrikeClick = (strike, side) => {
+		try {
+			setSelectedStrike(strike)
+			const keyCall = `call:${Math.round(Number(strike))}`
+			const keyPut = `put:${Math.round(Number(strike))}`
+			// Use any cached depth immediately (avoid waiting), still subscribe for fresh updates
+			const callDepth = side === 'call' ? (depthRef.current.get(keyCall) || { bids: [], asks: [], timestamp: null }) : null
+			const putDepth = side === 'put' ? (depthRef.current.get(keyPut) || { bids: [], asks: [], timestamp: null }) : null
+			// Subscribe only for this side/strike
+			subscribeMarketDepthForStrikeSide(strike, side)
+			// Set modal immediately with cached data if present
+			setDepthModal({ visible: true, strike, side, call: callDepth, put: putDepth })
+			// Retry up to 2 times shortly if no data yet
+			let attempts = 0
+			const tryAgain = () => {
+				attempts += 1
+				const hasData = side === 'call' 
+					? (depthRef.current.get(keyCall)?.bids?.length > 0)
+					: (depthRef.current.get(keyPut)?.asks?.length > 0)
+				if (!hasData && attempts < 2) {
+					subscribeMarketDepthForStrikeSide(strike, side)
+					setTimeout(tryAgain, 1500)
+				}
+			}
+			setTimeout(tryAgain, 1200)
+		} catch {}
 	}
+
+	const closeDepthModal = () => setDepthModal({ visible: false, strike: null, side: null, call: null, put: null })
 
 	// Alignment helpers for numeric columns
 	const innerColsTemplate = '88px 88px 64px'
@@ -810,6 +1209,7 @@ export default function GenericOptionChainGrid({
 	if (!isVisible) return null
 
 	return createPortal(
+		<>
 		<div className="modal-overlay" style={{
 			position: 'fixed',
 			top: 0,
@@ -875,6 +1275,32 @@ export default function GenericOptionChainGrid({
 										📅 Expiry: {new Date(selectedExpiry).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
 									</span>
 								)}
+								{/* Market Depth Status Indicator */}
+								<span style={{
+									display: 'flex',
+									alignItems: 'center',
+									gap: '6px',
+									fontSize: '14px',
+									padding: '4px 8px',
+									borderRadius: '4px',
+									background: depthDataAvailable ? 'rgba(87, 211, 140, 0.1)' : 
+											   (marketStatus?.is_open ? 'rgba(255, 193, 7, 0.1)' : 'rgba(255, 92, 92, 0.1)'),
+									color: depthDataAvailable ? '#57d38c' : 
+										   (marketStatus?.is_open ? '#ffc107' : '#ff5c5c'),
+									border: `1px solid ${depthDataAvailable ? 'rgba(87, 211, 140, 0.3)' : 
+											  (marketStatus?.is_open ? 'rgba(255, 193, 7, 0.3)' : 'rgba(255, 92, 92, 0.3)')}`
+								}}>
+									<div style={{
+										width: '6px',
+										height: '6px',
+										borderRadius: '50%',
+										background: depthDataAvailable ? '#57d38c' : 
+												   (marketStatus?.is_open ? '#ffc107' : '#ff5c5c'),
+										opacity: depthDataAvailable ? 1 : 0.5
+									}}></div>
+									{depthDataAvailable ? '📊 Market Depth Live' : 
+									 marketStatus?.is_open ? '⏳ Waiting for Depth Data' : '🔒 Market Closed'}
+								</span>
 								{lastUpdate && (
 									<span style={{
 										color: '#9aa4b2',
@@ -1171,7 +1597,9 @@ export default function GenericOptionChainGrid({
 													const bg = flash === 'up' ? 'rgba(87,211,140,0.12)' : (flash === 'down' ? 'rgba(255,92,92,0.12)' : 'transparent')
 													return (
 														<div style={{ ...numCellStyle, color: '#e6e9ef', paddingRight: 8, fontSize: '12px', backgroundColor: bg }}>
-															{formatPrice(call.last_price || call.ltp)}
+															<div onClick={() => handleStrikeClick(call.strike_price, 'call')} title="View market depth" style={{ ...numCellStyle, color: '#e6e9ef', paddingRight: 8, fontSize: '12px', backgroundColor: bg, cursor: 'pointer', userSelect: 'none' }}>
+																{formatPrice(call.last_price || call.ltp)}
+															</div>
 														</div>
 													)
 												})()}
@@ -1185,7 +1613,6 @@ export default function GenericOptionChainGrid({
 
 											{/* Strike Price */}
 											<div
-												onClick={() => handleStrikeClick(call.strike_price)}
 												style={{
 													...strikeCellStyle,
 													fontWeight: 'bold',
@@ -1198,7 +1625,6 @@ export default function GenericOptionChainGrid({
 														: selectedStrike === call.strike_price 
 															? 'rgba(79, 156, 255, 0.2)' 
 															: 'rgba(255,255,255,0.05)',
-													cursor: 'pointer',
 													borderRadius: selectedStrike === call.strike_price ? '4px' : '0',
 													fontSize: '12px',
 													border: isATMStrike(call.strike_price, currentUnderlying)
@@ -1239,7 +1665,9 @@ export default function GenericOptionChainGrid({
 												}}
 											>
 												<div style={{ ...numCellStyle, color: '#e6e9ef', paddingRight: 8, fontSize: '12px' }}>
-													{formatPrice(put.last_price || put.ltp)}
+													<div onClick={() => handleStrikeClick(put.strike_price, 'put')} title="View market depth" style={{ ...numCellStyle, color: '#e6e9ef', paddingRight: 8, fontSize: '12px', cursor: 'pointer', userSelect: 'none' }}>
+														{formatPrice(put.last_price || put.ltp)}
+													</div>
 												</div>
 												<div style={{ ...numCellStyle, color: '#9aa4b2', paddingRight: 8, fontSize: '12px' }}>
 													{formatVolume(put.open_interest || put.oi)}
@@ -1297,7 +1725,127 @@ export default function GenericOptionChainGrid({
 					</div>
 				</div>
 			</div>
-		</div>,
+		</div>
+		{/* Render depth modal overlay */}
+		<DepthModal open={depthModal.visible} onClose={closeDepthModal} strike={depthModal.strike} side={depthModal.side} call={depthModal.call} put={depthModal.put} />
+		</>
+		,
 		document.body
+	)
+}
+
+// Depth Modal Component
+function DepthModal({ open, onClose, strike, side, call, put }) {
+	if (!open) return null
+	
+	// Debug logging for depth modal
+	console.log('🔍 DepthModal rendering:', { 
+		strike, 
+		call, 
+		put, 
+		callBids: call?.bids, 
+		callAsks: call?.asks, 
+		putBids: put?.bids, 
+		putAsks: put?.asks,
+		callBidsLength: call?.bids?.length || 0,
+		putAsksLength: put?.asks?.length || 0
+	})
+	
+	// Check if we have any real market depth data
+	const hasCallData = call?.bids && Array.isArray(call.bids) && call.bids.length > 0
+	const hasPutData = put?.asks && Array.isArray(put.asks) && put.asks.length > 0
+	const hasAnyData = side === 'call' ? hasCallData : hasPutData
+	
+	// Staleness note
+	const ts = side === 'call' ? (call?.timestamp || null) : (put?.timestamp || null)
+	let freshnessNote = null
+	if (ts) {
+		try {
+			const ageSec = Math.max(0, Math.round((Date.now() - new Date(ts).getTime()) / 1000))
+			freshnessNote = `Last updated ${ageSec}s ago`
+		} catch {}
+	}
+	
+	const ladderStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px' }
+	const box = {
+		backgroundColor: '#0f141d', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '12px'
+	}
+	const overlay = {
+		position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+	}
+	const modal = {
+		backgroundColor: '#0b0f14', color: '#e6e9ef', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', padding: '16px', width: 'min(800px, 95vw)'
+	}
+	
+	return (
+		<div style={overlay} onClick={onClose}>
+			<div style={modal} onClick={(e) => e.stopPropagation()}>
+				<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+					<div style={{ fontWeight: 'bold' }}>Market Depth · {side === 'call' ? 'CALL' : 'PUT'} · Strike {strike}</div>
+					<button onClick={onClose} style={{ background: 'transparent', color: '#e6e9ef', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>Close</button>
+				</div>
+				{freshnessNote && (
+					<div style={{ color: '#9aa4b2', fontSize: '12px', marginBottom: 8 }}>{freshnessNote}</div>
+				)}
+				
+				{!hasAnyData ? (
+					<div style={{ 
+						textAlign: 'center', 
+						padding: '40px', 
+						color: '#9aa4b2',
+						fontSize: '16px'
+					}}>
+						<div style={{ marginBottom: '8px' }}>⏳ Waiting for live market depth…</div>
+						<div style={{ fontSize: '14px', color: '#6b7280' }}>
+							Ensure market is open and the strike is actively trading.
+						</div>
+					</div>
+				) : (
+					<div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+						{side === 'call' ? (
+							<div style={box}>
+								<div style={{ color: '#57d38c', marginBottom: 8, fontWeight: 'bold' }}>CALLS</div>
+								{hasCallData ? (
+									<div style={ladderStyle}>
+										<div style={{ color: '#9aa4b2' }}>Bid Px</div>
+										<div style={{ color: '#9aa4b2', textAlign: 'right' }}>Bid Qty</div>
+										{call.bids.slice(0, 5).map((r, i) => (
+											<React.Fragment key={`cb${i}`}>
+												<div>₹{Number(r.price ?? r.bPrice ?? r.bid_price ?? 0).toFixed(2)}</div>
+												<div style={{ textAlign: 'right' }}>{Number(r.qty ?? r.bQty ?? r.bid_qty ?? 0).toLocaleString()}</div>
+											</React.Fragment>
+										))}
+									</div>
+								) : (
+									<div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
+										No call data available
+									</div>
+								)}
+							</div>
+						) : (
+							<div style={box}>
+								<div style={{ color: '#ff5c5c', marginBottom: 8, fontWeight: 'bold' }}>PUTS</div>
+								{hasPutData ? (
+									<div style={ladderStyle}>
+										<div style={{ color: '#9aa4b2' }}>Ask Px</div>
+										<div style={{ color: '#9aa4b2', textAlign: 'right' }}>Ask Qty</div>
+										{put.asks.slice(0, 5).map((r, i) => (
+											<React.Fragment key={`pa${i}`}>
+												<div>₹{Number(r.price ?? r.sPrice ?? r.ask_price ?? 0).toFixed(2)}</div>
+												<div style={{ textAlign: 'right' }}>{Number(r.qty ?? r.sQty ?? r.ask_qty ?? 0).toLocaleString()}</div>
+											</React.Fragment>
+										))}
+									</div>
+								) : (
+									<div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
+										No put data available
+									</div>
+								)}
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+		</div>
 	)
 }

@@ -55,7 +55,6 @@ async def ws_options(websocket: WebSocket) -> None:
     loop = asyncio.get_running_loop()
     STREAM_MANAGER.set_loop(loop)
     STREAM_MANAGER.register_client(websocket, loop, is_option_client=True)
-    print(f"📡 Registered options client. Total option clients: {len(STREAM_MANAGER._option_clients)}")
     
     # The stream manager will automatically broadcast to this client via _broadcast_options
     # since we registered it as an option client above
@@ -129,7 +128,7 @@ async def ws_options(websocket: WebSocket) -> None:
                 strikes = msg.get("strikes", [])
                 right_req = (msg.get("right") or "both").lower()
                 
-                print(f"📥 Options subscription request: {underlying}, {expiry_date}, strikes={strikes}")
+                # Silence verbose subscription request log
                 
                 if not expiry_date or not strikes:
                     await websocket.send_text(json.dumps({
@@ -188,7 +187,7 @@ async def ws_options(websocket: WebSocket) -> None:
                         else:
                             breeze_expiry = expiry_date
                     except Exception as e:
-                        print(f"❌ Error parsing expiry date {expiry_date}: {e}")
+                        # Keep quiet on parse errors to avoid terminal noise
                         breeze_expiry = expiry_date
                     
                     keep_iso = (expiry_date or '')[:10]
@@ -197,7 +196,7 @@ async def ws_options(websocket: WebSocket) -> None:
                         state.selected_expiry_iso = keep_iso
                     except Exception:
                         state.selected_expiry_iso = keep_iso
-                    print(f"🔄 Converting expiry: {expiry_date} -> {breeze_expiry} | keep={keep_iso}")
+                    # Silent conversion info
                     # Ensure only this expiry remains subscribed
                     try:
                         STREAM_MANAGER.unsubscribe_options_except(keep_iso)
@@ -226,6 +225,33 @@ async def ws_options(websocket: WebSocket) -> None:
                                 product_type="options"
                             )
                     
+                    # Also try subscribing with BSE exchange for market depth data
+                    # Some options might have better market depth on BSE
+                    try:
+                        for strike in strikes:
+                            if right_req in ("call", "both"):
+                                STREAM_MANAGER.subscribe_option(
+                                    stock_code=underlying,
+                                    exchange_code="BSE",
+                                    expiry_date=breeze_expiry,
+                                    strike_price=str(strike),
+                                    right="call",
+                                    product_type="options"
+                                )
+                            if right_req in ("put", "both"):
+                                STREAM_MANAGER.subscribe_option(
+                                    stock_code=underlying,
+                                    exchange_code="BSE",
+                                    expiry_date=breeze_expiry,
+                                    strike_price=str(strike),
+                                    right="put",
+                                    product_type="options"
+                                )
+                        # Silent BSE subscription info
+                    except Exception as exc:
+                        # Silent BSE failure info
+                        pass
+                    
                     response_msg = {
                         "type": "subscribed",
                         "underlying": underlying,
@@ -233,7 +259,6 @@ async def ws_options(websocket: WebSocket) -> None:
                         "strikes": strikes,
                         "message": f"Subscribed to {len(strikes)} strikes for {underlying} options"
                     }
-                    print(f"✅ Options subscription successful: {response_msg}")
                     await websocket.send_text(json.dumps(response_msg))
                 except Exception as exc:
                     log_exception(exc, context="ws_options.subscribe_options")
@@ -258,11 +283,92 @@ async def ws_options(websocket: WebSocket) -> None:
                         "context": "unsubscribe_options",
                         "message": str(exc)
                     }))
+
+            elif action == "subscribe_market_depth":
+                underlying = (msg.get("underlying") or "NIFTY").upper()
+                expiry_date = msg.get("expiry_date")
+                strikes = msg.get("strikes", [])
+                right_req = (msg.get("right") or "both").lower()
+                
+                # Silence verbose market depth request log
+                
+                if not expiry_date or not strikes:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "subscribe_market_depth",
+                        "message": "expiry_date and strikes required"
+                    }))
+                    continue
+
+                if not _is_market_open_ist():
+                    await websocket.send_text(json.dumps({
+                        "type": "info",
+                        "message": "Market closed; market depth subscription may not receive live data"
+                    }))
+
+                try:
+                    # Ensure Breeze WS is connected before subscribing
+                    try:
+                        STREAM_MANAGER.connect()
+                    except Exception as exc:
+                        log_exception(exc, context="ws_options.ensure_connect_market_depth")
+                    
+                    # Convert ISO expiry date to Breeze format (DD-Mon-YYYY)
+                    from datetime import datetime
+                    try:
+                        if 'T' in expiry_date:
+                            # Parse ISO format: 2025-09-09T06:00:00.000Z
+                            dt = datetime.fromisoformat(expiry_date.replace('Z', '+00:00'))
+                            breeze_expiry = dt.strftime('%d-%b-%Y')
+                        else:
+                            breeze_expiry = expiry_date
+                    except Exception as e:
+                        # Keep quiet on parse errors to avoid terminal noise
+                        breeze_expiry = expiry_date
+                    
+                    # Subscribe to market depth for option chain via stream manager
+                    for strike in strikes:
+                        # Subscribe only to requested side(s)
+                        if right_req in ("call", "both"):
+                            STREAM_MANAGER.subscribe_option_market_depth(
+                                stock_code=underlying,
+                                exchange_code="NFO",
+                                expiry_date=breeze_expiry,
+                                strike_price=str(strike),
+                                right="call",
+                                product_type="options"
+                            )
+                        if right_req in ("put", "both"):
+                            STREAM_MANAGER.subscribe_option_market_depth(
+                                stock_code=underlying,
+                                exchange_code="NFO",
+                                expiry_date=breeze_expiry,
+                                strike_price=str(strike),
+                                right="put",
+                                product_type="options"
+                            )
+                    
+                    await websocket.send_text(json.dumps({
+                        "type": "subscribed",
+                        "message": f"Market depth subscribed for {len(strikes)} strikes",
+                        "underlying": underlying,
+                        "expiry_date": expiry_date,
+                        "strikes": strikes
+                    }))
+                    
+                except Exception as exc:
+                    log_exception(exc, context="ws_options.subscribe_market_depth")
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "context": "subscribe_market_depth",
+                        "message": str(exc)
+                    }))
+
             else:
                 await websocket.send_text(json.dumps({
                     "type": "error",
                     "context": "action",
-                    "message": "Unknown action. Use 'subscribe_options' or 'unsubscribe_options'"
+                    "message": "Unknown action. Use 'subscribe_options', 'subscribe_market_depth', or 'unsubscribe_options'"
                 }))
 
     except WebSocketDisconnect:

@@ -18,20 +18,20 @@ def fetch_nse_holidays_2025() -> pd.DataFrame:
     try:
         from nsepython import holiday_master
         
-        print("Fetching NSE holidays for 2025 using nsepython")
+        # Silence verbose info logs
         
         # Get holidays data from NSE
         holidays_data = holiday_master('trading')
         
         if not holidays_data or 'CM' not in holidays_data:
-            print("No CM holidays data received from nsepython")
+            # Silent: no CM data
             return pd.DataFrame(columns=["date", "day", "name"])
         
         # Get Cash Market holidays
         cm_holidays = holidays_data['CM']
         
         if not cm_holidays:
-            print("No CM holidays found")
+            # Silent: no CM holidays
             return pd.DataFrame(columns=["date", "day", "name"])
         
         # Convert to DataFrame
@@ -39,7 +39,7 @@ def fetch_nse_holidays_2025() -> pd.DataFrame:
         
         # Ensure we have the required columns
         if 'tradingDate' not in df.columns or 'description' not in df.columns or 'weekDay' not in df.columns:
-            print(f"Unexpected data structure. Available columns: {list(df.columns)}")
+            # Silent: unexpected structure
             return pd.DataFrame(columns=["date", "day", "name"])
         
         # Parse and format the data
@@ -51,14 +51,14 @@ def fetch_nse_holidays_2025() -> pd.DataFrame:
         result_df = df[df['date'].dt.year == 2025][['date', 'day', 'name']].copy()
         result_df = result_df.sort_values('date').reset_index(drop=True)
         
-        print(f"Successfully fetched {len(result_df)} holidays for 2025")
+        # Silent: success count
         return result_df
         
     except ImportError:
-        print("nsepython not installed. Please install it with: pip install nsepython")
+        # Silent: missing dependency notice
         return pd.DataFrame(columns=["date", "day", "name"])
     except Exception as e:
-        print(f"Error fetching NSE holidays for 2025: {e}")
+        # Silent: error message
         return pd.DataFrame(columns=["date", "day", "name"])
 
 
@@ -96,10 +96,10 @@ def save_holidays_to_db(df: pd.DataFrame) -> int:
                     },
                 )
             conn.commit()
-        print(f"Successfully saved {len(df)} holidays to database")
+        # Silent: db save count
         return len(df)
     except Exception as e:
-        print(f"Error saving holidays to database: {e}")
+        # Silent: db error
         return 0
 
 
@@ -143,7 +143,7 @@ def get_holidays_from_db(year: int = None) -> pd.DataFrame:
             return df
     
     except Exception as e:
-        print(f"Error fetching holidays from database: {e}")
+        # Silent: db fetch error
         return pd.DataFrame(columns=["date", "day", "name"])
 
 
@@ -168,7 +168,7 @@ def get_holidays_for_year(year: int) -> pd.DataFrame:
         
         # If no data found and it's current year or future, fetch from NSE
         if df.empty and year >= current_year:
-            print(f"No holidays found in database for {year}, fetching from NSE...")
+            # Silent: no holidays in DB
             df = fetch_nse_holidays_for_year(year)
             if not df.empty:
                 save_holidays_to_db(df)
@@ -176,7 +176,7 @@ def get_holidays_for_year(year: int) -> pd.DataFrame:
         return df
         
     except Exception as e:
-        print(f"Error getting holidays for year {year}: {e}")
+        # Silent: error getting holidays
         return pd.DataFrame(columns=["date", "day", "name"])
 
 
@@ -188,24 +188,24 @@ def fetch_nse_holidays_for_year(year: int) -> pd.DataFrame:
         DataFrame with columns: date, day, name
     """
     try:
-        print(f"Fetching NSE holidays for {year} using nsepython")
+        # Silent: info
         
         holidays_data = holiday_master('trading')
         
         if not holidays_data or 'CM' not in holidays_data:
-            print("No CM holidays data received from nsepython")
+            # Silent: no CM
             return pd.DataFrame(columns=["date", "day", "name"])
         
         cm_holidays = holidays_data['CM']
         
         if not cm_holidays:
-            print("No CM holidays found")
+            # Silent: none
             return pd.DataFrame(columns=["date", "day", "name"])
         
         df = pd.DataFrame(cm_holidays)
         
         if 'tradingDate' not in df.columns or 'description' not in df.columns or 'weekDay' not in df.columns:
-            print(f"Unexpected data structure. Available columns: {list(df.columns)}")
+            # Silent: unexpected structure
             return pd.DataFrame(columns=["date", "day", "name"])
         
         df['date'] = pd.to_datetime(df['tradingDate'], format='%d-%b-%Y')
@@ -215,14 +215,14 @@ def fetch_nse_holidays_for_year(year: int) -> pd.DataFrame:
         result_df = df[df['date'].dt.year == year][['date', 'day', 'name']].copy()
         result_df = result_df.sort_values('date').reset_index(drop=True)
         
-        print(f"Successfully fetched {len(result_df)} holidays for {year}")
+        # Silent: success count
         return result_df
         
     except ImportError:
-        print("nsepython not installed. Please install it with: pip install nsepython")
+        # Silent: missing dependency
         return pd.DataFrame(columns=["date", "day", "name"])
     except Exception as e:
-        print(f"Error fetching NSE holidays for {year}: {e}")
+        # Silent: error message
         return pd.DataFrame(columns=["date", "day", "name"])
 
 
@@ -450,18 +450,17 @@ def load_holidays_from_csv() -> pd.DataFrame:
 2024,2024-11-15,Friday,Gurunanak Jayanti
 2024,2024-12-25,Wednesday,Christmas"""
         
-        print("Loading holidays from provided CSV data...")
+        # Silent: info
         
         # Read the CSV data
         from io import StringIO
         df = pd.read_csv(StringIO(csv_data))
         
         if df.empty:
-            print("CSV data is empty")
+            # Silent: empty CSV
             return pd.DataFrame(columns=["date", "day", "name"])
         
-        print(f"CSV loaded with {len(df)} rows")
-        print(f"CSV columns: {list(df.columns)}")
+        # Silent: CSV shape
         
         # Parse the date column
         df['parsed_date'] = pd.to_datetime(df['Date'])
@@ -479,11 +478,11 @@ def load_holidays_from_csv() -> pd.DataFrame:
         # Sort by date
         result_df = result_df.sort_values('date').reset_index(drop=True)
         
-        print(f"Successfully parsed {len(result_df)} holidays from CSV")
+        # Silent: parse count
         return result_df
         
     except Exception as e:
-        print(f"Error loading holidays from CSV: {e}")
+        # Silent: CSV load error
         return pd.DataFrame(columns=["date", "day", "name"])
 
 
@@ -495,7 +494,7 @@ def load_all_historical_holidays() -> dict:
         Dictionary with load status and count
     """
     try:
-        print("Loading all historical holidays from CSV...")
+        # Silent: info
         df = load_holidays_from_csv()
         
         if df.empty:
@@ -529,7 +528,7 @@ def refresh_holidays_2025() -> dict:
         Dictionary with refresh status and count
     """
     try:
-        print("Refreshing holidays for 2025...")
+        # Silent: info
         df = fetch_nse_holidays_2025()
         
         if df.empty:

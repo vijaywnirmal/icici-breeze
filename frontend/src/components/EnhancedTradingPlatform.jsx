@@ -19,6 +19,22 @@ export default function EnhancedTradingPlatform() {
 	useEffect(() => {
 		checkMarketStatus()
 		loadWatchlist()
+		// Seed cached prices for any previously saved symbols
+		try {
+			const saved = JSON.parse(localStorage.getItem('trading_watchlist') || '[]')
+			if (Array.isArray(saved) && saved.length > 0) {
+				const seeded = {}
+				saved.forEach(item => {
+					const cache = JSON.parse(localStorage.getItem(`ltp:${item.symbol}`) || 'null')
+					if (cache && typeof cache === 'object') {
+						seeded[item.symbol] = cache
+					}
+				})
+				if (Object.keys(seeded).length > 0) {
+					setLivePrices(prev => ({ ...seeded, ...prev }))
+				}
+			}
+		} catch (_) {}
 	}, [])
 
 	// WebSocket connection for live prices
@@ -48,6 +64,23 @@ export default function EnhancedTradingPlatform() {
 			})
 		}
 	}, [watchlist.length, wsConnection])
+
+	// Whenever the watchlist changes, seed price cache for newly added symbols
+	useEffect(() => {
+		try {
+			if (!Array.isArray(watchlist) || watchlist.length === 0) return
+			const seeded = {}
+			watchlist.forEach(item => {
+				const cache = JSON.parse(localStorage.getItem(`ltp:${item.symbol}`) || 'null')
+				if (cache && typeof cache === 'object') {
+					seeded[item.symbol] = cache
+				}
+			})
+			if (Object.keys(seeded).length > 0) {
+				setLivePrices(prev => ({ ...seeded, ...prev }))
+			}
+		} catch (_) {}
+	}, [watchlist])
 
 	const checkMarketStatus = async () => {
 		try {
@@ -159,6 +192,18 @@ export default function EnhancedTradingPlatform() {
 							timestamp: data.timestamp
 						}
 					}))
+
+					// Persist last-known values so they are available when market is closed
+					try {
+						localStorage.setItem(`ltp:${data.symbol}` , JSON.stringify({
+							ltp: data.ltp,
+							change_pct: data.change_pct,
+							bid: data.bid,
+							ask: data.ask,
+							timestamp: data.timestamp,
+							status: 'live'
+						}))
+					} catch (_) {}
 				}
 			} catch (err) {
 				console.error('Failed to parse WebSocket message:', err)
@@ -389,8 +434,43 @@ export default function EnhancedTradingPlatform() {
 							borderRadius: '6px'
 						}}
 					>
-						<p style={{ margin: '0 0 4px 0' }}>Market is closed</p>
-						<p style={{ margin: '0' }}>Live prices unavailable</p>
+						{(() => {
+							const cached = livePrices[stock.symbol]
+							if (cached && (typeof cached.ltp === 'number' || typeof cached.change_pct === 'number')) {
+								return (
+									<div>
+										<div style={{ marginBottom: '6px' }}>Showing last known values</div>
+										<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+											<span style={{ fontWeight: 'bold', color: 'var(--muted)' }}>LTP:</span>
+											<span style={{ fontWeight: 'bold', color: 'var(--text)' }}>₹{formatPrice(cached.ltp)}</span>
+										</div>
+										<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+											<span style={{ fontWeight: 'bold', color: 'var(--muted)' }}>Change:</span>
+											<span style={{ fontWeight: 'bold', color: getChangeColor(cached.change_pct) }}>{formatChange(cached.change_pct)}</span>
+										</div>
+										{(typeof cached.bid === 'number' || typeof cached.ask === 'number') && (
+											<div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+												<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)' }}>
+													<span>Bid: ₹{formatPrice(cached.bid)}</span>
+													<span>Ask: ₹{formatPrice(cached.ask)}</span>
+												</div>
+											</div>
+										)}
+										{cached.timestamp && (
+											<div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--muted)' }}>
+												As of {new Date(cached.timestamp).toLocaleString()}
+											</div>
+										)}
+									</div>
+								)
+							}
+							return (
+								<>
+									<p style={{ margin: '0 0 4px 0' }}>Market is closed</p>
+									<p style={{ margin: '0' }}>Live prices unavailable</p>
+								</>
+							)
+						})()}
 					</div>
 				)}
 			</div>

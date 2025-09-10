@@ -55,9 +55,7 @@ def list_market_holidays(
 ) -> Dict[str, Any]:
     """Get market holidays for a specific year."""
     try:
-        print(f"API endpoint called with year={year}")
         holidays_df = get_holidays_for_year(year)
-        print(f"API endpoint got {len(holidays_df)} holidays")
         
         if len(holidays_df) > 0:
             # Format data for API response

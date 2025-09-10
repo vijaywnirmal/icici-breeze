@@ -1,0 +1,15 @@
+supplier portal
+
+Views the active Purchase Orders
+
+Phase 1
+
+Supplier
+
+Security Gate
+
+Store Guy
+
+Admin
+
+Finance Controller invoice only be visible for FC 

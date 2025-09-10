@@ -149,7 +149,53 @@ class BreezeSocketService:
                         "open_interest": ticks.get("OI") or ticks.get("open_interest") or ticks.get("oi"),
                         "ttv": ticks.get("ttv"),  # Total Trade Volume for OI calculation
                         "last": ticks.get("last") or ticks.get("ltp"),
+                        # Market depth (if enabled)
+                        "bids": ticks.get("bids") or ticks.get("best_bids") or ticks.get("market_depth_buy"),
+                        "asks": ticks.get("asks") or ticks.get("best_asks") or ticks.get("market_depth_sell"),
+                        "best_bid_qty": ticks.get("bQty") or ticks.get("best_bid_qty"),
+                        "best_ask_qty": ticks.get("sQty") or ticks.get("best_ask_qty"),
                     }
+
+                    # Normalize Breeze 'depth' structure (BestBuyRate-1/BestSellRate-1 ...)
+                    try:
+                        depth_rows = ticks.get("depth")
+                        if isinstance(depth_rows, list) and depth_rows:
+                            bids_list: list[dict[str, float]] = []
+                            asks_list: list[dict[str, float]] = []
+                            
+                            # Process each depth level (1-5)
+                            for i in range(1, 6):
+                                key_buy_px = f"BestBuyRate-{i}"
+                                key_buy_qty = f"BestBuyQty-{i}"
+                                key_sell_px = f"BestSellRate-{i}"
+                                key_sell_qty = f"BestSellQty-{i}"
+                                
+                                # Find the row that contains this level's data
+                                for row in depth_rows:
+                                    if key_buy_px in row or key_buy_qty in row:
+                                        px = row.get(key_buy_px)
+                                        qty = row.get(key_buy_qty)
+                                        if px is not None and qty is not None:
+                                            bids_list.append({"price": px, "qty": qty})
+                                    if key_sell_px in row or key_sell_qty in row:
+                                        px = row.get(key_sell_px)
+                                        qty = row.get(key_sell_qty)
+                                        if px is not None and qty is not None:
+                                            asks_list.append({"price": px, "qty": qty})
+                            
+                            # Sort bids (highest first) and asks (lowest first)
+                            bids_list.sort(key=lambda x: x["price"], reverse=True)
+                            asks_list.sort(key=lambda x: x["price"])
+                            
+                            if bids_list:
+                                payload["bids"] = bids_list
+                            if asks_list:
+                                payload["asks"] = asks_list
+                                
+                            # Silenced verbose market depth debug output
+                    except Exception as exc:
+                        # Swallow depth parsing errors silently to avoid terminal noise
+                        pass
                     # Upsert cache for last-known values (used when market is closed)
                     try:
                         upsert_quote(symbol, payload)
@@ -201,8 +247,7 @@ class BreezeSocketService:
             raise
 
     def subscribe_option(self, stock_code: str, exchange_code: str, expiry_date: str, strike_price: str, right: str, product_type: str) -> None:
-        """Subscribe to option chain data."""
-        print(f"🔔 Subscribing to option: {stock_code} {expiry_date} {strike_price} {right}")
+        """Subscribe to option chain exchange quotes only."""
         svc = self._ensure_breeze()
         if not svc:
             raise RuntimeError("No Breeze session available")
@@ -210,7 +255,7 @@ class BreezeSocketService:
             self.connect()
         
         try:
-            # Subscribe using Breeze API
+            # Subscribe using Breeze API for exchange quotes only
             # Important: omit interval for real-time exchange quotes; passing
             # an interval throttles updates to bar cadence (e.g., 1minute)
             resp = svc.client.subscribe_feeds(
@@ -223,20 +268,7 @@ class BreezeSocketService:
                 get_market_depth=False,
                 get_exchange_quotes=True
             )
-            print(f"✅ Option subscription response: {resp}")
-            # Lightweight confirmation log
-            try:
-                info = {
-                    "exchange_code": exchange_code,
-                    "stock_code": stock_code,
-                    "expiry_date": expiry_date,
-                    "strike_price": strike_price,
-                    "right": right,
-                    "product_type": product_type,
-                }
-                print(f"[WS] Subscribed option: {json.dumps(info)} | resp={resp}")
-            except Exception:
-                pass
+            # Silence verbose subscription responses
             
             # Create alias for mapping (match frontend alias exactly)
             # Normalize expiry to ISO for alias; keep original format for API
@@ -280,6 +312,75 @@ class BreezeSocketService:
             
         except Exception as exc:
             log_exception(exc, context="BreezeSocketService.subscribe_option", 
+                         stock_code=stock_code, strike_price=strike_price, right=right)
+            raise
+
+    def subscribe_option_market_depth(self, stock_code: str, exchange_code: str, expiry_date: str, strike_price: str, right: str, product_type: str) -> None:
+        """Subscribe to option chain market depth only."""
+        svc = self._ensure_breeze()
+        if not svc:
+            raise RuntimeError("No Breeze session available")
+        if not self._connected:
+            self.connect()
+        
+        try:
+            # Subscribe using Breeze API for market depth only
+            resp = svc.client.subscribe_feeds(
+                exchange_code=exchange_code,
+                stock_code=stock_code,
+                expiry_date=expiry_date,
+                strike_price=strike_price,
+                right=right,
+                product_type=product_type,
+                get_market_depth=True,
+                get_exchange_quotes=False
+            )
+            # Silence verbose subscription responses
+            
+            # Create alias for mapping (match frontend alias exactly)
+            # Normalize expiry to ISO for alias; keep original format for API
+            from datetime import datetime
+            iso_expiry = str(expiry_date)
+            try:
+                if isinstance(expiry_date, str):
+                    # Common inputs: "13-Feb-2025", "2025-09-10T06:00:00.000Z", "2025-09-10"
+                    parsed = None
+                    for fmt in ("%d-%b-%Y", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%d"):
+                        try:
+                            parsed = datetime.strptime(expiry_date, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    if parsed:
+                        iso_expiry = parsed.strftime("%Y-%m-%dT06:00:00.000Z")
+                    else:
+                        # If it already contains 'T', assume ISO-like
+                        iso_expiry = expiry_date
+            except Exception:
+                iso_expiry = str(expiry_date)
+
+            right_u = right.upper()
+            right_txt = "CALL" if right_u in ("CE", "CALL") else "PUT"
+            strike_norm = int(float(strike_price))
+            alias_iso = f"{stock_code.upper()}|{iso_expiry}|{right_txt}|{strike_norm}"
+            alias_raw = f"{stock_code.upper()}|{expiry_date}|{right_txt}|{strike_norm}"
+            
+            # Store subscription for alias mapping (key by ALIAS and by EXPIRY+RIGHT+STRIKE)
+            # Use same alias format as regular subscriptions but mark as market_depth
+            for alias in (alias_iso, alias_raw, f"{stock_code.upper()}|{iso_expiry}|{right_txt}|{strike_norm}"):
+                self._subscriptions[alias] = {
+                    "exchange_code": exchange_code,
+                    "product_type": product_type,
+                    "alias": alias,
+                    "stock_code": stock_code,
+                    "expiry_date": iso_expiry,
+                    "strike_price": strike_norm,
+                    "right": right,
+                    "subscription_type": "market_depth"
+                }
+            
+        except Exception as exc:
+            log_exception(exc, context="BreezeSocketService.subscribe_option_market_depth", 
                          stock_code=stock_code, strike_price=strike_price, right=right)
             raise
 
@@ -400,7 +501,7 @@ class BreezeSocketService:
                         strike_price=strike,
                         right=right,
                         product_type=prod,
-                        get_market_depth=False,
+                        get_market_depth=True,
                         get_exchange_quotes=True,
                         interval=interval,
                     )
