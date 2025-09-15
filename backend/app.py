@@ -19,7 +19,7 @@ from .routes.nse_indexes import router as nse_indexes_router
 from .routes.bulk_websocket import router as bulk_websocket_router
 from .routes.option_chain import router as option_chain_router
 from .utils.instruments_scheduler import DailyInstrumentsUpdater
-from .utils.session import get_breeze, is_session_valid, bootstrap_from_breeze_file
+from .utils.session import get_breeze, is_session_valid
 
 
 # Load environment variables from .env at startup
@@ -69,11 +69,7 @@ async def _startup() -> None:
     # Check for critical env vars
     if not os.getenv("APP_NAME"):
         logging.warning("Critical environment variable APP_NAME is missing.")
-    # Bootstrap Breeze session from .breeze_session.json to survive --reload
-    try:
-        bootstrap_from_breeze_file()
-    except Exception as e:
-        logging.error(f"Error bootstrapping Breeze session: {e}")
+    # Removed file-based session bootstrap to avoid relying on tracked files
     # Start instruments updater
     try:
         updater = DailyInstrumentsUpdater()
