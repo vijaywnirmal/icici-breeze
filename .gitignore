@@ -1,1 +1,10 @@
 .env
+.breeze_session.json
+breeze_credentials.txt
+cookies.txt
+session_data.json
+__pycache__/
+*.pyc
+node_modules/
+frontend/dist/
+logs/

@@ -11,8 +11,6 @@ urllib3
 numpy
 scipy
 pandas
-lxml
-beautifulsoup4
 nselib
 nsetools
 nsepython

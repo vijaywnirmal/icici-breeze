@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+breeze-connect
+python-dotenv
+pydantic
+loguru
+psycopg[binary]
+SQLAlchemy>=2.0
+requests
+urllib3
+numpy
+scipy
+pandas
+nselib
+nsetools
+nsepython

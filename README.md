@@ -12,17 +12,18 @@ icici-breeze-trading/
 │   ├── services/           # Business logic services
 │   ├── utils/              # Utility functions and helpers
 │   ├── templates/          # Strategy templates
-│   ├── requirements.txt    # Python dependencies
-│   └── create_instruments_table.py  # Instruments table management
+│   ├── requirements.in     # Top-level Python dependencies (unpinned)
+│   ├── requirements.txt    # Locked Python dependencies (generated)
+│   └── requirements.lock.txt # Snapshot of current environment (optional)
 ├── frontend/               # React frontend application
 │   ├── src/               # React source code
 │   ├── package.json       # Node.js dependencies
-│   └── vite.config.js     # Vite configuration
+│   └── package-lock.json  # Locked Node.js dependencies (generated)
 ├── SecurityMaster/        # ICICI security master data
 ├── logs/                  # Application logs
 ├── run_backend.py         # Backend startup script
 ├── update_instruments.py  # Instruments update script
-└── env.example           # Environment variables template
+└── env.example           # Authoritative environment variables template
 ```
 
 ## Quick Start
@@ -49,10 +50,10 @@ icici-breeze-trading/
 
 ### Frontend Setup
 
-1. **Install Node.js dependencies:**
+1. **Install Node.js dependencies (locked):**
    ```bash
    cd frontend
-   npm install
+   npm ci
    ```
 
 2. **Run the frontend:**
@@ -77,25 +78,58 @@ python update_instruments.py
 - **Strategy Builder**: Custom trading strategy creation
 - **Holiday Calendar**: Market holiday tracking
 
-## API Endpoints
-
-- `GET /api/login` - User authentication
-- `GET /api/instruments/search` - Search instruments
-- `GET /api/instruments/live-trading` - Live trading instruments
-- `GET /api/nifty50/stocks` - Nifty 50 stocks
-- `GET /api/historical/daily` - Historical data
-- `WS /ws/ticks` - WebSocket for live prices
-
 ## Environment Variables
 
-Copy `env.example` to `.env` and configure:
+Copy `env.example` to `.env` and configure. These variables are loaded by the backend (via `dotenv`) and the frontend (Vite `VITE_*`). Do not commit real secrets.
 
 ```env
-ICICI_API_KEY=your_api_key
-ICICI_API_SECRET=your_api_secret
-ICICI_SESSION_KEY=your_session_key
-DATABASE_URL=your_database_url
+# Backend
+APP_NAME="Automated Trading Platform"
+ENVIRONMENT=development
+BREEZE_API_KEY=
+BREEZE_API_SECRET=
+BREEZE_SESSION_TOKEN=
+POSTGRES_DSN=
+INSTRUMENTS_FIRST_RUN_ON_LOGIN=true
+
+# Frontend
+VITE_API_BASE_URL=
+VITE_API_BASE_WS=
 ```
+
+## Dependency Locking
+
+### Python (Backend) with pip-tools
+
+- Top-level requirements are in `backend/requirements.in`.
+- Generate a locked `backend/requirements.txt` with hashes:
+  ```bash
+  pip install pip-tools
+  python -m piptools compile backend/requirements.in --resolver=backtracking --generate-hashes --output-file backend/requirements.txt
+  ```
+- Install using the locked file:
+  ```bash
+  pip install --require-hashes -r backend/requirements.txt
+  ```
+- For a full snapshot of the current environment (optional), `backend/requirements.lock.txt` is generated via:
+  ```bash
+  cd backend && pip freeze > requirements.lock.txt
+  ```
+
+### Node.js (Frontend)
+
+- Lockfile is `frontend/package-lock.json` (managed by npm).
+- Clean, reproducible install:
+  ```bash
+  cd frontend
+  npm ci
+  ```
+
+## Secret Management Policy
+
+- Never commit plaintext credentials. Files like `.breeze_session.json`, `breeze_credentials.txt`, `cookies.txt`, and `session_data.json` are ignored by `.gitignore` and must not be used for storing secrets.
+- Use a local `.env` for development and a secret manager for production (e.g., AWS Secrets Manager, Azure Key Vault, GCP Secret Manager, 1Password).
+- All code reads credentials from environment variables only. Session persistence remains in memory; no secret material is written to disk.
 
 ## Development
 
