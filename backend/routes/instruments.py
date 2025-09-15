@@ -72,7 +72,8 @@ def instruments_search(
         
         params.update({
             "exact_term": q.strip().upper(),
-            "prefix_term": f"{q.strip().upper()}%"
+            "prefix_term": f"{q.strip().upper()}%",
+            "limit": limit,
         })
 
         with get_conn() as conn:

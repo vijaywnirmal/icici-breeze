@@ -96,3 +96,42 @@ def set_cached_customer_details(api_session_token: str, details: Dict[str, Any])
 	_CUSTOMER_CACHE[api_session_token] = details
 
 
+def bootstrap_from_breeze_file() -> bool:
+	"""Bootstrap Breeze session from .breeze_session.json at repository root.
+
+	The file should contain JSON with keys: api_key, api_secret, session_key.
+	Returns True if session is established, otherwise False.
+	"""
+	global _BREEZE
+	# If already initialized, nothing to do
+	if _BREEZE is not None:
+		return True
+
+	# Candidate locations: CWD and project root (two levels up from this file)
+	candidates = [
+		Path.cwd() / ".breeze_session.json",
+		Path(__file__).resolve().parents[2] / ".breeze_session.json",
+	]
+
+	session_file: Optional[Path] = next((p for p in candidates if p.is_file()), None)
+	if session_file is None:
+		return False
+
+	try:
+		content = json.loads(session_file.read_text(encoding="utf-8"))
+		api_key = str(content.get("api_key") or "").strip()
+		api_secret = str(content.get("api_secret") or "").strip()
+		session_key = str(content.get("session_key") or "").strip()
+		if not api_key or not api_secret or not session_key:
+			return False
+
+		service = BreezeService(api_key=api_key)
+		result = service.login_and_fetch_profile(api_secret=api_secret, session_key=session_key)
+		if result and result.success:
+			set_breeze(service)
+			return True
+		return False
+	except Exception:
+		# Swallow errors to avoid crashing startup; caller can log
+		return False
+

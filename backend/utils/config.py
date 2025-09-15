@@ -5,10 +5,14 @@ from dotenv import load_dotenv
 
 
 # Ensure .env is loaded before reading environment variables
-# Look for .env file in the backend directory
+# Load both project root .env and backend/.env (backend overrides only missing keys)
 backend_dir = Path(__file__).parent.parent
-env_path = backend_dir / ".env"
-load_dotenv(env_path)
+project_root = backend_dir.parent
+
+# Load root .env first
+load_dotenv(project_root / ".env")
+# Then load backend/.env without overriding already-set variables
+load_dotenv(backend_dir / ".env", override=False)
 
 
 @dataclass(frozen=True)
