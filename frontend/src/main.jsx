@@ -2,14 +2,13 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
+import AppLayout from './components/AppLayout.jsx'
 import HomePage from './pages/Home.jsx'
 import HolidaysPage from './pages/Holidays.jsx'
 import BacktestPage from './pages/Backtest.jsx'
 import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
 import LiveTrading from './pages/LiveTrading.jsx'
-import TickerBar from './components/TickerBar.jsx'
-import CustomerProfile from './components/CustomerProfile.jsx'
 import './styles.css'
 
 // Silence all console output in production and development per request
@@ -32,52 +31,34 @@ createRoot(document.getElementById('root')).render(
 		<Routes>
 			<Route path="/" element={<App />} />
 			<Route path="/home" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<HomePage />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="/holidays" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<HolidaysPage />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="/backtest" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<BacktestPage />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="/builder" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<StrategyBuilder />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="/results" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<BacktestResults />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="/live-trading" element={
-				<div className="full-screen-layout">
-					<div className="ticker-container">
-						<TickerBar />
-					</div>
+				<AppLayout>
 					<LiveTrading />
-				</div>
+				</AppLayout>
 			} />
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>

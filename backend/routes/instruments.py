@@ -409,6 +409,80 @@ def get_instrument_tokens(
         return error_response("Failed to get instrument tokens", error=str(exc))
 
 
+@router.get("/nifty50/stocks")
+def get_nifty50_stocks() -> Dict[str, Any]:
+    """Get Nifty50 stocks list for ticker display.
+    
+    Returns a list of Nifty50 stocks with their tokens and symbols.
+    """
+    try:
+        # Define a basic list of Nifty50 stocks
+        # This is a simplified list - in production, you might want to fetch this from a more reliable source
+        nifty50_stocks = [
+            {"symbol": "RELIANCE", "token": "2885633", "company_name": "RELIANCE INDUSTRIES LTD"},
+            {"symbol": "TCS", "token": "2953217", "company_name": "TATA CONSULTANCY SERVICES LTD"},
+            {"symbol": "HDFCBANK", "token": "3419649", "company_name": "HDFC BANK LTD"},
+            {"symbol": "INFY", "token": "408065", "company_name": "INFOSYS LTD"},
+            {"symbol": "HINDUNILVR", "token": "356865", "company_name": "HINDUSTAN UNILEVER LTD"},
+            {"symbol": "ITC", "token": "424961", "company_name": "ITC LTD"},
+            {"symbol": "SBIN", "token": "779521", "company_name": "STATE BANK OF INDIA"},
+            {"symbol": "BHARTIARTL", "token": "2714625", "company_name": "BHARTI AIRTEL LTD"},
+            {"symbol": "KOTAKBANK", "token": "492033", "company_name": "KOTAK MAHINDRA BANK LTD"},
+            {"symbol": "LT", "token": "2933761", "company_name": "LARSEN & TOUBRO LTD"},
+            {"symbol": "ASIANPAINT", "token": "60417", "company_name": "ASIAN PAINTS LTD"},
+            {"symbol": "AXISBANK", "token": "1510401", "company_name": "AXIS BANK LTD"},
+            {"symbol": "MARUTI", "token": "2815745", "company_name": "MARUTI SUZUKI INDIA LTD"},
+            {"symbol": "SUNPHARMA", "token": "857857", "company_name": "SUN PHARMACEUTICAL INDUSTRIES LTD"},
+            {"symbol": "TITAN", "token": "897537", "company_name": "TITAN COMPANY LTD"},
+            {"symbol": "ULTRACEMCO", "token": "2952193", "company_name": "ULTRATECH CEMENT LTD"},
+            {"symbol": "WIPRO", "token": "969473", "company_name": "WIPRO LTD"},
+            {"symbol": "NESTLEIND", "token": "4598529", "company_name": "NESTLE INDIA LTD"},
+            {"symbol": "POWERGRID", "token": "3834113", "company_name": "POWER GRID CORP OF INDIA LTD"},
+            {"symbol": "NTPC", "token": "2977281", "company_name": "NTPC LTD"},
+            {"symbol": "ONGC", "token": "633601", "company_name": "OIL & NATURAL GAS CORP LTD"},
+            {"symbol": "TECHM", "token": "3465729", "company_name": "TECH MAHINDRA LTD"},
+            {"symbol": "TATAMOTORS", "token": "884737", "company_name": "TATA MOTORS LTD"},
+            {"symbol": "JSWSTEEL", "token": "3001089", "company_name": "JSW STEEL LTD"},
+            {"symbol": "BAJFINANCE", "token": "81153", "company_name": "BAJAJ FINANCE LTD"},
+            {"symbol": "HCLTECH", "token": "1850625", "company_name": "HCL TECHNOLOGIES LTD"},
+            {"symbol": "DRREDDY", "token": "225537", "company_name": "DR REDDYS LABORATORIES LTD"},
+            {"symbol": "BAJAJFINSV", "token": "4267265", "company_name": "BAJAJ FINSERV LTD"},
+            {"symbol": "ADANIPORTS", "token": "3861249", "company_name": "ADANI PORTS & SPECIAL ECONOMIC ZONE LTD"},
+            {"symbol": "COALINDIA", "token": "5215745", "company_name": "COAL INDIA LTD"},
+            {"symbol": "TATASTEEL", "token": "895745", "company_name": "TATA STEEL LTD"},
+            {"symbol": "GRASIM", "token": "315393", "company_name": "GRASIM INDUSTRIES LTD"},
+            {"symbol": "M&M", "token": "2815745", "company_name": "MAHINDRA & MAHINDRA LTD"},
+            {"symbol": "BRITANNIA", "token": "140033", "company_name": "BRITANNIA INDUSTRIES LTD"},
+            {"symbol": "EICHERMOT", "token": "232961", "company_name": "EICHER MOTORS LTD"},
+            {"symbol": "HEROMOTOCO", "token": "345089", "company_name": "HERO MOTOCORP LTD"},
+            {"symbol": "DIVISLAB", "token": "2800641", "company_name": "DIVIS LABORATORIES LTD"},
+            {"symbol": "CIPLA", "token": "177665", "company_name": "CIPLA LTD"},
+            {"symbol": "SHREECEM", "token": "794369", "company_name": "SHREE CEMENT LTD"},
+            {"symbol": "APOLLOHOSP", "token": "3861249", "company_name": "APOLLO HOSPITALS ENTERPRISE LTD"},
+            {"symbol": "BAJAJ-AUTO", "token": "4267265", "company_name": "BAJAJ AUTO LTD"},
+            {"symbol": "INDUSINDBK", "token": "3001089", "company_name": "INDUSIND BANK LTD"},
+            {"symbol": "TATACONSUM", "token": "884737", "company_name": "TATA CONSUMER PRODUCTS LTD"},
+            {"symbol": "BPCL", "token": "633601", "company_name": "BHARAT PETROLEUM CORP LTD"},
+            {"symbol": "HINDALCO", "token": "1850625", "company_name": "HINDALCO INDUSTRIES LTD"},
+            {"symbol": "UPL", "token": "225537", "company_name": "UPL LTD"},
+            {"symbol": "SBILIFE", "token": "4267265", "company_name": "SBI LIFE INSURANCE COMPANY LTD"},
+            {"symbol": "ICICIBANK", "token": "3861249", "company_name": "ICICI BANK LTD"},
+            {"symbol": "SHRIRAMFIN", "token": "5215745", "company_name": "SHRIRAM FINANCE LTD"},
+            {"symbol": "ADANIENT", "token": "895745", "company_name": "ADANI ENTERPRISES LTD"},
+            {"symbol": "HDFCLIFE", "token": "315393", "company_name": "HDFC LIFE INSURANCE COMPANY LTD"}
+        ]
+        
+        return success_response(
+            "Nifty50 stocks list",
+            count=len(nifty50_stocks),
+            stocks=nifty50_stocks
+        )
+        
+    except Exception as exc:
+        log_exception(exc, context="instruments.get_nifty50_stocks")
+        return error_response("Failed to get Nifty50 stocks", error=str(exc))
+
+
 def _example_join_trades() -> str:
     """Illustrative SQL for joining trades/orders that store token to instruments.
 

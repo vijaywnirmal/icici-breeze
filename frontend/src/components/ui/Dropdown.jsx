@@ -20,12 +20,18 @@ export function Dropdown({ trigger, children, align = 'right', position = 'botto
 			const viewportHeight = window.innerHeight
 			const viewportWidth = window.innerWidth
 			
-			// Check if dropdown goes below viewport
-			if (position === 'bottom' && rect.bottom > viewportHeight) {
+			// Only flip to top if there's really not enough space below (with some buffer)
+			if (position === 'bottom' && rect.bottom > viewportHeight - 20) {
 				dropdownRef.current.style.top = 'auto'
 				dropdownRef.current.style.bottom = '100%'
 				dropdownRef.current.style.marginBottom = 'var(--space-2)'
 				dropdownRef.current.style.marginTop = '0'
+			} else {
+				// Reset to default bottom position
+				dropdownRef.current.style.top = '100%'
+				dropdownRef.current.style.bottom = 'auto'
+				dropdownRef.current.style.marginTop = 'var(--space-2)'
+				dropdownRef.current.style.marginBottom = '0'
 			}
 			
 			// Check if dropdown goes right of viewport
@@ -36,13 +42,16 @@ export function Dropdown({ trigger, children, align = 'right', position = 'botto
 		}
 	}, [open, align, position])
 
-	return (
+		return (
 		<div 
 			ref={ref}
-			style={{ position: 'relative' }}
+			style={{ position: 'relative', zIndex: 1000 }}
 		>
 			<div 
-				onClick={() => setOpen(v => !v)} 
+				onClick={() => {
+					console.log('Dropdown clicked, current state:', open);
+					setOpen(v => !v);
+				}} 
 				style={{ cursor: 'pointer', userSelect: 'none' }}
 			>
 				{typeof trigger === 'function' ? trigger({ open }) : trigger}
@@ -50,6 +59,7 @@ export function Dropdown({ trigger, children, align = 'right', position = 'botto
 			{open && (
 				<div 
 					ref={dropdownRef}
+					data-dropdown="true"
 					style={{
 						position: 'absolute',
 						top: position === 'bottom' ? '100%' : 'auto',
@@ -64,7 +74,14 @@ export function Dropdown({ trigger, children, align = 'right', position = 'botto
 						borderRadius: 'var(--radius-lg)',
 						boxShadow: 'var(--shadow-lg)',
 						padding: 'var(--space-2)',
-						zIndex: 1000
+						zIndex: 9999,
+						visibility: 'visible',
+						opacity: 1,
+						display: 'block'
+					}}
+					onClick={(e) => {
+						console.log('Dropdown content clicked');
+						e.stopPropagation();
 					}}
 				>
 					{typeof children === 'function' ? children({ close: () => setOpen(false) }) : children}
