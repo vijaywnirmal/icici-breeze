@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
+import useWebSocket from '../hooks/useWebSocket'
 
 const WebSocketDemo = () => {
     const [instruments, setInstruments] = useState([])
@@ -9,6 +10,15 @@ const WebSocketDemo = () => {
     
     const wsRef = useRef(null)
     const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+    const wsBase = import.meta.env.VITE_API_BASE_WS || ''
+    const wsUrl = useMemo(() => {
+        const base = (wsBase || apiBase).replace(/\/$/, '')
+        if (base.startsWith('ws://') || base.startsWith('wss://')) return `${base}/ws/stocks`
+        if (base.startsWith('http://')) return `ws://${base.substring('http://'.length)}/ws/stocks`
+        if (base.startsWith('https://')) return `wss://${base.substring('https://'.length)}/ws/stocks`
+        return 'ws://127.0.0.1:8000/ws/stocks'
+    }, [apiBase, wsBase])
+    const { isOpen, connect, send, subscribe, addMessageListener } = useWebSocket(wsUrl)
 
     // Fetch all WebSocket-enabled instruments
     const fetchInstruments = async () => {
@@ -29,53 +39,11 @@ const WebSocketDemo = () => {
     }
 
     // Connect to WebSocket
-    const connectWebSocket = () => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-            return
-        }
-
-        const wsUrl = apiBase.replace('http', 'ws') + '/ws/stocks'
-        const ws = new WebSocket(wsUrl)
-        wsRef.current = ws
-
-        ws.onopen = () => {
-            console.log('WebSocket connected')
-            setWsConnected(true)
-        }
-
-        ws.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data)
-                if (data.type === 'tick') {
-                    setTickData(prev => ({
-                        ...prev,
-                        [data.symbol]: {
-                            ltp: data.ltp,
-                            close: data.close,
-                            change_pct: data.change_pct,
-                            timestamp: data.timestamp
-                        }
-                    }))
-                }
-            } catch (error) {
-                console.error('Error parsing WebSocket message:', error)
-            }
-        }
-
-        ws.onclose = () => {
-            console.log('WebSocket disconnected')
-            setWsConnected(false)
-        }
-
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error)
-            setWsConnected(false)
-        }
-    }
+    const connectWebSocket = () => connect()
 
     // Subscribe to selected instruments
     const subscribeToInstruments = () => {
-        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        if (!isOpen) {
             console.error('WebSocket not connected')
             return
         }
@@ -94,10 +62,7 @@ const WebSocketDemo = () => {
         }))
 
         // Send subscription message
-        wsRef.current.send(JSON.stringify({
-            action: 'subscribe_many',
-            symbols: symbols
-        }))
+        subscribe(symbols)
 
         console.log(`Subscribed to ${selectedInstruments.length} instruments`)
     }
@@ -116,13 +81,23 @@ const WebSocketDemo = () => {
 
     useEffect(() => {
         fetchInstruments()
-        
-        return () => {
-            if (wsRef.current) {
-                wsRef.current.close()
-            }
-        }
-    }, [])
+        const off = addMessageListener((data) => {
+            try {
+                if (data && data.type === 'tick') {
+                    setTickData(prev => ({
+                        ...prev,
+                        [data.symbol]: {
+                            ltp: data.ltp,
+                            close: data.close,
+                            change_pct: data.change_pct,
+                            timestamp: data.timestamp
+                        }
+                    }))
+                }
+            } catch {}
+        })
+        return () => off()
+    }, [addMessageListener])
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>

@@ -3,7 +3,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
-	overflow: hidden;
+	overflow: visible;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -12,8 +12,9 @@
 	overflow-y: auto;
 	overflow-x: hidden;
 	background: linear-gradient(135deg, rgba(15, 15, 23, 0.98), rgba(20, 20, 30, 0.95));
-	position: relative;
-	z-index: 10;
+	/* Ensure content sits below the header/ticker, not above it */
+	height: auto; /* override any earlier height: 100vh */
+	/* removed position and z-index so header remains visible */
 }
 
 .main-header {
@@ -67,7 +68,7 @@
 	border-radius: 0 0 12px 12px;
 	height: 32px;
 	width: 100%;
-	overflow: hidden;
+	overflow: visible;
 	border-top: 1px solid rgba(255, 255, 255, 0.05);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
@@ -211,7 +212,7 @@
 	display: flex;
 	align-items: center;
 	height: 100%;
-	z-index: 1001;
+	z-index: 999;
 }
 
 .ticker-control-btn {
@@ -284,7 +285,7 @@
 	transform: translateY(-2px);
 }
 
-/* Pause animation on hover */
+/* Hover pause behavior */
 .ticker-marquee-container:hover .ticker-marquee {
 	animation-play-state: paused;
 }
@@ -302,7 +303,7 @@
 	right: 0;
 	bottom: 0;
 	background: transparent;
-	z-index: 1000;
+	z-index: 999;
 	pointer-events: auto;
 }
 
@@ -527,8 +528,10 @@
 	padding: 24px;
 	max-width: 1200px;
 	margin: 0 auto;
-	height: 100%;
-	overflow-y: auto;
+	/* Prevent grid from stretching to full height and stretching cards */
+	align-items: start;
+	grid-auto-rows: minmax(160px, auto);
+	/* removed height and overflow so the page scroll is handled by .main-content */
 }
 
 .feature-card {
@@ -536,6 +539,8 @@
 	border: 1px solid rgba(255, 255, 255, 0.1) !important;
 	backdrop-filter: blur(10px);
 	transition: all 0.3s ease;
+	/* Keep a consistent minimum height for good visual balance */
+	min-height: 50px;
 }
 
 .feature-card:hover {
@@ -569,6 +574,8 @@
 	.features-grid {
 		grid-template-columns: repeat(3, 1fr);
 		gap: 16px;
+		/* Ensure consistent row sizing on tablets */
+		grid-auto-rows: minmax(160px, auto);
 	}
 }
 
@@ -609,6 +616,7 @@
 		grid-template-columns: repeat(2, 1fr);
 		gap: 16px;
 		padding: 16px;
+		grid-auto-rows: minmax(160px, auto);
 	}
 }
 
@@ -649,5 +657,6 @@
 		grid-template-columns: 1fr;
 		gap: 12px;
 		padding: 12px;
+		grid-auto-rows: minmax(140px, auto);
 	}
 }

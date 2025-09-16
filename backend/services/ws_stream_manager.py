@@ -223,8 +223,23 @@ class BreezeSocketService:
                                     # Swallow handler errors to avoid noisy logs
                                     pass
                         else:
-                            # Route to regular clients only
+                            # Route to regular clients
                             asyncio.run_coroutine_threadsafe(self._broadcast(payload), self._loop)
+                            
+                            # If market depth is present, also forward to option clients so depth-only
+                            # subscriptions (which may lack strike/right fields) still reach the options UI
+                            try:
+                                if payload.get("bids") or payload.get("asks"):
+                                    asyncio.run_coroutine_threadsafe(self._broadcast_options(payload), self._loop)
+                                    # Invoke option handlers as well
+                                    option_handlers = getattr(self, '_option_tick_handlers', [])
+                                    for handler in option_handlers:
+                                        try:
+                                            asyncio.run_coroutine_threadsafe(handler(payload), self._loop)
+                                        except Exception:
+                                            pass
+                            except Exception:
+                                pass
                 except Exception as exc:
                     log_exception(exc, context="BreezeSocketService.on_ticks")
 

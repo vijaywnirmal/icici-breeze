@@ -75,6 +75,17 @@ async def ws_options(websocket: WebSocket) -> None:
     async def _forward_filtered_option_tick(tick: Dict[str, Any]) -> None:
         try:
             sel = getattr(state, 'selected_expiry_iso', '') or ''
+            # Detect presence of market depth payload
+            has_depth = False
+            try:
+                has_depth = bool(
+                    (tick.get('bids') and isinstance(tick.get('bids'), list) and len(tick.get('bids')) > 0) or
+                    (tick.get('asks') and isinstance(tick.get('asks'), list) and len(tick.get('asks')) > 0) or
+                    (tick.get('depth') and isinstance(tick.get('depth'), list) and len(tick.get('depth')) > 0)
+                )
+            except Exception:
+                has_depth = False
+
             if sel:
                 # Extract expiry from tick or alias
                 raw_exp = tick.get('expiry_date') or ''
@@ -97,8 +108,17 @@ async def ws_options(websocket: WebSocket) -> None:
                         norm = datetime.fromisoformat(str(raw_exp).replace('Z', '+00:00')).date().isoformat()
                 except Exception:
                     norm = str(raw_exp)[:10]
-                if norm != sel:
+
+                # If we cannot determine expiry but this is a depth tick, allow it and stamp current expiry
+                if not norm and has_depth:
+                    try:
+                        tick['expiry_date'] = sel
+                    except Exception:
+                        pass
+                elif norm and norm != sel:
+                    # If the tick has a determinable expiry that doesn't match current selection, drop it
                     return
+
             await websocket.send_text(json.dumps(tick))
         except Exception as exc:
             log_exception(exc, context="ws_options.forward_filtered")

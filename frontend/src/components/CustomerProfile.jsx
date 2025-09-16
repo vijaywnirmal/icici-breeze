@@ -3,6 +3,27 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Dropdown, DropdownItem } from './ui/Dropdown.jsx'
 import Button from './ui/Button.jsx'
 
+// Add CSS keyframes for dropdown animation
+const dropdownStyles = `
+@keyframes dropdownFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+`
+
+// Inject styles
+if (typeof document !== 'undefined') {
+	const styleElement = document.createElement('style')
+	styleElement.textContent = dropdownStyles
+	document.head.appendChild(styleElement)
+}
+
 export default function CustomerProfile({ layout = 'sidebar' }) {
 	const [customerData, setCustomerData] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -157,107 +178,58 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 			</button>
 			
 			{showDropdown && (
-				<div 
-					style={{
-						position: 'absolute',
-						top: '100%',
-						right: '0',
-						marginTop: 'var(--space-1)',
-						minWidth: '180px',
-						backgroundColor: 'var(--panel)',
-						border: '1px solid var(--border)',
-						borderRadius: 'var(--radius)',
-						boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-						padding: 'var(--space-2)',
-						zIndex: 9999,
-						visibility: 'visible',
-						opacity: 1,
-						display: 'block'
-					}}
-					onClick={(e) => {
-						console.log('Dropdown content clicked');
-						e.stopPropagation();
-					}}
-				>
-					{customerData && (
-						<>
-							<div style={{ marginBottom: 'var(--space-2)' }}>
-								<div style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--space-1) 0', fontSize: '11px' }}>
-									<span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>User ID:</span>
-									<span style={{ color: 'var(--text)', textAlign: 'right', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-										{customerData.idirect_userid || customerData.user_id || 'N/A'}
-									</span>
+				<>
+					{/* Overlay */}
+					<div 
+						className="profile-modal-overlay"
+						onClick={() => setShowDropdown(false)}
+					/>
+
+					{/* Modal */}
+					<div 
+						className="profile-modal"
+						ref={dropdownRef}
+						onClick={(e) => e.stopPropagation()}
+					>
+						{customerData && (
+							<div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+								<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+									<span style={{ color: 'rgba(255,255,255,0.6)' }}>User ID:</span>
+									<span>{customerData.idirect_userid || customerData.user_id || 'N/A'}</span>
 								</div>
-								<div style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--space-1) 0', fontSize: '11px' }}>
-									<span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Name:</span>
-									<span style={{ color: 'var(--text)', textAlign: 'right', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-										{getDisplayName()}
-									</span>
+								<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+									<span style={{ color: 'rgba(255,255,255,0.6)' }}>Name:</span>
+									<span>{getDisplayName()}</span>
 								</div>
 							</div>
-							<div style={{ height: '1px', background: 'var(--border)', margin: 'var(--space-2) 0' }}></div>
-						</>
-					)}
-					<div 
-						style={{
-							padding: 'var(--space-1) var(--space-2)',
-							borderRadius: 'var(--radius)',
-							backgroundColor: 'transparent',
-							color: 'var(--text)',
-							fontSize: '12px',
-							fontFamily: 'var(--font-sans)',
-							cursor: 'pointer',
-							transition: 'var(--transition-fast)',
-							display: 'flex',
-							alignItems: 'center',
-							gap: 'var(--space-1)',
-							height: '24px'
-						}}
-						onClick={() => navigate('/holidays')}
-						onMouseEnter={(e) => {
-							e.target.style.backgroundColor = 'var(--panel-hover)'
-						}}
-						onMouseLeave={(e) => {
-							e.target.style.backgroundColor = 'transparent'
-						}}
-					>
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-							<path d="M3 5h18M8 5v14m8-14v14M3 19h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-						</svg>
-						Holidays
+						)}
+
+						<div 
+							className="profile-modal-item"
+							onClick={() => navigate('/holidays')}
+						>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+								<path d="M3 5h18M8 5v14m8-14v14M3 19h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+							</svg>
+							Holidays
+						</div>
+
+						<div 
+							className="profile-modal-item logout"
+							onClick={handleLogout}
+						>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+								<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" 
+									stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+							Logout
+						</div>
 					</div>
-					<div 
-						style={{
-							padding: 'var(--space-1) var(--space-2)',
-							borderRadius: 'var(--radius)',
-							backgroundColor: 'transparent',
-							color: 'var(--danger)',
-							fontSize: '12px',
-							fontFamily: 'var(--font-sans)',
-							cursor: 'pointer',
-							transition: 'var(--transition-fast)',
-							display: 'flex',
-							alignItems: 'center',
-							gap: 'var(--space-1)',
-							height: '24px'
-						}}
-						onClick={handleLogout}
-						onMouseEnter={(e) => {
-							e.target.style.backgroundColor = 'var(--panel-hover)'
-						}}
-						onMouseLeave={(e) => {
-							e.target.style.backgroundColor = 'transparent'
-						}}
-					>
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-						</svg>
-						Logout
-					</div>
-				</div>
+				</>
 			)}
 		</div>
 	)
 
 	return null
 }
+

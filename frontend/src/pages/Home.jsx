@@ -46,26 +46,18 @@ export default function HomePage() {
 	const mainFeatures = [
 		{
 			title: 'Live Trading',
-			description: 'Real-time market data and option chains',
-			icon: '📈',
 			action: () => navigate('/live-trading')
 		},
 		{
 			title: 'Backtest Strategy',
-			description: 'Test your trading strategies with historical data',
-			icon: '🔬',
 			action: () => navigate('/backtest')
 		},
 		{
 			title: 'Strategy Builder',
-			description: 'Build and customize trading strategies',
-			icon: '🔧',
 			action: () => navigate('/builder')
 		},
 		{
 			title: 'View Results',
-			description: 'Analyze backtest results and performance',
-			icon: '📊',
 			action: () => navigate('/results')
 		}
 	]
@@ -100,7 +92,8 @@ export default function HomePage() {
 					className="feature-card"
 					style={{
 						cursor: 'pointer',
-						minHeight: '120px',
+						// Keep consistent minimum height; avoids overly tall cards
+						minHeight: '50px',
 						border: '1px solid rgba(255, 255, 255, 0.1)',
 						background: 'rgba(255, 255, 255, 0.02)',
 						transition: 'all 0.3s ease',
@@ -112,7 +105,8 @@ export default function HomePage() {
 						<div style={{
 							display: 'flex',
 							flexDirection: 'column',
-							height: '100%',
+							// Remove forced stretch inside cards
+							// height: '100%',
 							gap: 'var(--space-3)',
 							alignItems: 'center',
 							textAlign: 'center'

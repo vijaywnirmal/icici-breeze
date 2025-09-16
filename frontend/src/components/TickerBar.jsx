@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import GenericOptionChainGrid from './GenericOptionChainGrid'
 import CustomerProfile from './CustomerProfile'
@@ -25,6 +24,7 @@ export default function TickerBar() {
 	const [selectedIndexConfig, setSelectedIndexConfig] = useState(null)
 	const [tickerPaused, setTickerPaused] = useState(false)
 	const [showSettings, setShowSettings] = useState(false)
+	const settingsRef = useRef(null)
 	const [visibleIndices, setVisibleIndices] = useState({
 		'NIFTY': true,
 		'BANKNIFTY': true,
@@ -109,6 +109,20 @@ export default function TickerBar() {
 		})
 		setTickerSpeed(60)
 	}
+
+	// Handle click outside to close settings dropdown
+	useEffect(() => {
+		function handleClickOutside(event) {
+			if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+				setShowSettings(false)
+			}
+		}
+
+		if (showSettings) {
+			document.addEventListener('mousedown', handleClickOutside)
+			return () => document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [showSettings])
 
 	const handleSpeedChange = (e) => {
 		setTickerSpeed(parseInt(e.target.value))
@@ -423,15 +437,100 @@ export default function TickerBar() {
 				{/* Right Control Buttons */}
 				<div className="ticker-controls-right">
 					<div className="settings-dropdown-container">
-						<button 
-							className="ticker-control-btn"
-							onClick={() => setShowSettings(true)}
-						>
-							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" strokeWidth="2"/>
-								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" strokeWidth="2"/>
-							</svg>
-						</button>
+						<div style={{ position: 'relative' }}>
+							<button 
+								className="ticker-control-btn"
+								onClick={() => setShowSettings(!showSettings)}
+								title="Edit Columns"
+							>
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" strokeWidth="2"/>
+									<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" strokeWidth="2"/>
+								</svg>
+							</button>
+							{showSettings && (
+								<div
+									ref={settingsRef}
+									style={{
+										position: 'absolute',
+										top: '100%',
+										right: '0',
+										marginTop: '8px',
+										background: '#1a1a1a',
+										border: '1px solid #333',
+										borderRadius: '8px',
+										padding: '16px',
+										minWidth: '280px',
+										zIndex: 9999,
+										boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+									}}
+									onClick={(e) => e.stopPropagation()}
+								>
+									<div style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#fff' }}>
+										Edit Columns
+									</div>
+									<div style={{ marginBottom: '16px' }}>
+										{Object.entries(visibleIndices).map(([index, visible]) => (
+											<label
+												key={index}
+												style={{
+													display: 'flex',
+													alignItems: 'center',
+													marginBottom: '8px',
+													cursor: 'pointer',
+													color: '#fff'
+												}}
+											>
+												<input
+													type="checkbox"
+													checked={visible}
+													onChange={(e) => setVisibleIndices(prev => ({
+														...prev,
+														[index]: e.target.checked
+													}))}
+													style={{ marginRight: '8px' }}
+												/>
+												{index}
+											</label>
+										))}
+									</div>
+									<button
+										onClick={handleResetSettings}
+										style={{
+											background: '#333',
+											color: '#fff',
+											border: '1px solid #555',
+											borderRadius: '4px',
+											padding: '6px 12px',
+											fontSize: '12px',
+											cursor: 'pointer',
+											marginBottom: '12px'
+										}}
+									>
+										Reset to Default
+									</button>
+									<div style={{ marginBottom: '8px', fontSize: '12px', color: '#ccc' }}>
+										Ticker Speed: {tickerSpeed}s
+									</div>
+									<input
+										type="range"
+										min="10"
+										max="300"
+										step="10"
+										value={tickerSpeed}
+										onChange={handleSpeedChange}
+										style={{
+											width: '100%',
+											height: '4px',
+											background: '#333',
+											borderRadius: '2px',
+											outline: 'none',
+											cursor: 'pointer'
+										}}
+									/>
+								</div>
+							)}
+						</div>
 						
 					</div>
 				</div>
@@ -452,76 +551,7 @@ export default function TickerBar() {
 				/>
 			)}
 
-			{/* Settings Modal - rendered using portal */}
-			{showSettings && createPortal(
-				<div className="settings-modal-overlay" onClick={() => setShowSettings(false)}>
-					<div className="settings-modal" onClick={(e) => e.stopPropagation()}>
-						<div className="settings-header">
-							<span className="settings-title">Edit Columns</span>
-							<button className="settings-reset-btn" onClick={handleResetSettings}>
-								<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="14" width="14">
-									<g clipPath="url(#clip0_1_277)">
-										<path fill="currentColor" d="M12 20q-3.35 0-5.675-2.325T4 12t2.325-5.675T12 4q1.725 0 3.3.713A7.6 7.6 0 0 1 18 6.75V5q0-.424.288-.713A.97.97 0 0 1 19 4q.424 0 .712.287Q20 4.576 20 5v5q0 .424-.288.713A.97.97 0 0 1 19 11h-5a.97.97 0 0 1-.713-.287A.97.97 0 0 1 13 10q0-.424.287-.713A.97.97 0 0 1 14 9h3.2a5.84 5.84 0 0 0-2.187-2.2A5.93 5.93 0 0 0 12 6Q9.5 6 7.75 7.75T6 12t1.75 4.25T12 18q1.699 0 3.113-.863a5.95 5.95 0 0 0 2.187-2.312 1.07 1.07 0 0 1 .563-.487q.362-.138.737-.013a.9.9 0 0 1 .575.525q.175.4-.025.75a8.1 8.1 0 0 1-2.925 3.2Q14.325 20 12 20"></path>
-									</g>
-									<defs>
-										<clipPath id="clip0_1_277">
-											<path fill="#fff" d="M0 0h24v24H0z"></path>
-										</clipPath>
-									</defs>
-								</svg>
-								Reset
-							</button>
-						</div>
-						
-						<div className="settings-columns">
-							{nseIndexes.map((index) => (
-								<div key={index.name} className="settings-column-item">
-									<div className="column-drag-handle">
-										<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
-											<path fill="currentColor" d="M9 20q-.825 0-1.412-.587A1.93 1.93 0 0 1 7 18q0-.824.588-1.413A1.93 1.93 0 0 1 9 16q.825 0 1.412.587Q11 17.176 11 18q0 .824-.588 1.413A1.93 1.93 0 0 1 9 20m6 0q-.825 0-1.412-.587A1.93 1.93 0 0 1 13 18q0-.824.588-1.413A1.93 1.93 0 0 1 15 16q.824 0 1.413.587Q17 17.176 17 18q0 .824-.587 1.413A1.93 1.93 0 0 1 15 20m-6-6q-.825 0-1.412-.588A1.93 1.93 0 0 1 7 12q0-.825.588-1.412A1.93 1.93 0 0 1 9 10q.825 0 1.412.588Q11 11.175 11 12t-.588 1.412A1.93 1.93 0 0 1 9 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 13 12q0-.825.588-1.412A1.93 1.93 0 0 1 15 10q.824 0 1.413.588Q17 11.175 17 12t-.587 1.412A1.93 1.93 0 0 1 15 14M9 8q-.825 0-1.412-.588A1.93 1.93 0 0 1 7 6q0-.824.588-1.412A1.93 1.93 0 0 1 9 4q.825 0 1.412.588Q11 5.175 11 6q0 .824-.588 1.412A1.93 1.93 0 0 1 9 8m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 13 6q0-.824.588-1.412A1.93 1.93 0 0 1 15 4q.824 0 1.413.588Q17 5.175 17 6q0 .824-.587 1.412A1.93 1.93 0 0 1 15 8"></path>
-										</svg>
-									</div>
-									<span className="column-name">{index.name}</span>
-									<label className="column-checkbox">
-										<input
-											type="checkbox"
-											checked={visibleIndices[index.name] || false}
-											onChange={() => handleToggleIndex(index.name)}
-										/>
-										<span className="checkmark">
-											<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" height="16" width="16">
-												<g clipPath="url(#clip0_1_129)">
-													<path fill="currentColor" d="m9.55 14.15 8.475-8.475q.3-.3.713-.3.412 0 .712.3t.3.713-.3.712l-9.2 9.2q-.3.3-.7.3a.96.96 0 0 1-.7-.3L4.55 12a.93.93 0 0 1-.288-.713 1.02 1.02 0 0 1 .313-.712q.3-.3.712-.3.413 0 .713.3z"></path>
-												</g>
-												<defs>
-													<clipPath id="clip0_1_129">
-														<path fill="#fff" d="M0 0h24v24H0z"></path>
-													</clipPath>
-												</defs>
-											</svg>
-										</span>
-									</label>
-								</div>
-							))}
-						</div>
-						
-						<div className="settings-speed">
-							<label className="speed-label">Ticker Speed</label>
-							<div className="speed-slider-container">
-								<input
-									type="range"
-									min="10"
-									max="120"
-									value={tickerSpeed}
-									onChange={handleSpeedChange}
-									className="speed-slider"
-								/>
-							</div>
-						</div>
-					</div>
-				</div>,
-				document.body
-			)}
+
 
 		</>
 	)
