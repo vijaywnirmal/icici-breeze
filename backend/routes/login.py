@@ -6,7 +6,7 @@ from ..utils.session import set_breeze
 from ..utils.response import success_response, error_response, log_exception
 from ..utils.config import settings
 from ..utils.session import get_breeze
-from ..utils.session import get_cached_customer_details, set_cached_customer_details
+from ..utils.session import get_cached_customer_details, set_cached_customer_details, purge_session_and_caches
 
 
 router = APIRouter(prefix="/api", tags=["auth"])
@@ -144,3 +144,14 @@ def account_details(api_session: str | None = Query(None)) -> dict[str, object]:
     except Exception as exc:
         log_exception(exc, context="login.account_details")
         return error_response("Unexpected error", error=str(exc))
+
+
+@router.post("/logout")
+def logout(api_session: str | None = Query(None)) -> dict[str, object]:
+    """Clear active Breeze session and cached customer data (Redis + memory)."""
+    try:
+        purge_session_and_caches(api_session)
+        return success_response("Logged out", cleared_api_session=api_session or "all")
+    except Exception as exc:
+        log_exception(exc, context="auth.logout")
+        return error_response("Failed to logout", error=str(exc))

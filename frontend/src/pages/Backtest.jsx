@@ -15,7 +15,7 @@ export default function BacktestPage() {
 	const [backtestId, setBacktestId] = useState('')
 	const [trades, setTrades] = useState([])
 
-	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+	const apiBase = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) || (typeof window !== 'undefined' ? window.location.origin : '')
 	const api = useMemo(() => (apiBase || '').replace(/\/$/, ''), [apiBase])
 
 	async function onRun(e) {

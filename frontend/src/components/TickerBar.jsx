@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/router'
 import GenericOptionChainGrid from './GenericOptionChainGrid'
 import CustomerProfile from './CustomerProfile'
 import Navigation from './Navigation'
 import { INDEX_CONFIGS } from '../config/indexConfigs'
-import './TickerBar.css'
+// Import moved to pages/_app.jsx to satisfy Next.js global CSS rule
 
 const WS_PATH = '/ws/stocks'
 
 export default function TickerBar() {
-	const navigate = useNavigate()
+	const router = useRouter()
 	
 	// Define the NSE indexes with their Breeze tokens
 	const nseIndexes = [
@@ -32,8 +32,8 @@ export default function TickerBar() {
 	})
 	const [tickerSpeed, setTickerSpeed] = useState(60)
 
-	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
-	const wsBase = import.meta.env.VITE_API_BASE_WS || ''
+	const apiBase = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) || ''
+	const wsBase = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_WS) || ''
 	const httpBase = useMemo(() => (apiBase || 'http://127.0.0.1:8000').replace(/\/$/, ''), [apiBase])
 	const wsUrl = useMemo(() => {
 		const base = (wsBase || httpBase || '').replace(/\/$/, '')
@@ -344,13 +344,13 @@ export default function TickerBar() {
 
 		return (
 		<>
-			{/* Main Header with Title, Icon and Profile */}
+			{/* Main Header with Title, Nav and Profile */}
 			<div className="main-header">
 				{/* Left side - Icon and Title */}
 				<div className="header-left">
 					<button
 						className="logo-button-minimal"
-						onClick={() => navigate('/home')}
+						onClick={() => router.push('/')}
 					>
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
 							<path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -364,8 +364,16 @@ export default function TickerBar() {
 					</div>
 				</div>
 
-				{/* Right side - Profile Button */}
-				<CustomerProfile />
+				{/* Right side - App Navigation + Profile */}
+				<div className="header-right">
+					<nav className="header-nav">
+						<button className="nav-chip" onClick={() => router.push('/live-trading')}>Live Trading</button>
+						<button className="nav-chip" onClick={() => router.push('/backtest')}>Backtest Strategy</button>
+						<button className="nav-chip" onClick={() => router.push('/builder')}>Strategy Builder</button>
+						<button className="nav-chip" onClick={() => router.push('/results')}>View Results</button>
+					</nav>
+					<CustomerProfile />
+				</div>
 			</div>
 
 			{/* Professional Ticker Bar */}

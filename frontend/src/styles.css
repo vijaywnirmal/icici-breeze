@@ -26,8 +26,8 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
-  }
-  
+}
+
   html,
   body,
   #root {
@@ -75,8 +75,8 @@
 	flex-direction: column;
 	background: var(--bg-color);
 	overflow: hidden;
-  }
-  
+}
+
   /* ===============================
 	 TICKER BAR
   =================================*/
@@ -123,6 +123,7 @@
   .customer-profile,
   .sidebar-profile {
 	position: relative;
+	z-index: 12600;
 	color: var(--text-color);
 	font-size: 13px;
   }
@@ -132,32 +133,33 @@
 	position: fixed;
 	inset: 0;
 	background: transparent;
-	z-index: 1100; /* below the modal */
+	z-index: 999; /* below the modal */
 	pointer-events: auto;
   }
   
-  /* Dropdown container anchored to viewport (avoid clipping) */
+  /* Dropdown container positioned relative to button */
   .profile-modal,
   .profile-dropdown {
-	position: fixed; /* pin to viewport */
-	top: 80px; /* adjust to match header height */
-	right: 20px;
+	position: absolute;
+	top: 100%; /* position below the button */
+	right: 0; /* align with right edge of button */
 	background: rgba(20,20,25,0.98);
 	border: 1px solid rgba(255,255,255,0.12);
 	border-radius: 8px;
 	box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-	z-index: 1200; /* above overlay and ticker */
+	z-index: 1001; /* above overlay */
 	animation: dropdownFadeIn 0.2s ease;
 	min-width: 220px;
 	padding: 12px 0;
 	overflow: hidden;
   }
-
+  
   /* Ensure profile button is above ticker and can be clickable */
   .profile-button-minimal,
   .profile-button {
 	position: relative;
-	z-index: 1210;
+	z-index: 1000;
+	pointer-events: auto;
   }
   
   /* Dropdown items */
@@ -184,15 +186,15 @@
   
   @keyframes dropdownFadeIn {
 	from {
-	  opacity: 0;
-	  transform: translateY(-10px);
+		opacity: 0;
+		transform: translateY(-10px);
 	}
 	to {
-	  opacity: 1;
-	  transform: translateY(0);
+		opacity: 1;
+		transform: translateY(0);
 	}
-  }
-  
+}
+
   /* ===============================
 	 MODALS
   =================================*/
@@ -223,7 +225,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	align-items: center;
+	align-items: center; 
 	height: 100%;
 	background: var(--bg-color);
   }

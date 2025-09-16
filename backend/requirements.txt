@@ -14,3 +14,4 @@ pandas
 nselib
 nsetools
 nsepython
+redis>=5.0.0

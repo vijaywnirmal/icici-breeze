@@ -12,7 +12,7 @@ export default function EnhancedTradingPlatform() {
 	const [selectedTab, setSelectedTab] = useState('search') // 'search', 'watchlist', 'trending'
 	const searchTimeoutRef = useRef(null)
 
-	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+	const apiBase = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) || (typeof window !== 'undefined' ? window.location.origin : '')
 	const wsBase = apiBase.replace('http', 'ws')
 
 	// Check market status on component mount
