@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { Dropdown, DropdownItem } from './ui/Dropdown.jsx'
 import Button from './ui/Button.jsx'
 
@@ -9,11 +10,11 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 	const [customerData, setCustomerData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [showDropdown, setShowDropdown] = useState(false)
-	const navigate = useNavigate()
-	const dropdownRef = useRef(null)
+	const router = useRouter()
+	const containerRef = useRef(null)
 	
-	const apiBase = import.meta.env.VITE_API_BASE_URL || ''
-	const api = useMemo(() => (apiBase || '').replace(/\/$/, ''), [apiBase])
+	const apiBase = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) || ''
+	const api = useMemo(() => (apiBase || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, ''), [apiBase])
 
 	function makeUrl(path) {
 		try {
@@ -69,7 +70,7 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 	// Handle click outside to close dropdown
 	useEffect(() => {
 		function handleClickOutside(event) {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+			if (containerRef.current && !containerRef.current.contains(event.target)) {
 				setShowDropdown(false)
 			}
 		}
@@ -80,9 +81,14 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 		}
 	}, [showDropdown])
 
-	const handleLogout = () => {
-		sessionStorage.removeItem('api_session')
-		navigate('/', { replace: true })
+	const handleLogout = async () => {
+		try {
+			const token = sessionStorage.getItem('api_session') || ''
+			const url = token ? `/api/logout?api_session=${encodeURIComponent(token)}` : '/api/logout'
+			await fetch(url, { method: 'POST' }).catch(() => null)
+		} catch {}
+		try { sessionStorage.removeItem('api_session') } catch {}
+		router.replace('/')
 	}
 
 	// Extract display name from customer data
@@ -117,7 +123,7 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 
 	if (layout === 'sidebar') {
 		return (
-			<div className="sidebar-profile" ref={dropdownRef}>
+			<div className="sidebar-profile" ref={containerRef}>
 				<Dropdown
 					trigger={<div className="sidebar-profile-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" stroke="currentColor" strokeWidth="1"/></svg></div>}
 					position="top"
@@ -130,7 +136,7 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 									<div className="info-item"><span className="info-label">Name:</span><span className="info-value">{getDisplayName()}</span></div>
 								</>
 							)}
-							<Link to="/holidays" className="sidebar-profile-item">
+							<Link href="/holidays" className="sidebar-profile-item">
 								<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 5h18M8 5v14m8-14v14M3 19h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
 								<span>Holidays</span>
 							</Link>
@@ -144,7 +150,11 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 
 	// Top-right profile button for main layout
 	return (
+<<<<<<< HEAD
 		<div style={{ position: 'relative', display: 'inline-block', zIndex: 10000 }}>
+=======
+		<div className="customer-profile" ref={containerRef} style={{ position: 'relative', zIndex: 1000 }}>
+>>>>>>> 5c637c62df39be05dea64d026b57124ad9477fe3
 			<button 
 				style={{
 					width: '40px',
@@ -183,6 +193,7 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 			</button>
 			
 			{showDropdown && (
+<<<<<<< HEAD
 				<div
 					ref={dropdownRef}
 					style={{
@@ -218,10 +229,35 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 							<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
 								<span style={{ color: 'rgba(255,255,255,0.6)' }}>Name:</span>
 								<span style={{ color: '#fff', fontWeight: '500' }}>{getDisplayName()}</span>
+=======
+				<>
+					{/* Overlay */}
+					<div 
+						className="profile-modal-overlay"
+						onClick={() => setShowDropdown(false)}
+					/>
+
+					{/* Modal */}
+					<div 
+						className="profile-modal"
+						onClick={(e) => e.stopPropagation()}
+					>
+						{customerData && (
+							<div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+								<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+									<span style={{ color: 'rgba(255,255,255,0.6)' }}>User ID:</span>
+									<span>{customerData.idirect_userid || customerData.user_id || 'N/A'}</span>
+								</div>
+								<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+									<span style={{ color: 'rgba(255,255,255,0.6)' }}>Name:</span>
+									<span>{getDisplayName()}</span>
+								</div>
+>>>>>>> 5c637c62df39be05dea64d026b57124ad9477fe3
 							</div>
 						</div>
 					)}
 
+<<<<<<< HEAD
 					{/* Menu Items */}
 					<div style={{ marginBottom: '16px' }}>
 						<div 
@@ -245,12 +281,24 @@ export default function CustomerProfile({ layout = 'sidebar' }) {
 							onMouseLeave={(e) => {
 								e.target.style.background = 'transparent';
 							}}
+=======
+						<button 
+							type="button"
+							className="profile-modal-item logout"
+							onClick={handleLogout}
+							style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none' }}
+>>>>>>> 5c637c62df39be05dea64d026b57124ad9477fe3
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 								<path d="M3 5h18M8 5v14m8-14v14M3 19h18" strokeLinecap="round"/>
 							</svg>
+<<<<<<< HEAD
 							<span style={{ fontSize: '13px', fontWeight: '500' }}>Holidays</span>
 						</div>
+=======
+							Logout
+						</button>
+>>>>>>> 5c637c62df39be05dea64d026b57124ad9477fe3
 					</div>
 
 					{/* Logout Button */}
