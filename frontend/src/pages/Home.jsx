@@ -3,6 +3,7 @@ import { Card, CardHeader, CardContent } from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Typography from '../components/ui/Typography'
 import { useNavigate } from 'react-router-dom'
+import WatchlistWidget from '../components/WatchlistWidget'
 
 export default function HomePage() {
 	const [firstName, setFirstName] = useState('')
@@ -45,19 +46,21 @@ export default function HomePage() {
 
 	const mainFeatures = [
 		{
-			title: 'Live Trading',
-			action: () => navigate('/live-trading')
-		},
-		{
 			title: 'Backtest Strategy',
+			icon: '📊',
+			description: 'Test your strategies',
 			action: () => navigate('/backtest')
 		},
 		{
 			title: 'Strategy Builder',
+			icon: '🔧',
+			description: 'Build custom strategies',
 			action: () => navigate('/builder')
 		},
 		{
 			title: 'View Results',
+			icon: '📋',
+			description: 'Analyze performance',
 			action: () => navigate('/results')
 		}
 	]
@@ -84,49 +87,139 @@ export default function HomePage() {
 	}
 
 	return (
-		<div className="features-grid">
-			{mainFeatures.map((feature, index) => (
-				<Card
-					key={index}
+		<div style={{ 
+			display: 'grid', 
+			gridTemplateColumns: '1fr 400px', 
+			gap: '24px', 
+			height: '100%',
+			minHeight: '600px'
+		}}>
+			{/* Left Column - Main Features */}
+			<div style={{ display: 'flex', flexDirection: 'column' }}>
+				{/* Welcome Header */}
+				<div style={{ marginBottom: '24px' }}>
+					<h1 style={{ 
+						color: 'var(--text)', 
+						margin: '0 0 8px 0', 
+						fontSize: '28px',
+						fontWeight: 'bold'
+					}}>
+						Welcome{firstName ? `, ${firstName}` : ''}! 👋
+					</h1>
+					<p style={{ 
+						color: 'var(--muted)', 
+						margin: '0', 
+						fontSize: '16px' 
+					}}>
+						Choose a feature to get started with your trading journey
+					</p>
+				</div>
+
+				{/* Features Grid */}
+				<div className="features-grid" style={{
+					display: 'grid',
+					gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+					gap: '16px',
+					flex: 1
+				}}>
+					{mainFeatures.map((feature, index) => (
+						<Card
+							key={index}
+							variant="elevated"
+							className="feature-card"
+							style={{
+								cursor: 'pointer',
+								minHeight: '120px',
+								border: '1px solid rgba(255, 255, 255, 0.1)',
+								background: 'rgba(255, 255, 255, 0.02)',
+								transition: 'all 0.3s ease',
+								backdropFilter: 'blur(10px)',
+								display: 'flex',
+								flexDirection: 'column'
+							}}
+							onClick={feature.action}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.transform = 'translateY(-2px)'
+								e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)'
+								e.currentTarget.style.borderColor = 'rgba(79, 156, 255, 0.3)'
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.transform = 'translateY(0)'
+								e.currentTarget.style.boxShadow = 'none'
+								e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+							}}
+						>
+							<CardContent style={{ 
+								display: 'flex', 
+								flexDirection: 'column', 
+								height: '100%',
+								padding: '20px'
+							}}>
+								<div style={{
+									display: 'flex',
+									flexDirection: 'column',
+									height: '100%',
+									gap: '12px',
+									alignItems: 'center',
+									textAlign: 'center'
+								}}>
+									<div style={{
+										fontSize: '36px',
+										lineHeight: 1,
+										marginBottom: '4px'
+									}}>
+										{feature.icon}
+									</div>
+									<Typography variant="h3" style={{ 
+										margin: '0 0 4px 0', 
+										fontSize: '18px', 
+										color: '#ffffff',
+										fontWeight: 'bold'
+									}}>
+										{feature.title}
+									</Typography>
+									<Typography variant="caption" color="secondary" style={{ 
+										margin: '0', 
+										fontSize: '13px', 
+										color: 'rgba(255, 255, 255, 0.7)',
+										lineHeight: 1.4
+									}}>
+										{feature.description}
+									</Typography>
+								</div>
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			</div>
+
+			{/* Right Column - Watchlist Widget */}
+			<div style={{ 
+				display: 'flex', 
+				flexDirection: 'column',
+				height: '100%'
+			}}>
+				<Card 
 					variant="elevated"
-					className="feature-card"
 					style={{
-						cursor: 'pointer',
-						// Keep consistent minimum height; avoids overly tall cards
-						minHeight: '50px',
+						height: '100%',
 						border: '1px solid rgba(255, 255, 255, 0.1)',
 						background: 'rgba(255, 255, 255, 0.02)',
-						transition: 'all 0.3s ease',
-						backdropFilter: 'blur(10px)'
+						backdropFilter: 'blur(10px)',
+						display: 'flex',
+						flexDirection: 'column'
 					}}
-					onClick={feature.action}
 				>
-					<CardContent>
-						<div style={{
-							display: 'flex',
-							flexDirection: 'column',
-							// Remove forced stretch inside cards
-							// height: '100%',
-							gap: 'var(--space-3)',
-							alignItems: 'center',
-							textAlign: 'center'
-						}}>
-							<div style={{
-								fontSize: '32px',
-								lineHeight: 1
-							}}>
-								{feature.icon}
-							</div>
-							<Typography variant="h3" style={{ margin: 0, fontSize: '16px', color: '#ffffff' }}>
-								{feature.title}
-							</Typography>
-							<Typography variant="caption" color="secondary" style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
-								{feature.description}
-							</Typography>
-						</div>
+					<CardContent style={{ 
+						height: '100%', 
+						padding: '20px',
+						display: 'flex',
+						flexDirection: 'column'
+					}}>
+						<WatchlistWidget />
 					</CardContent>
 				</Card>
-			))}
+			</div>
 		</div>
 	)
 }
