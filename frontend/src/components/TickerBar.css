@@ -34,18 +34,6 @@
 	z-index: 10; /* Send header to back, below modals */
 }
 
-.header-right {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.header-nav {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-
 .header-left {
 	display: flex;
 	align-items: center;
@@ -87,25 +75,6 @@
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 	position: relative;
 	z-index: 10; /* Send ticker bar to back, below modals */
-}
-
-/* Navigation chips on ticker bar */
-.nav-chip {
-	background: rgba(0,0,0,0.35);
-	border: 1px solid rgba(255,255,255,0.14);
-	color: #fff;
-	padding: 4px 10px;
-	border-radius: 999px;
-	font-size: 12px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform .15s ease, background .15s ease, border-color .15s ease;
-}
-
-.nav-chip:hover { 
-	background: rgba(255,255,255,0.12);
-	border-color: rgba(255,255,255,0.22);
-	transform: translateY(-1px);
 }
 
 .ticker-controls-left {

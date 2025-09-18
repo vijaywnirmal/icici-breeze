@@ -1,9 +1,9 @@
 import React from 'react'
-import { useRouter } from 'next/router'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function Navigation() {
-	const router = useRouter()
-	const location = { pathname: router.pathname }
+	const navigate = useNavigate()
+	const location = useLocation()
 	
 	// Get current page name
 	const getPageName = (pathname) => {
@@ -29,7 +29,7 @@ export default function Navigation() {
 			{/* Home Button - Only show if not on home page */}
 			{!isHomePage && (
 				<button
-					onClick={() => router.push('/')}
+					onClick={() => navigate('/home')}
 					style={{
 						display: 'flex',
 						alignItems: 'center',
