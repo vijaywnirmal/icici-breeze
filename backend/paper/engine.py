@@ -27,6 +27,7 @@ from .market import MarketData
 
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 SETTLED = dt.time(15, 45)  # NSE closes 15:30; give the minute data a few minutes
+MARKET_OPEN, LAST_BAR = dt.time(9, 15), dt.time(15, 29)
 WARMUP_DAYS = 7  # calendar days of earlier 5-minute bars used to warm up the RSI
 CONTEXT_MIN = 30  # minutes of option prices kept before the entry / after the exit, for the replay
 
@@ -99,6 +100,9 @@ def step(md: MarketData, cfg: PaperConfig, ledger: Optional[dict], now: Optional
 def process_day(ledger: dict, cfg: PaperConfig, md: MarketData, day: dt.date, nifty_close: float,
                 save_replay=None) -> None:
     bars = md.index_bars(day - dt.timedelta(days=WARMUP_DAYS), day, cfg.bar_interval)
+    # Breeze also returns pre-open (09:05) and post-close (15:35) index bars; keep the continuous session only
+    if not bars.empty:
+        bars = bars[[MARKET_OPEN <= t.time() <= LAST_BAR for t in bars.index]]
     trades_today = []
     if not bars.empty:
         r = rsi(bars["Close"], cfg.rsi_period)
