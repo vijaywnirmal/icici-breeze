@@ -42,6 +42,13 @@ def paper_equity() -> Dict[str, Any]:
     return success_response("Paper equity", equity=[{"date": d, "value": v, "benchmark": b} for d, v, b in ledger["equity"]])
 
 
+@router.get("/replay/{trade_id}")
+def paper_replay(trade_id: str) -> Dict[str, Any]:
+    """Minute-by-minute data for animating one trade: option bars, Nifty 5-min closes, RSI."""
+    data = L.load_replay(trade_id)
+    return success_response("Replay", **data) if data else error_response(f"No replay for {trade_id}")
+
+
 @router.post("/step")
 def paper_step() -> Dict[str, Any]:
     breeze = get_breeze()

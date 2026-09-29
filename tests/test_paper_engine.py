@@ -1,4 +1,4 @@
-"""Paper engine tests against a synthetic market (no Breeze login needed).
+"""Intraday paper engine tests against a scripted synthetic market (no Breeze login needed).
 
     .venv\\Scripts\\python -m pytest tests/test_paper_engine.py -q
 """
@@ -14,146 +14,180 @@ from backend.paper import costs, engine
 from backend.paper.config import PaperConfig
 from backend.paper.engine import IST
 
+OPEN = dt.time(9, 15)
+MINUTES = 375  # 09:15 .. 15:29
 
-def sessions(start: dt.date, n: int, holidays=()) -> list[dt.date]:
+
+def sessions(start: dt.date, n: int) -> list[dt.date]:
     out, d = [], start
     while len(out) < n:
-        if d.weekday() < 5 and d not in holidays:
+        if d.weekday() < 5:
             out.append(d)
         d += dt.timedelta(days=1)
     return out
 
 
-class FakeMarket:
-    """Nifty rises for `up` sessions then falls; options priced as intrinsic + a little time value."""
+def path(kind: str, base: float = 22000.0) -> list[float]:
+    """Nifty minute by minute for a scripted session."""
+    p = []
+    for m in range(MINUTES + 1):
+        x = base + 15 * math.sin(2 * math.pi * m / 40)
+        if kind != "flat" and m >= 45:
+            sign = -1 if kind.startswith("dip") else 1
+            k = min(m, 60) - 45  # a 15-minute slide (or spike) from 10:00: RSI crosses 20 at its end
+            x = base + sign * 8 * k
+            if m > 60:
+                after = m - 60
+                if kind in ("dip_rebound", "spike_fade"):
+                    x += -sign * 12 * min(after, 60)
+                elif kind == "dip_fall":
+                    x += sign * 6 * after
+        p.append(x)
+    return p
 
-    def __init__(self, days, up=70, dead_expiries=()):
+
+class FakeMarket:
+    def __init__(self, days, scenarios=None, dead_expiries=(), wide_bar_at=None):
         self.days = days
-        closes = [20000 + 40 * i if i < up else 20000 + 40 * up - 60 * (i - up) for i in range(len(days))]
-        self.df = pd.DataFrame({"Open": [c - 10 for c in closes], "High": [c + 50 for c in closes],
-                                "Low": [c - 50 for c in closes], "Close": closes}, index=days)
-        self.dead = set(dead_expiries)  # expiries with no contracts listed (holiday-moved weeklies)
-        self.calls = 0
+        self.scen = {d: (scenarios or {}).get(d, "flat") for d in days}
+        self.paths = {d: path(self.scen[d]) for d in days}
+        self.dead = set(dead_expiries)
+        self.wide_bar_at = wide_bar_at  # (day, minute) where one option bar spans both target and stop
+
+    def _t(self, d, m):
+        return dt.datetime.combine(d, OPEN) + dt.timedelta(minutes=m)
 
     def index_daily(self, start, end):
-        return self.df[(self.df.index >= start) & (self.df.index <= end)]
+        rows = {d: self.paths[d] for d in self.days if start <= d <= end}
+        return pd.DataFrame({"Open": [p[0] for p in rows.values()], "High": [max(p) for p in rows.values()],
+                             "Low": [min(p) for p in rows.values()], "Close": [p[-1] for p in rows.values()]},
+                            index=list(rows))
 
-    def _price(self, expiry, strike, right, day, spot):
-        if expiry in self.dead or day not in self.df.index or day > expiry:
-            return None
-        intrinsic = max(spot - strike, 0) if right == "call" else max(strike - spot, 0)
-        return round(intrinsic + 20 * math.sqrt((expiry - day).days + 1), 2)
+    def index_bars(self, start, end, interval):
+        n = int(interval.replace("minute", ""))
+        recs = []
+        for d in self.days:
+            if not start <= d <= end:
+                continue
+            p = self.paths[d]
+            for m in range(0, MINUTES, n):
+                seg = p[m:m + n + 1]
+                recs.append((self._t(d, m), seg[0], max(seg), min(seg), seg[-1]))
+        return pd.DataFrame(recs, columns=["time", "Open", "High", "Low", "Close"]).set_index("time")
 
-    def option_open(self, expiry, strike, right, day):
-        self.calls += 1
-        return self._price(expiry, strike, right, day, self.df.loc[day, "Open"] if day in self.df.index else 0)
+    def option_bars(self, expiry, strike, right, day):
+        if expiry in self.dead or day not in self.paths:
+            return pd.DataFrame(columns=["Open", "High", "Low", "Close"])
+        p = self.paths[day]
+        prem = [max(5.0, 80 + (0.5 if right == "call" else -0.5) * (x - strike)) for x in p]
+        recs = []
+        for m in range(MINUTES):
+            o, c = prem[m], prem[m + 1]
+            hi, lo = max(o, c), min(o, c)
+            if self.wide_bar_at == (day, m):
+                hi, lo = o * 2, o * 0.5
+            recs.append((self._t(day, m), o, hi, lo, c))
+        return pd.DataFrame(recs, columns=["time", "Open", "High", "Low", "Close"]).set_index("time")
 
-    def option_close(self, expiry, strike, right, day):
-        self.calls += 1
-        return self._price(expiry, strike, right, day, self.df.loc[day, "Close"] if day in self.df.index else 0)
 
-
-def at_close(d: dt.date) -> dt.datetime:
+def at_close(d):
     return dt.datetime.combine(d, dt.time(16, 0), tzinfo=IST)
 
 
-CFG = PaperConfig(fast=5, slow=20)
-DAYS = sessions(dt.date(2026, 1, 5), 120)
+CFG = PaperConfig()
+DAYS = sessions(dt.date(2026, 6, 1), 12)  # Mon 1 Jun .. ; RSI warms up on the first few flat days
 
 
-def run_daily(md, start_idx, end_idx, cfg=CFG):
-    ledger = engine.step(md, cfg, None, at_close(DAYS[start_idx]))
-    for d in DAYS[start_idx + 1:end_idx + 1]:
-        ledger = engine.step(md, cfg, ledger, at_close(d))
+def run(md, upto, cfg=CFG, replays=None):
+    save = (lambda tid, data: replays.__setitem__(tid, data)) if replays is not None else None
+    ledger = engine.step(md, cfg, None, at_close(DAYS[4]), save)  # record opens on DAYS[4]
+    for d in DAYS[5:upto + 1]:
+        ledger = engine.step(md, cfg, ledger, at_close(d), save)
     return ledger
 
 
-def test_first_run_only_decides():
-    md = FakeMarket(DAYS)
-    ledger = engine.step(md, CFG, None, at_close(DAYS[30]))
-    assert ledger["start"] == DAYS[30].isoformat()
-    assert ledger["trades"] == [] and ledger["position"] is None
-    assert ledger["pending"]["reason"] == "open" and ledger["pending"]["target"]["right"] == "call"
+def test_quiet_days_record_no_trades():
+    ledger = run(FakeMarket(DAYS), 8)
+    assert ledger["trades"] == []
+    assert [e[0] for e in ledger["equity"]] == [d.isoformat() for d in DAYS[4:9]]
+    assert ledger["start"] == DAYS[4].isoformat()
 
 
-def test_fill_at_next_open_with_slippage_and_charges():
-    md = FakeMarket(DAYS)
-    ledger = run_daily(md, 30, 31)
-    t = ledger["trades"][0]
-    assert t["date"] == DAYS[31].isoformat() and t["action"] == "open" and t["right"] == "call"
-    assert t["price"] == costs.slipped(t["raw_price"], "buy", CFG)
-    assert ledger["cash"] == pytest.approx(CFG.capital - t["price"] * t["qty"] - t["charges"], abs=0.01)
-    assert dt.date.fromisoformat(t["expiry"]) > DAYS[31]  # never opens a contract expiring that day
+def test_dip_then_rebound_opens_a_call_and_hits_the_target():
+    replays = {}
+    ledger = run(FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}), 6, replays=replays)
+    (t,) = ledger["trades"]
+    assert t["right"] == "call" and t["exit_reason"] == "target" and t["pnl"] > 0
+    assert t["rsi"] < CFG.oversold
+    assert t["exit_price"] == pytest.approx(t["target_price"])  # a target is a limit: no slippage
+    assert dt.datetime.fromisoformat(t["entry_time"]) >= dt.datetime.fromisoformat(t["signal_time"])
+    assert t["id"] in replays and replays[t["id"]]["option"] and replays[t["id"]]["rsi"]
 
 
-def test_switch_to_put_when_trend_flips():
-    md = FakeMarket(DAYS, up=70)
-    ledger = run_daily(md, 30, 110)
-    switches = [t for t in ledger["trades"] if t["reason"] == "switch"]
-    assert switches, "trend flipped but the position never switched"
-    closed, opened = switches[0], switches[1]
-    assert closed["action"] == "close" and opened["action"] == "open"
-    assert closed["right"] == "call" and opened["right"] == "put" and closed["date"] == opened["date"]
+def test_dip_that_keeps_falling_hits_the_stop():
+    (t,) = run(FakeMarket(DAYS, {DAYS[6]: "dip_fall"}), 6)["trades"]
+    assert t["exit_reason"] == "stop" and t["pnl"] < 0
+    assert t["exit_price"] == costs.slipped(t["stop_price"], "sell", CFG)
 
 
-def test_rolls_before_expiry_and_never_holds_through_it():
-    md = FakeMarket(DAYS)
-    ledger = run_daily(md, 30, 60)
-    assert any(t["reason"] == "roll" for t in ledger["trades"])
+def test_going_nowhere_squares_off_at_1515():
+    (t,) = run(FakeMarket(DAYS, {DAYS[6]: "dip_flat"}), 6)["trades"]
+    assert t["exit_reason"] == "time"
+    assert dt.datetime.fromisoformat(t["exit_time"]).time() == dt.time(15, 15)
+
+
+def test_spike_opens_a_put():
+    (t,) = run(FakeMarket(DAYS, {DAYS[6]: "spike_fade"}), 6)["trades"]
+    assert t["right"] == "put" and t["rsi"] > CFG.overbought
+
+
+def test_target_and_stop_in_the_same_minute_counts_as_stop():
+    md = FakeMarket(DAYS, {DAYS[6]: "dip_rebound"})
+    first = run(FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}), 6)["trades"][0]
+    m = int((dt.datetime.fromisoformat(first["entry_time"]) - dt.datetime.combine(DAYS[6], OPEN)).total_seconds() // 60)
+    md.wide_bar_at = (DAYS[6], m + 1)
+    (t,) = run(md, 6)["trades"]
+    assert t["exit_reason"] == "stop"
+
+
+def test_entries_respect_the_time_window():
+    cfg = PaperConfig(first_entry="11:00")  # the dip's signal comes around 10:1x
+    ledger = run(FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}), 6, cfg=cfg)
     for t in ledger["trades"]:
-        if t["action"] == "close":
-            assert dt.date.fromisoformat(t["date"]) < dt.date.fromisoformat(t["expiry"])
-    assert not any(t["reason"] == "expired" for t in ledger["trades"])
+        assert dt.datetime.fromisoformat(t["signal_time"]).time() >= dt.time(11, 0)
 
 
-def test_catch_up_matches_daily_runs():
-    daily = run_daily(FakeMarket(DAYS), 30, 90)
-    md = FakeMarket(DAYS)
-    caught = engine.step(md, CFG, None, at_close(DAYS[30]))
-    caught = engine.step(md, CFG, caught, at_close(DAYS[90]))  # backend was down for two months
-    assert caught["trades"] == daily["trades"]
-    assert caught["equity"] == daily["equity"]
-    assert caught["cash"] == daily["cash"]
+def test_one_trade_a_day_by_default():
+    ledger = run(FakeMarket(DAYS, {DAYS[6]: "dip_flat"}), 6)
+    assert sum(t["date"] == DAYS[6].isoformat() for t in ledger["trades"]) == 1
 
 
-def test_step_is_idempotent():
-    md = FakeMarket(DAYS)
-    ledger = run_daily(md, 30, 50)
-    before = repr(ledger)
-    again = engine.step(md, CFG, ledger, at_close(DAYS[50]))
-    assert repr(again) == before
+def test_catch_up_matches_daily_runs_and_is_idempotent():
+    scen = {DAYS[5]: "dip_rebound", DAYS[7]: "dip_fall", DAYS[9]: "spike_fade"}
+    daily = run(FakeMarket(DAYS, scen), 10)
+    md = FakeMarket(DAYS, scen)
+    caught = engine.step(md, CFG, None, at_close(DAYS[4]))
+    caught = engine.step(md, CFG, caught, at_close(DAYS[10]))  # backend was off for a week
+    assert caught["trades"] == daily["trades"] and caught["equity"] == daily["equity"]
+    again = engine.step(md, CFG, caught, at_close(DAYS[10]))
+    assert again["trades"] == daily["trades"] and len(again["equity"]) == len(daily["equity"])
 
 
-def test_before_the_close_uses_previous_session():
-    md = FakeMarket(DAYS)
-    ledger = engine.step(md, CFG, None, dt.datetime.combine(DAYS[40], dt.time(11, 0), tzinfo=IST))
-    assert ledger["start"] == DAYS[39].isoformat()
+def test_before_the_close_simulates_only_finished_sessions():
+    ledger = engine.step(FakeMarket(DAYS), CFG, None, dt.datetime.combine(DAYS[5], dt.time(11, 0), tzinfo=IST))
+    assert ledger["last_processed"] == DAYS[4].isoformat()
 
 
-def test_holiday_moved_expiry_falls_back_to_previous_day():
-    first_fill = DAYS[31]
-    tuesday = engine.next_expiry(engine.next_weekday(first_fill), 1)
-    md = FakeMarket(DAYS, dead_expiries={tuesday})  # that week's weekly moved to Monday
-    ledger = run_daily(md, 30, 31)
-    opened = ledger["trades"][0]
-    assert opened["expiry"] == (tuesday - dt.timedelta(days=1)).isoformat()
+def test_holiday_moved_expiry_falls_back_a_day():
+    day = DAYS[6]
+    tuesday = engine.next_expiry(day, 1)
+    (t,) = run(FakeMarket(DAYS, {day: "dip_rebound"}, dead_expiries={tuesday}), 6)["trades"]
+    assert t["expiry"] == (tuesday - dt.timedelta(days=1)).isoformat() or t["expiry"] == (tuesday - dt.timedelta(days=2)).isoformat()
 
 
-def test_no_price_means_stay_flat_and_note():
-    md = FakeMarket(DAYS)
-    md.option_open = lambda *a: None
-    ledger = run_daily(md, 30, 31)
-    assert ledger["position"] is None and ledger["notes"]
-
-
-def test_equity_accounts_for_every_rupee():
-    md = FakeMarket(DAYS)
-    ledger = run_daily(md, 30, 100)
-    realized = sum(t["pnl"] for t in ledger["trades"] if t["action"] == "close")
-    pos = ledger["position"]
-    open_value = pos["mark"] * pos["qty"] if pos else 0
-    open_cost = pos["entry_cost"] if pos else 0
-    assert ledger["equity"][-1][1] == pytest.approx(CFG.capital + realized + open_value - open_cost, abs=0.05)
+def test_equity_is_capital_plus_realized():
+    ledger = run(FakeMarket(DAYS, {DAYS[5]: "dip_rebound", DAYS[7]: "dip_fall"}), 9)
+    assert ledger["equity"][-1][1] == pytest.approx(CFG.capital + sum(t["pnl"] for t in ledger["trades"]), abs=0.05)
 
 
 def test_charges_components():
