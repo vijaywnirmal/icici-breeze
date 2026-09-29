@@ -8,3 +8,6 @@ __pycache__/
 node_modules/
 frontend/dist/
 logs/
+.venv/
+# runtime state: the paper-trading ledger and its config overrides
+data/
