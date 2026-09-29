@@ -84,6 +84,15 @@ def step(md: MarketData, cfg: PaperConfig, ledger: Optional[dict], now: Optional
     end = last_settled_day(now or now_ist())
     daily = md.index_daily(end - dt.timedelta(days=30), end)
     daily = daily[daily.index <= end]
+    if end not in daily.index:
+        # Breeze publishes the day's daily bar well after the close, but the intraday bars are there
+        # within minutes: take the session from them once they run to the close.
+        bars = md.index_bars(end, end, cfg.bar_interval)
+        bars = bars[[t.date() == end and t.time() <= LAST_BAR for t in bars.index]] if not bars.empty else bars
+        if not bars.empty and bars.index[-1].time() >= dt.time(15, 25):
+            row = pd.DataFrame({"Open": [float(bars["Open"].iloc[0])], "High": [float(bars["High"].max())],
+                                "Low": [float(bars["Low"].min())], "Close": [float(bars["Close"].iloc[-1])]}, index=[end])
+            daily = pd.concat([daily, row])
     if daily.empty:
         raise RuntimeError("no Nifty bars returned - is the Breeze session logged in?")
     if ledger is None:

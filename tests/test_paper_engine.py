@@ -221,6 +221,14 @@ def test_catch_up_matches_daily_runs_and_is_idempotent():
     assert again["trades"] == daily["trades"] and len(again["equity"]) == len(daily["equity"])
 
 
+def test_session_runs_before_its_daily_bar_is_published():
+    md = FakeMarket(DAYS, {DAYS[6]: "dip_rebound"})
+    full = md.index_daily
+    md.index_daily = lambda s, e: full(s, e)[lambda df: df.index < DAYS[6]]  # today's daily bar not out yet
+    ledger = run(md, 6)
+    assert ledger["last_processed"] == DAYS[6].isoformat() and len(ledger["trades"]) == 1
+
+
 def test_before_the_close_simulates_only_finished_sessions():
     ledger = engine.step(FakeMarket(DAYS), CFG, None, dt.datetime.combine(DAYS[5], dt.time(11, 0), tzinfo=IST))
     assert ledger["last_processed"] == DAYS[4].isoformat()
