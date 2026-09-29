@@ -19,6 +19,8 @@ from .routes.instruments import router as instruments_router
 from .routes.nse_indexes import router as nse_indexes_router
 from .routes.bulk_websocket import router as bulk_websocket_router
 from .routes.option_chain import router as option_chain_router
+from .paper.routes import router as paper_router
+from .paper.runner import PaperRunner
 from .utils.instruments_scheduler import DailyInstrumentsUpdater
 from .utils.session import get_breeze, is_session_valid
 
@@ -66,14 +68,16 @@ app.include_router(instruments_router)
 app.include_router(nse_indexes_router)
 app.include_router(bulk_websocket_router)
 app.include_router(option_chain_router)
+app.include_router(paper_router)
 
 
 updater: Optional[DailyInstrumentsUpdater] = None
+paper_runner: Optional[PaperRunner] = None
 
 
 @app.on_event("startup")
 async def _startup() -> None:
-    global updater
+    global updater, paper_runner
     # Check for critical env vars
     if not os.getenv("APP_NAME"):
         logging.warning("Critical environment variable APP_NAME is missing.")
@@ -85,6 +89,9 @@ async def _startup() -> None:
     except Exception as e:
         logging.error(f"Error starting DailyInstrumentsUpdater: {e}")
         updater = None
+    # Keep the options paper record current whenever a Breeze session exists
+    paper_runner = PaperRunner()
+    await paper_runner.start()
 
 
 @app.on_event("shutdown")
@@ -95,6 +102,8 @@ async def _shutdown() -> None:
             await updater.stop()
         except Exception as e:
             logging.error(f"Error stopping DailyInstrumentsUpdater: {e}")
+    if paper_runner is not None:
+        await paper_runner.stop()
 
 
 @app.get("/health")
