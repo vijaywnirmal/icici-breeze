@@ -47,12 +47,17 @@ def path(kind: str, base: float = 22000.0) -> list[float]:
 
 
 class FakeMarket:
-    def __init__(self, days, scenarios=None, dead_expiries=(), wide_bar_at=None):
+    def __init__(self, days, scenarios=None, dead_expiries=(), wide_bar_at=None, wide_first="stop", seconds=True,
+                 gap_at=None):
         self.days = days
         self.scen = {d: (scenarios or {}).get(d, "flat") for d in days}
         self.paths = {d: path(self.scen[d]) for d in days}
         self.dead = set(dead_expiries)
         self.wide_bar_at = wide_bar_at  # (day, minute) where one option bar spans both target and stop
+        self.wide_first = wide_first  # which level that minute's seconds reach first
+        self.gap_at = gap_at  # (day, minute): the price gaps from above the stop to far below it
+        if not seconds:
+            self.option_seconds = None  # a data source without 1-second history
 
     def _t(self, d, m):
         return dt.datetime.combine(d, OPEN) + dt.timedelta(minutes=m)
@@ -86,7 +91,30 @@ class FakeMarket:
             hi, lo = max(o, c), min(o, c)
             if self.wide_bar_at == (day, m):
                 hi, lo = o * 2, o * 0.5
+            if self.gap_at == (day, m):
+                lo, c = o * 0.5, o * 0.5
             recs.append((self._t(day, m), o, hi, lo, c))
+        return pd.DataFrame(recs, columns=["time", "Open", "High", "Low", "Close"]).set_index("time")
+
+    def option_seconds(self, expiry, strike, right, start, end):
+        """Seconds interpolated inside each minute bar; scripted for the wide / gap minutes."""
+        day = start.date()
+        bars = self.option_bars(expiry, strike, right, day)
+        recs = []
+        for t, b in bars.iterrows():
+            for k in range(60):
+                ts = t + dt.timedelta(seconds=k)
+                if not start <= ts <= end:
+                    continue
+                o = b["Open"]
+                if self.wide_bar_at == (day, (t - dt.datetime.combine(day, OPEN)).seconds // 60):
+                    first, second = (b["Low"], b["High"]) if self.wide_first == "stop" else (b["High"], b["Low"])
+                    p = o if k < 10 else first if k < 30 else second
+                elif self.gap_at == (day, (t - dt.datetime.combine(day, OPEN)).seconds // 60):
+                    p = o if k < 20 else b["Low"]  # jumps straight through the stop at second 20
+                else:
+                    p = o + (b["Close"] - o) * k / 60
+                recs.append((ts, p, p, p, p))
         return pd.DataFrame(recs, columns=["time", "Open", "High", "Low", "Close"]).set_index("time")
 
 
@@ -127,7 +155,9 @@ def test_dip_then_rebound_opens_a_call_and_hits_the_target():
 def test_dip_that_keeps_falling_hits_the_stop():
     (t,) = run(FakeMarket(DAYS, {DAYS[6]: "dip_fall"}), 6)["trades"]
     assert t["exit_reason"] == "stop" and t["pnl"] < 0
-    assert t["exit_price"] == costs.slipped(t["stop_price"], "sell", CFG)
+    # the first print at/below the level: at the stop or a touch worse, never better
+    level = costs.slipped(t["stop_price"], "sell", CFG)
+    assert level * 0.99 <= t["exit_price"] <= level
 
 
 def test_going_nowhere_squares_off_at_1515():
@@ -141,13 +171,31 @@ def test_spike_opens_a_put():
     assert t["right"] == "put" and t["rsi"] > CFG.overbought
 
 
-def test_target_and_stop_in_the_same_minute_counts_as_stop():
-    md = FakeMarket(DAYS, {DAYS[6]: "dip_rebound"})
+def _entry_minute():
     first = run(FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}), 6)["trades"][0]
-    m = int((dt.datetime.fromisoformat(first["entry_time"]) - dt.datetime.combine(DAYS[6], OPEN)).total_seconds() // 60)
-    md.wide_bar_at = (DAYS[6], m + 1)
+    return int((dt.datetime.fromisoformat(first["entry_time"]) - dt.datetime.combine(DAYS[6], OPEN)).total_seconds() // 60)
+
+
+@pytest.mark.parametrize("first", ["stop", "target"])
+def test_seconds_decide_which_level_came_first(first):
+    m = _entry_minute() + 1
+    md = FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}, wide_bar_at=(DAYS[6], m), wide_first=first)
+    (t,) = run(md, 6)["trades"]
+    assert t["exit_reason"] == first and t["resolution"] == "second"
+    assert dt.datetime.fromisoformat(t["exit_time"]) == dt.datetime.combine(DAYS[6], OPEN) + dt.timedelta(minutes=m, seconds=10)
+
+
+def test_without_seconds_both_in_a_minute_counts_as_stop():
+    md = FakeMarket(DAYS, {DAYS[6]: "dip_rebound"}, wide_bar_at=(DAYS[6], _entry_minute() + 1), seconds=False)
+    (t,) = run(md, 6)["trades"]
+    assert t["exit_reason"] == "stop" and t["resolution"] == "minute"
+
+
+def test_a_stop_that_gaps_fills_at_the_gap_not_the_level():
+    md = FakeMarket(DAYS, {DAYS[6]: "dip_flat"}, gap_at=(DAYS[6], _entry_minute() + 2))
     (t,) = run(md, 6)["trades"]
     assert t["exit_reason"] == "stop"
+    assert t["exit_price"] < costs.slipped(t["stop_price"], "sell", CFG) * 0.9  # far worse than the level
 
 
 def test_entries_respect_the_time_window():

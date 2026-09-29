@@ -1,7 +1,8 @@
 """The market data the paper engine needs, behind a small interface so tests can supply their own.
 
 Everything comes from Breeze's historical endpoint, so a whole session can be simulated after the close
-(or days later): Nifty's daily and 5-minute bars, and an option contract's 1-minute bars.
+(or days later): Nifty's daily and 5-minute bars, and an option contract's 1-minute and 1-second bars
+(get_historical_data_v2 interval="1second" - it works for NFO options, including expired contracts).
 """
 from __future__ import annotations
 
@@ -11,6 +12,7 @@ from typing import Protocol
 import pandas as pd
 
 COLS = ["Open", "High", "Low", "Close"]
+SECOND_CHUNK = dt.timedelta(minutes=15)
 
 
 class MarketData(Protocol):
@@ -22,6 +24,10 @@ class MarketData(Protocol):
 
     def option_bars(self, expiry: dt.date, strike: int, right: str, day: dt.date) -> pd.DataFrame:
         """The contract's 1-minute bars for `day` (empty if it didn't trade / doesn't exist)."""
+
+    def option_seconds(self, expiry: dt.date, strike: int, right: str, start: dt.datetime,
+                       end: dt.datetime) -> pd.DataFrame:
+        """The contract's 1-second bars in [start, end] (naive IST), empty if unavailable."""
 
 
 def _stamp(d: dt.date, hhmm: str = "00:00") -> str:
@@ -68,3 +74,22 @@ class BreezeMarket:
                 expiry_date=_stamp(expiry, "06:00"), right=right, strike_price=str(strike)))
         except Exception:
             return pd.DataFrame(columns=COLS)
+
+    def option_seconds(self, expiry, strike, right, start, end):
+        # Breeze returns ~1,000 rows per call at most; 15-minute chunks stay under that (900 seconds)
+        parts, t = [], start
+        while t <= end:
+            stop = min(end, t + SECOND_CHUNK - dt.timedelta(seconds=1))
+            try:
+                parts.append(_frame(self.client.get_historical_data_v2(
+                    interval="1second", from_date=f"{t:%Y-%m-%dT%H:%M:%S}.000Z", to_date=f"{stop:%Y-%m-%dT%H:%M:%S}.000Z",
+                    stock_code=self.symbol, exchange_code="NFO", product_type="options",
+                    expiry_date=_stamp(expiry, "06:00"), right=right, strike_price=str(strike))))
+            except Exception:
+                pass
+            t = stop + dt.timedelta(seconds=1)
+        parts = [p for p in parts if not p.empty]
+        if not parts:
+            return pd.DataFrame(columns=COLS)
+        df = pd.concat(parts)
+        return df[~df.index.duplicated()].sort_index()

@@ -49,6 +49,28 @@ def paper_replay(trade_id: str) -> Dict[str, Any]:
     return success_response("Replay", **data) if data else error_response(f"No replay for {trade_id}")
 
 
+@router.get("/probe")
+def paper_probe(day: dt.date, start: str = "09:35", end: str = "09:40", interval: str = "1second",
+                expiry: Optional[dt.date] = None, strike: Optional[int] = None, right: str = "call") -> Dict[str, Any]:
+    """Read-only check of what Breeze history returns for a short window (option if strike given, else NIFTY)."""
+    breeze = get_breeze()
+    if breeze is None:
+        return error_response("No Breeze session - log in first")
+    kw = dict(interval=interval, from_date=f"{day}T{start}:00.000Z", to_date=f"{day}T{end}:00.000Z", stock_code="NIFTY")
+    if strike:
+        kw.update(exchange_code="NFO", product_type="options", expiry_date=f"{expiry}T06:00:00.000Z",
+                  right=right, strike_price=str(strike))
+    else:
+        kw.update(exchange_code="NSE", product_type="cash")
+    try:
+        resp = breeze.client.get_historical_data_v2(**kw)
+    except Exception as exc:
+        return error_response("Breeze call failed", error=str(exc))
+    rows = (resp or {}).get("Success") or []
+    return success_response("Probe", rows=len(rows), status=(resp or {}).get("Status"), error=(resp or {}).get("Error"),
+                            first=rows[:3], last=rows[-2:])
+
+
 @router.post("/step")
 def paper_step() -> Dict[str, Any]:
     breeze = get_breeze()
