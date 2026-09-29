@@ -32,7 +32,7 @@ class PaperRunner:
     async def _loop(self) -> None:
         while True:
             try:
-                breeze = get_breeze()
+                breeze = await asyncio.to_thread(get_breeze)  # may touch Redis / the network: keep it off the event loop
                 if breeze is not None:
                     ledger = await asyncio.to_thread(L.run_step, BreezeMarket(breeze.client, load_config().symbol))
                     log.info("paper record current to %s", ledger["last_processed"])

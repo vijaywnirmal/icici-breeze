@@ -13,33 +13,42 @@ logger = logging.getLogger(__name__)
 
 # Global Redis client instance
 _redis_client: Optional[redis.Redis] = None
+# When Redis is down, don't retry on every call: each refused connect costs ~2 s on Windows, and the rate
+# limiter and session lookup call this several times per request, which made every request time out.
+_redis_retry_at: Optional[datetime] = None
+_REDIS_RETRY = timedelta(seconds=60)
 
 def get_redis_client() -> Optional[redis.Redis]:
     """Get Redis client instance. Returns None if Redis is not configured."""
-    global _redis_client
-    
+    global _redis_client, _redis_retry_at
+
     if _redis_client is not None:
         return _redis_client
-    
+    if _redis_retry_at is not None and datetime.now() < _redis_retry_at:
+        return None
+
     try:
         redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
         _redis_client = redis.from_url(
             redis_url,
             decode_responses=True,
-            socket_connect_timeout=5,
+            socket_connect_timeout=1,
             socket_timeout=5,
             retry_on_timeout=True,
             health_check_interval=30
         )
-        
+
         # Test connection
         _redis_client.ping()
         logger.info("Redis connection established successfully")
+        _redis_retry_at = None
         return _redis_client
-        
+
     except Exception as e:
-        logger.warning(f"Redis not available: {e}. Falling back to in-memory caching.")
+        if _redis_retry_at is None:  # log once per outage, not every minute
+            logger.warning(f"Redis not available: {e}. Falling back to in-memory caching.")
         _redis_client = None
+        _redis_retry_at = datetime.now() + _REDIS_RETRY
         return None
 
 def is_redis_available() -> bool:
