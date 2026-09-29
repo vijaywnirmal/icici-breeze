@@ -210,14 +210,25 @@ def test_one_trade_a_day_by_default():
     assert sum(t["date"] == DAYS[6].isoformat() for t in ledger["trades"]) == 1
 
 
+def test_missed_days_are_skipped_by_default():
+    scen = {DAYS[5]: "dip_rebound", DAYS[7]: "dip_fall", DAYS[9]: "spike_fade"}
+    md = FakeMarket(DAYS, scen)
+    ledger = engine.step(md, CFG, None, at_close(DAYS[4]))
+    ledger = engine.step(md, CFG, ledger, at_close(DAYS[9]))  # off Tue..Thu, back on Fri
+    assert [t["date"] for t in ledger["trades"]] == [DAYS[9].isoformat()]  # only the day it ran
+    assert [e[0] for e in ledger["equity"]] == [d.isoformat() for d in DAYS[4:10]]
+    assert sum("not simulated" in n["note"] for n in ledger["notes"]) == 4
+
+
 def test_catch_up_matches_daily_runs_and_is_idempotent():
     scen = {DAYS[5]: "dip_rebound", DAYS[7]: "dip_fall", DAYS[9]: "spike_fade"}
-    daily = run(FakeMarket(DAYS, scen), 10)
+    cfg = PaperConfig(catch_up_missed_days=True)
+    daily = run(FakeMarket(DAYS, scen), 10, cfg=cfg)
     md = FakeMarket(DAYS, scen)
-    caught = engine.step(md, CFG, None, at_close(DAYS[4]))
-    caught = engine.step(md, CFG, caught, at_close(DAYS[10]))  # backend was off for a week
+    caught = engine.step(md, cfg, None, at_close(DAYS[4]))
+    caught = engine.step(md, cfg, caught, at_close(DAYS[10]))  # backend was off for a week
     assert caught["trades"] == daily["trades"] and caught["equity"] == daily["equity"]
-    again = engine.step(md, CFG, caught, at_close(DAYS[10]))
+    again = engine.step(md, cfg, caught, at_close(DAYS[10]))
     assert again["trades"] == daily["trades"] and len(again["equity"]) == len(daily["equity"])
 
 

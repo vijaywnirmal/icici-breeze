@@ -24,6 +24,9 @@ class PaperConfig:
     first_entry: str = "09:30"  # skip the opening auction noise
     last_entry: str = "14:30"  # no new trades this late
     max_trades_per_day: int = 1
+    # Only simulate the latest session. A day missed (no login / backend off) is skipped, not filled in
+    # later - trades are captured and posted on their own day. Set true to fill gaps from history instead.
+    catch_up_missed_days: bool = False
 
     # --- contract: at-the-money, nearest weekly expiry after today (never an expiry-day contract)
     strike_step: int = 50
@@ -62,5 +65,8 @@ def load_config() -> PaperConfig:
     names = {f.name for f in fields(PaperConfig)}
     for k, v in overrides.items():
         if k in names:
-            setattr(cfg, k, type(getattr(cfg, k))(v))
+            kind = type(getattr(cfg, k))
+            if kind is bool:  # bool("false") is True
+                v = v if isinstance(v, bool) else str(v).strip().lower() in ("1", "true", "yes", "on")
+            setattr(cfg, k, kind(v))
     return cfg

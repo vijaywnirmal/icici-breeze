@@ -101,10 +101,23 @@ def step(md: MarketData, cfg: PaperConfig, ledger: Optional[dict], now: Optional
         base = float(daily["Close"].iloc[-2]) if len(daily) > 1 else float(daily["Open"].iloc[-1])
         ledger = new_ledger(cfg, start, base)
     last = dt.date.fromisoformat(ledger["last_processed"]) if ledger["last_processed"] else None
-    for day in [d for d in daily.index if (last is None and d >= dt.date.fromisoformat(ledger["start"]))
-                or (last is not None and d > last)]:
-        process_day(ledger, cfg, md, day, float(daily.loc[day, "Close"]), save_replay)
+    todo = [d for d in daily.index if (last is None and d >= dt.date.fromisoformat(ledger["start"]))
+            or (last is not None and d > last)]
+    for day in todo:
+        if day != todo[-1] and not cfg.catch_up_missed_days:
+            skip_day(ledger, day, float(daily.loc[day, "Close"]))
+        else:
+            process_day(ledger, cfg, md, day, float(daily.loc[day, "Close"]), save_replay)
     return ledger
+
+
+def skip_day(ledger: dict, day: dt.date, nifty_close: float) -> None:
+    """A session that wasn't simulated on the day: no trades, account unchanged, benchmark marked."""
+    realized = sum(t["pnl"] for t in ledger["trades"])
+    cap = ledger["config"]["capital"]
+    ledger["equity"].append([day.isoformat(), round(cap + realized, 2), round(cap * nifty_close / ledger["bench_base"], 2)])
+    ledger["notes"].append({"date": day.isoformat(), "note": "not simulated - missed on the day (no session)"})
+    ledger["last_processed"] = day.isoformat()
 
 
 # ------------------------------------------------------------------ one session
