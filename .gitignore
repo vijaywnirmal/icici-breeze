@@ -11,3 +11,5 @@ logs/
 .venv/
 # runtime state: the paper-trading ledger and its config overrides
 data/
+# ICICI scrip master: downloaded daily by the backend
+SecurityMaster/
