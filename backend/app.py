@@ -96,7 +96,6 @@ async def _startup() -> None:
 
 @app.on_event("shutdown")
 async def _shutdown() -> None:
-    global updater
     if updater is not None:
         try:
             await updater.stop()

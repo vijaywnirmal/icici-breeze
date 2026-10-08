@@ -39,8 +39,6 @@ def set_breeze(service: BreezeService) -> None:
 
 
 def get_breeze() -> Optional[BreezeService]:
-	global _BREEZE
-	
 	# Return in-memory session if present
 	if _BREEZE is not None:
 		return _BREEZE

@@ -9,12 +9,12 @@ sys.path.append('backend')
 
 from backend.utils.session import get_breeze
 
+base_url = "http://127.0.0.1:8000"
+
 def test_option_chain_subscription():
     """Test option chain websocket subscription."""
     print("🧪 Testing Option Chain WebSocket Subscription")
     print("=" * 50)
-    
-    base_url = "http://127.0.0.1:8000"
     
     # Check if we have a Breeze session
     breeze = get_breeze()

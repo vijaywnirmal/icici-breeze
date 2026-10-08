@@ -131,7 +131,7 @@ def run_strategy_backtest(payload: StrategyBacktestPayload) -> Dict[str, Any]:
 			"open": [b.open for b in bars],
 			"high": [b.high for b in bars],
 			"low": [b.low for b in bars],
-			"volume": [b.volume for b in bars] if hasattr(b, 'volume') else [0] * len(bars)
+			"volume": [getattr(b, 'volume', 0) for b in bars]
 		}, index=idx)
 		
 		# Compute technical indicators
