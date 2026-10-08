@@ -77,13 +77,13 @@ async def test_depth_data_flow():
                                 first_bid = bids[0]
                                 has_price = 'price' in first_bid
                                 has_qty = 'qty' in first_bid
-                                print(f"      ✅ Bid structure check: price={has_price}, qty={qty}")
+                                print(f"      ✅ Bid structure check: price={has_price}, qty={has_qty}")
                             
                             if asks and len(asks) > 0:
                                 first_ask = asks[0]
                                 has_price = 'price' in first_ask
                                 has_qty = 'qty' in first_ask
-                                print(f"      ✅ Ask structure check: price={has_price}, qty={qty}")
+                                print(f"      ✅ Ask structure check: price={has_price}, qty={has_qty}")
                         
                         # Show full message for first few ticks
                         if message_count <= 2:

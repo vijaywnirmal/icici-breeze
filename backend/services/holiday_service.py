@@ -188,8 +188,8 @@ def fetch_nse_holidays_for_year(year: int) -> pd.DataFrame:
         DataFrame with columns: date, day, name
     """
     try:
-        # Silent: info
-        
+        from nsepython import holiday_master
+
         holidays_data = holiday_master('trading')
         
         if not holidays_data or 'CM' not in holidays_data:
