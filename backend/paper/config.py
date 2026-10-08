@@ -7,7 +7,7 @@ Override any field by writing it to data/paper/config.json, e.g. {"target_pct": 
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "paper"
@@ -55,18 +55,27 @@ class PaperConfig:
         return asdict(self)
 
 
+def with_overrides(cfg: PaperConfig, overrides: dict, strict: bool = False) -> PaperConfig:
+    """A copy of cfg with overrides applied, each coerced to its field's type. Unknown names are ignored,
+    or raise KeyError when strict; a value of the wrong type raises ValueError / TypeError."""
+    out = replace(cfg)
+    names = {f.name for f in fields(PaperConfig)}
+    for k, v in overrides.items():
+        if k not in names:
+            if strict:
+                raise KeyError(k)
+            continue
+        kind = type(getattr(out, k))
+        if kind is bool:  # bool("false") is True
+            v = v if isinstance(v, bool) else str(v).strip().lower() in ("1", "true", "yes", "on")
+        setattr(out, k, kind(v))
+    return out
+
+
 def load_config() -> PaperConfig:
-    cfg = PaperConfig()
     path = DATA_DIR / "config.json"
     try:
         overrides = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return cfg
-    names = {f.name for f in fields(PaperConfig)}
-    for k, v in overrides.items():
-        if k in names:
-            kind = type(getattr(cfg, k))
-            if kind is bool:  # bool("false") is True
-                v = v if isinstance(v, bool) else str(v).strip().lower() in ("1", "true", "yes", "on")
-            setattr(cfg, k, kind(v))
-    return cfg
+        return PaperConfig()
+    return with_overrides(PaperConfig(), overrides)

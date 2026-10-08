@@ -2,15 +2,17 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any, Dict, Optional
+import threading
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from ..utils.response import error_response, success_response
 from ..utils.session import get_breeze
+from . import backtest as BT
 from . import ledger as L
-from .config import load_config
+from .config import load_config, with_overrides
 from .market import BreezeMarket
 
 router = APIRouter(prefix="/api/paper", tags=["paper"])
@@ -177,3 +179,83 @@ def paper_step() -> Dict[str, Any]:
     except Exception as exc:
         return error_response("Paper step failed", error=str(exc))
     return success_response("Paper record updated", **L.summary(ledger))
+
+
+# ------------------------------------------------------------------ backtests
+
+class _Backtest(BaseModel):
+    start: dt.date
+    end: dt.date
+    split: Optional[dt.date] = None  # first out-of-sample session
+    overrides: Dict[str, Any] = {}  # settings for this run only, e.g. {"target_pct": 40}
+    grid: Dict[str, List[Any]] = {}  # sweep instead of one run, e.g. {"oversold": [15, 20, 25]}
+    name: Optional[str] = None
+
+
+_JOB: Dict[str, Any] = {"running": False}
+_JOB_LOCK = threading.Lock()
+
+
+@router.post("/backtest")
+def paper_backtest(body: _Backtest) -> Dict[str, Any]:
+    """Start a backtest (or sweep) on the backend's Breeze session. One at a time; it runs in the background -
+    poll GET /api/paper/backtests for progress, then GET /api/paper/backtests/{name} for the result."""
+    breeze = get_breeze()
+    if breeze is None:
+        return error_response("No Breeze session - log in first")
+    if body.end < body.start or (body.split and not body.start < body.split <= body.end):
+        return error_response("Need start <= end, and start < split <= end")
+    if "symbol" in body.overrides or "symbol" in body.grid:
+        return error_response("Backtests are Nifty-only (the expiry calendar is Nifty's)")
+    try:
+        cfg = with_overrides(load_config(), body.overrides, strict=True)
+        for k, vals in body.grid.items():
+            if not vals:
+                raise ValueError(f"grid {k} is empty")
+            for v in vals:
+                with_overrides(cfg, {k: v}, strict=True)
+    except KeyError as exc:
+        return error_response(f"Unknown setting {exc}")
+    except (TypeError, ValueError) as exc:
+        return error_response("Invalid value", error=str(exc))
+    kind = "sweep" if body.grid else "backtest"
+    name = body.name or f"{kind}-{body.start}-{body.end}-{dt.datetime.now():%Y%m%d%H%M%S}"
+    if not BT._NAME.match(name):
+        return error_response("Name may only use letters, digits, '.', '-' and '_'")
+
+    with _JOB_LOCK:
+        if _JOB["running"]:
+            return error_response(f"Backtest {_JOB['name']} is still running")
+        client = BT.ThrottledClient(breeze.client)
+        _JOB.clear()
+        _JOB.update(running=True, name=name, kind=kind, done=0, total=None, error=None, client=client)
+
+    def progress(i, n, _what):
+        _JOB.update(done=i, total=n)
+
+    def work():
+        try:
+            md = BT.CachedMarket(BreezeMarket(client, cfg.symbol), symbol=cfg.symbol)
+            BT.save_result(name, BT.execute(md, cfg, body.start, body.end, body.split, body.grid or None, progress))
+        except Exception as exc:
+            _JOB["error"] = str(exc)
+        finally:
+            _JOB["running"] = False
+
+    threading.Thread(target=work, name=f"backtest-{name}", daemon=True).start()
+    return success_response("Backtest started", name=name, kind=kind)
+
+
+@router.get("/backtests")
+def paper_backtests() -> Dict[str, Any]:
+    """Saved results, newest first, and the current or last job."""
+    job = {k: v for k, v in _JOB.items() if k != "client"}
+    if "client" in _JOB:
+        job["breeze_calls"] = _JOB["client"].calls
+    return success_response("Backtests", results=BT.list_results(), job=job)
+
+
+@router.get("/backtests/{name}")
+def paper_backtest_result(name: str) -> Dict[str, Any]:
+    result = BT.load_result(name)
+    return success_response("Backtest", **result) if result else error_response(f"No backtest named {name}")
