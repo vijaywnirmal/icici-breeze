@@ -11,6 +11,7 @@ from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "paper"
+SIDES = ("both", "call", "put")
 
 
 @dataclass
@@ -24,6 +25,7 @@ class PaperConfig:
     first_entry: str = "09:30"  # skip the opening auction noise
     last_entry: str = "14:30"  # no new trades this late
     max_trades_per_day: int = 1
+    sides: str = "both"  # one of SIDES: "call" ignores put signals, "put" ignores call signals
     # Only simulate the latest session. A day missed (no login / backend off) is skipped, not filled in
     # later - trades are captured and posted on their own day. Set true to fill gaps from history instead.
     catch_up_missed_days: bool = False
@@ -69,6 +71,8 @@ def with_overrides(cfg: PaperConfig, overrides: dict, strict: bool = False) -> P
         if kind is bool:  # bool("false") is True
             v = v if isinstance(v, bool) else str(v).strip().lower() in ("1", "true", "yes", "on")
         setattr(out, k, kind(v))
+    if out.sides not in SIDES:
+        raise ValueError(f"sides must be one of {', '.join(SIDES)}, not {out.sides!r}")
     return out
 
 

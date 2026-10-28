@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from backend.paper import costs, engine
-from backend.paper.config import PaperConfig
+from backend.paper.config import PaperConfig, with_overrides
 from backend.paper.engine import IST
 
 OPEN = dt.time(9, 15)
@@ -262,3 +262,23 @@ def test_charges_components():
     buy, sell = costs.charges(10_000, "buy", cfg), costs.charges(10_000, "sell", cfg)
     assert sell > buy  # STT is sell-side only for options
     assert buy == pytest.approx(20 + 3.503 + 0.01 + 0.3 + (20 + 3.503 + 0.01) * 0.18, abs=0.01)
+
+
+def test_calls_only_ignores_put_signals():
+    cfg = with_overrides(CFG, {"sides": "call"})
+    md = FakeMarket(DAYS, {DAYS[6]: "spike_fade", DAYS[7]: "dip_rebound"})
+    assert [t["right"] for t in run(md, 7, cfg)["trades"]] == ["call"]
+
+
+def test_puts_only_ignores_call_signals():
+    cfg = with_overrides(CFG, {"sides": "put"})
+    md = FakeMarket(DAYS, {DAYS[6]: "spike_fade", DAYS[7]: "dip_rebound"})
+    trades = run(md, 7, cfg)["trades"]
+    # the dip day's call signal is skipped; its rebound later runs RSI above 80, a put of its own
+    assert [t["right"] for t in trades] == ["put", "put"]
+    assert all(t["rsi"] > CFG.overbought for t in trades)
+
+
+def test_unknown_side_is_rejected():
+    with pytest.raises(ValueError):
+        with_overrides(CFG, {"sides": "calls"})

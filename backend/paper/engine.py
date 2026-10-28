@@ -145,6 +145,8 @@ def process_day(ledger: dict, cfg: PaperConfig, md: MarketData, day: dt.date, ni
             if pd.isna(v) or cfg.oversold <= v <= cfg.overbought:
                 continue
             right = "call" if v < cfg.oversold else "put"
+            if cfg.sides != "both" and right != cfg.sides:
+                continue  # an ignored side never takes the day's trade slot
             trade = _trade(ledger, cfg, md, day, signal_at, right, float(today.loc[t, "Close"]), float(v),
                            today, r.loc[today.index], save_replay)
             if trade:
