@@ -91,7 +91,7 @@ export function Dropdown({ trigger, children, align = 'right', position = 'botto
 	)
 }
 
-export function DropdownItem({ className = '', children, onClick, ...props }) {
+export function DropdownItem({ className = '', children, onClick, style, ...props }) {
 	return (
 		<div 
 			onClick={onClick} 
@@ -105,7 +105,7 @@ export function DropdownItem({ className = '', children, onClick, ...props }) {
 				fontFamily: 'var(--font-sans)',
 				cursor: 'pointer',
 				transition: 'var(--transition-fast)',
-				...props.style
+				...style
 			}}
 			onMouseEnter={(e) => {
 				e.target.style.backgroundColor = 'var(--panel-hover)'

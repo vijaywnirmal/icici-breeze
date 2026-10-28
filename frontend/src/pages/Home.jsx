@@ -90,8 +90,8 @@ export default function HomePage() {
 		<div style={{ 
 			display: 'grid', 
 			gridTemplateColumns: '1fr 400px', 
-			gap: '24px', 
-			height: '100%',
+			gap: '24px',
+			padding: 'var(--space-6)',
 			minHeight: '600px'
 		}}>
 			{/* Left Column - Main Features */}

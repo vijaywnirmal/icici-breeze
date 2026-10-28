@@ -58,8 +58,8 @@ export default function OptionChain() {
       <h2>Option Chain</h2>
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search underlying" />
-        <button onClick={fetchOptions} disabled={loading}>{loading ? 'Loading...' : 'Search'}</button>
-        <button onClick={connect} disabled={isOpen}>{isOpen ? 'Connected' : 'Connect WS'}</button>
+        <button className="btn" onClick={fetchOptions} disabled={loading}>{loading ? 'Loading...' : 'Search'}</button>
+        <button className="btn btn-secondary" onClick={connect} disabled={isOpen}>{isOpen ? 'Connected' : 'Connect WS'}</button>
       </div>
       <div style={{ maxHeight: 420, overflow: 'auto', border: '1px solid #eee', borderRadius: 6 }}>
         {items.length === 0 ? (

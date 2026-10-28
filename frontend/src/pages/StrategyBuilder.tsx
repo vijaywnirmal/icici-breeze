@@ -140,8 +140,9 @@ export default function StrategyBuilder() {
 						<div>
 							<Label>Universe</Label>
 							<Select 
-								multiple 
-								value={universe} 
+								multiple
+								style={{ height: 'auto', padding: 'var(--space-1)', backgroundImage: 'none' }}
+								value={universe}
 								onChange={(e) => setMeta({ universe: Array.from(e.target.selectedOptions).map(o => o.value) })}
 							>
 								{symbols.map(s => <option key={s} value={s}>{s}</option>)}

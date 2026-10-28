@@ -12,7 +12,7 @@ import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
 import './styles.css'
 
-// Silence all console output in production and development per request
+// Silence routine console output per request; warnings and errors still show so failures can be traced
 ;(() => {
   const noop = () => {}
   // eslint-disable-next-line no-console
@@ -21,10 +21,6 @@ import './styles.css'
   console.debug = noop
   // eslint-disable-next-line no-console
   console.info = noop
-  // eslint-disable-next-line no-console
-  console.warn = noop
-  // eslint-disable-next-line no-console
-  console.error = noop
 })()
 
 createRoot(document.getElementById('root')).render(

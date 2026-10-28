@@ -5,7 +5,8 @@ export default function Select({
 	variant = 'default', 
 	size = 'md', 
 	error = false,
-	...props 
+	style,
+	...props
 }) {
 	const getSizeStyles = () => {
 		switch (size) {
@@ -52,7 +53,7 @@ export default function Select({
 				boxSizing: 'border-box',
 				...getSizeStyles(),
 				...getVariantStyles(),
-				...props.style
+				...style
 			}}
 			onFocus={(e) => {
 				e.target.style.borderColor = 'var(--accent)'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function Card({ className = '', children, variant = 'default', ...props }) {
+export function Card({ className = '', children, variant = 'default', style, ...props }) {
 	const getVariantStyles = () => {
 		switch (variant) {
 			case 'default':
@@ -50,7 +50,7 @@ export function Card({ className = '', children, variant = 'default', ...props }
 				borderRadius: 'var(--radius)',
 				transition: 'all 0.2s ease',
 				...getVariantStyles(),
-				...props.style
+				...style
 			}}
 			{...props}
 		>
@@ -59,14 +59,14 @@ export function Card({ className = '', children, variant = 'default', ...props }
 	)
 }
 
-export function CardHeader({ className = '', children, ...props }) {
+export function CardHeader({ className = '', children, style, ...props }) {
 	return (
 		<div 
 			className={className}
 			style={{
 				padding: 'var(--space-4)',
 				borderBottom: '1px solid var(--border)',
-				...props.style
+				...style
 			}}
 			{...props}
 		>
@@ -75,13 +75,13 @@ export function CardHeader({ className = '', children, ...props }) {
 	)
 }
 
-export function CardContent({ className = '', children, ...props }) {
+export function CardContent({ className = '', children, style, ...props }) {
 	return (
 		<div 
 			className={className}
 			style={{
 				padding: 'var(--space-4)',
-				...props.style
+				...style
 			}}
 			{...props}
 		>
@@ -90,14 +90,14 @@ export function CardContent({ className = '', children, ...props }) {
 	)
 }
 
-export function CardFooter({ className = '', children, ...props }) {
+export function CardFooter({ className = '', children, style, ...props }) {
 	return (
 		<div 
 			className={className}
 			style={{
 				padding: 'var(--space-4)',
 				borderTop: '1px solid var(--border)',
-				...props.style
+				...style
 			}}
 			{...props}
 		>

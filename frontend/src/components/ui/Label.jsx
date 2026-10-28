@@ -5,7 +5,8 @@ export default function Label({
 	children, 
 	required = false,
 	error = false,
-	...props 
+	style,
+	...props
 }) {
 	return (
 		<label
@@ -17,7 +18,7 @@ export default function Label({
 				fontFamily: 'var(--font-sans)',
 				fontSize: '14px',
 				fontWeight: 500,
-				...props.style
+				...style
 			}}
 			{...props}
 		>

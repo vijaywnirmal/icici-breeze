@@ -80,34 +80,22 @@ export default function HolidaysPage() {
 	return (
 		<section className="content card" style={{width:'100%', maxWidth:900}}>
 			<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-				<h1>NSE Trading Holidays</h1>
+				<h1 style={{margin: 0}}>NSE Trading Holidays</h1>
 				<div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-					<select 
-						value={selectedYear} 
+					<select
+						value={selectedYear}
 						onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-						style={{
-							padding: '8px 12px',
-							border: '1px solid #ccc',
-							borderRadius: '4px',
-							backgroundColor: 'white'
-						}}
+						style={{width: 'auto'}}
 					>
 						{Array.from({length: 15}, (_, i) => 2011 + i).map(year => (
 							<option key={year} value={year}>{year}</option>
 						))}
 					</select>
 					{selectedYear === 2025 && (
-						<button 
+						<button
+							className="btn"
 							onClick={handleRefresh}
 							disabled={refreshing}
-							style={{
-								padding: '8px 16px',
-								backgroundColor: refreshing ? '#ccc' : '#007bff',
-								color: 'white',
-								border: 'none',
-								borderRadius: '4px',
-								cursor: refreshing ? 'not-allowed' : 'pointer'
-							}}
 						>
 							{refreshing ? 'Refreshing...' : 'Refresh 2025'}
 						</button>

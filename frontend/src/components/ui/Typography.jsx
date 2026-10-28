@@ -5,7 +5,8 @@ export default function Typography({
 	children, 
 	variant = 'body1',
 	color = 'default',
-	...props 
+	style,
+	...props
 }) {
 	const getVariantStyles = () => {
 		switch (variant) {
@@ -122,7 +123,7 @@ export default function Typography({
 				margin: 0,
 				...getVariantStyles(),
 				...getColorStyles(),
-				...props.style
+				...style
 			}}
 			{...props}
 		>

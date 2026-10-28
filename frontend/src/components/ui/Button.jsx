@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function Button({ children, as: As = 'button', variant = 'primary', size = 'md', className = '', loading = false, ...props }) {
+export function Button({ children, as: As = 'button', variant = 'primary', size = 'md', className = '', loading = false, style, ...props }) {
 	const getSizeStyles = () => {
 		switch (size) {
 			case 'sm': return { height: 'var(--size-sm)', padding: '0 var(--space-3)', fontSize: '13px' }
@@ -72,7 +72,7 @@ export function Button({ children, as: As = 'button', variant = 'primary', size 
 				outline: 'none',
 				...getSizeStyles(),
 				...getVariantStyles(),
-				...props.style
+				...style
 			}}
 			disabled={loading || props.disabled}
 			onMouseEnter={(e) => {
