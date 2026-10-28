@@ -10,6 +10,7 @@ import HolidaysPage from './pages/Holidays.jsx'
 import BacktestPage from './pages/Backtest.jsx'
 import StrategyBuilder from './pages/StrategyBuilder.tsx'
 import BacktestResults from './pages/BacktestResults.tsx'
+import PaperTrading from './pages/PaperTrading.jsx'
 import './styles.css'
 
 // Silence routine console output per request; warnings and errors still show so failures can be traced
@@ -50,6 +51,11 @@ createRoot(document.getElementById('root')).render(
 			<Route path="/results" element={
 				<AppLayout>
 					<BacktestResults />
+				</AppLayout>
+			} />
+			<Route path="/paper" element={
+				<AppLayout>
+					<PaperTrading />
 				</AppLayout>
 			} />
 			<Route path="/option-chain" element={

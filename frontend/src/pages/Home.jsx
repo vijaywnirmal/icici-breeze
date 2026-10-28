@@ -46,6 +46,12 @@ export default function HomePage() {
 
 	const mainFeatures = [
 		{
+			title: 'Paper Trading',
+			icon: '📈',
+			description: 'RSI options record',
+			action: () => navigate('/paper')
+		},
+		{
 			title: 'Backtest Strategy',
 			icon: '📊',
 			description: 'Test your strategies',
